@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -74,12 +75,33 @@ public class RobotAgent : Agent
 
     private void FixedUpdate()
     {
-        
+
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        base.OnActionReceived(actions);
+        int i = -1;
+
+        
+
+        jointDriver.BodyParts[rightFoot].SetTargetRotation(actions.ContinuousActions[++i],0, actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[leftFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
+
+        jointDriver.BodyParts[rightLowerLeg].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
+        jointDriver.BodyParts[leftLowerLeg].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
+
+        jointDriver.BodyParts[rightUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[leftUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
+
+        jointDriver.BodyParts[rightUpperArm].SetTargetRotation(actions.ContinuousActions[++i],0, actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[leftUpperArm].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
+
+        jointDriver.BodyParts[rightLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
+        jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
+
+
+
+        AddReward(-0.1f*(math.abs(body.rotation.z) * math.abs(body.rotation.x)));
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -123,11 +145,33 @@ public class RobotAgent : Agent
     {
         foreach(var entry in jointDriver.BodyParts)
         {
+           
             entry.Value.Reset();
         }
         bodyBP.Reset();
         headBP.Reset();
         leftPalmBP.Reset();
         rightPalmBP.Reset();
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var continuousActions = actionsOut.ContinuousActions;
+        // Default values
+        float value = 0f;
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            value = 1f;
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            value = 0f;
+        }
+
+        // Set indices 9, 10, 11 (upper leg control)
+        continuousActions[9] = value;
+        continuousActions[10] = value;
+        continuousActions[11] = value;
     }
 }

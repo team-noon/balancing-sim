@@ -2,22 +2,22 @@
     "RobotAgent": {
         "checkpoints": [
             {
-                "steps": 1021,
-                "file_path": "results\\noon\\RobotAgent\\RobotAgent-1021.onnx",
-                "reward": -0.8571428571428571,
-                "creation_time": 1756655848.4334893,
+                "steps": 25235,
+                "file_path": "results\\noon\\RobotAgent\\RobotAgent-25235.onnx",
+                "reward": null,
+                "creation_time": 1756668569.0515165,
                 "auxillary_file_paths": [
-                    "results\\noon\\RobotAgent\\RobotAgent-1021.pt"
+                    "results\\noon\\RobotAgent\\RobotAgent-25235.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 1021,
+            "steps": 25235,
             "file_path": "results\\noon\\RobotAgent.onnx",
-            "reward": -0.8571428571428571,
-            "creation_time": 1756655848.4334893,
+            "reward": null,
+            "creation_time": 1756668569.0515165,
             "auxillary_file_paths": [
-                "results\\noon\\RobotAgent\\RobotAgent-1021.pt"
+                "results\\noon\\RobotAgent\\RobotAgent-25235.pt"
             ]
         }
     },

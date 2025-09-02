@@ -27,7 +27,7 @@ public class BodyPart
     public ConfigurableJoint Joint;
     public GroundContact groundContact;
     public Transform partTransform;
-    public quaternion startRotation;
+    public Quaternion startRotation;
     public Vector3 startPosition;
     public Rigidbody partRigidBody;
     public JointDriver jointDriver;
@@ -39,10 +39,16 @@ public class BodyPart
             jointDriver = jd;
             Joint = thisTransform.GetComponent<ConfigurableJoint>();
 
-            Joint.slerpDrive = new JointDrive
+            Joint.angularXDrive = new JointDrive
             {
-                positionDamper = jointDriver.jointDampen,
                 positionSpring = jointDriver.jointSpring,
+                positionDamper = jointDriver.jointDampen,
+                maximumForce = jointDriver.maxJointForce
+            };
+            Joint.angularYZDrive = new JointDrive
+            {
+                positionSpring = jointDriver.jointSpring,
+                positionDamper = jointDriver.jointDampen,
                 maximumForce = jointDriver.maxJointForce
             };
         }
@@ -59,7 +65,7 @@ public class BodyPart
 
         groundContact.agent = thisAgent;
 
-        startRotation = thisTransform.rotation;
+        startRotation = thisTransform.localRotation;
         startPosition = thisTransform.position;
 
 
@@ -68,34 +74,27 @@ public class BodyPart
 
     }
 
-    public Vector3 currentEularJointRotation;
-    public float currentXNormalizedRot;
-    public float currentYNormalizedRot;
-    public float currentZNormalizedRot;
 
-    // straight up stolen from ml agents <3
+
+
     public void SetTargetRotation(float x, float y, float z)
     {
-        x = (x + 1f) * 0.5f;
-        y = (y + 1f) * 0.5f;
-        z = (z + 1f) * 0.5f;
+        float targetX = Mathf.Lerp(Joint.lowAngularXLimit.limit, Joint.highAngularXLimit.limit, (x + 1f) * 0.5f);
+        float targetY = Mathf.Lerp(-Joint.angularYLimit.limit, Joint.angularYLimit.limit, (y + 1f) * 0.5f);
+        float targetZ = Mathf.Lerp(-Joint.angularZLimit.limit, Joint.angularZLimit.limit, (z + 1f) * 0.5f);
 
-        var xRot = Mathf.Lerp(Joint.lowAngularXLimit.limit, Joint.highAngularXLimit.limit, x);
-        var yRot = Mathf.Lerp(-Joint.angularYLimit.limit, Joint.angularYLimit.limit, y);
-        var zRot = Mathf.Lerp(-Joint.angularZLimit.limit, Joint.angularZLimit.limit, z);
+        Quaternion localRotation = Quaternion.Euler(targetX, targetY, targetZ);
 
-        currentXNormalizedRot = Mathf.InverseLerp(Joint.lowAngularXLimit.limit, Joint.highAngularXLimit.limit, xRot);
-        currentYNormalizedRot = Mathf.InverseLerp(-Joint.angularYLimit.limit, Joint.angularYLimit.limit, yRot);
-        currentZNormalizedRot = Mathf.InverseLerp(-Joint.angularZLimit.limit, Joint.angularZLimit.limit, zRot);
-
-        Joint.targetRotation = Quaternion.Euler(xRot, yRot, zRot);
-        currentEularJointRotation = new Vector3(xRot, yRot, zRot);
+        // targetRotation is relative to the "rest rotation"
+        Joint.targetRotation = Quaternion.Inverse(localRotation) * startRotation;
+        Debug.Log($"{Joint.name} targetRotation = {Joint.targetRotation.eulerAngles} axisParalel = {(Joint.axis.normalized + Joint.secondaryAxis.normalized).magnitude == 2 || (Joint.axis.normalized + Joint.secondaryAxis.normalized).magnitude == 0}");
     }
+
 
     public void Reset()
     {
         partTransform.position = startPosition;
-        partTransform.rotation = startRotation;
+        partTransform.localRotation = startRotation;
 
         partRigidBody.angularVelocity = Vector3.zero;
         partRigidBody.linearVelocity = Vector3.zero;
@@ -107,3 +106,5 @@ public class BodyPart
     }
     
 }
+
+

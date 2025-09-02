@@ -7,29 +7,31 @@ public class GroundContact : MonoBehaviour
 {
     public Agent agent;
 
-    [Header("Ground Check")] public bool agentDoneOnGroundContact = true; // Whether to reset agent on ground contact.
+    [Header("Ground Check")] 
+    public bool agentDoneOnGroundContact = true; // Whether to reset agent on ground contact.
     public bool penalizeGroundContact = true; // Whether to penalize on contact.
     public float groundContactPenalty = -1; // Penalty amount (ex: -1).
+    public Collider thisCollider;
     public bool touchingGround;
     const string k_Ground = "ground"; // Tag of ground object.
 
     /// <summary>
     /// Check for collision with ground, and optionally penalize agent.
     /// </summary>
-    void OnCollisionEnter(Collision col)
+    void OnCollisionStay(Collision col)
     {
-        if (col.transform.CompareTag(k_Ground))
+        if (col.transform.CompareTag(k_Ground) && col.contacts[0].thisCollider == thisCollider)
         {
+            Debug.Log($"collided {transform.name}");
             touchingGround = true;
             if (penalizeGroundContact)
             {
-                agent.SetReward(groundContactPenalty);
+                agent.AddReward(groundContactPenalty);
             }
 
             if (agentDoneOnGroundContact)
             {
-                Debug.Log(this.transform.name);
-                Debug.Log(this.transform.position);
+
                 agent.EndEpisode();
             }
         }
@@ -40,7 +42,8 @@ public class GroundContact : MonoBehaviour
     /// </summary>
     void OnCollisionExit(Collision other)
     {
-        if (other.transform.CompareTag(k_Ground))
+        Debug.Log(other.contacts.Length);
+        if (other.transform.CompareTag(k_Ground) && other.contacts[0].thisCollider == thisCollider)
         {
             touchingGround = false;
         }
