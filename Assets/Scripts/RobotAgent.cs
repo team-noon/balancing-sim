@@ -8,7 +8,7 @@ using UnityEngine;
 public class RobotAgent : Agent
 {
 
-
+    Vector3 startingPos;
 
     [SerializeField] JointDriver jointDriver;
 
@@ -49,10 +49,10 @@ public class RobotAgent : Agent
 
     void Start()
     {
-        bodyBP = new BodyPart(body, this);
-        headBP = new BodyPart(head, this);
-        leftPalmBP = new BodyPart(leftPalm, this);
-        rightPalmBP = new BodyPart(rightPalm, this);
+        bodyBP = new BodyPart(body);
+        headBP = new BodyPart(head);
+        leftPalmBP = new BodyPart(leftPalm);
+        rightPalmBP = new BodyPart(rightPalm);
 
 
 
@@ -75,11 +75,16 @@ public class RobotAgent : Agent
 
     private void FixedUpdate()
     {
-
+        if (Vector3.Distance(startingPos, transform.position) > 1000)
+        {
+            SetReward(-100f);
+            EndEpisode();
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        
         int i = -1;
 
         
@@ -101,15 +106,16 @@ public class RobotAgent : Agent
 
 
 
-        AddReward(-0.1f*(math.abs(body.rotation.z) * math.abs(body.rotation.x)));
+        AddReward(-0.1f*(math.abs(body.rotation.z) * math.abs(body.rotation.x))); 
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        
         // rotation and velocity of the body
         sensor.AddObservation(body.transform.rotation.eulerAngles);
-        sensor.AddObservation(bodyBP.partRigidBody.linearVelocity);
-        sensor.AddObservation(bodyBP.partRigidBody.angularVelocity);
+        sensor.AddObservation(bodyBP.Joint.linearVelocity);
+        sensor.AddObservation(bodyBP.Joint.angularVelocity);
 
         // arms
         // elbow
@@ -138,17 +144,22 @@ public class RobotAgent : Agent
 
         sensor.AddObservation(leftLowerLeg.eulerAngles.z - leftFoot.eulerAngles.z);
         sensor.AddObservation(rightLowerLeg.eulerAngles.z - rightFoot.eulerAngles.z);
-
+        
     }
 
     public override void OnEpisodeBegin()
     {
-        foreach(var entry in jointDriver.BodyParts)
+        startingPos = transform.position;
+        // Reset the root first
+        bodyBP.Reset(isRoot: true);
+
+        // Reset all other parts
+        foreach (var entry in jointDriver.BodyParts)
         {
-           
-            entry.Value.Reset();
+            if (entry.Key != body) // skip root, already reset
+                entry.Value.Reset();
         }
-        bodyBP.Reset();
+
         headBP.Reset();
         leftPalmBP.Reset();
         rightPalmBP.Reset();
@@ -162,16 +173,16 @@ public class RobotAgent : Agent
 
         if (Input.GetKey(KeyCode.W))
         {
-            value = 1f;
+            value = 0.5f;
         }
         else if (Input.GetKey(KeyCode.S))
         {
-            value = 0f;
+            value = -0.5f;
         }
 
         // Set indices 9, 10, 11 (upper leg control)
         continuousActions[9] = value;
         continuousActions[10] = value;
-        continuousActions[11] = value;
+        continuousActions[11] = value; 
     }
 }

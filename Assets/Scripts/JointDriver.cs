@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using Unity.MLAgents;
@@ -6,9 +7,6 @@ using UnityEngine;
 
 public class JointDriver : MonoBehaviour
 {
-    public float jointSpring;
-    public float jointDampen;
-    public float maxJointForce;
 
     public Dictionary<Transform, BodyPart> BodyParts = new Dictionary<Transform, BodyPart>();
 
@@ -16,7 +14,7 @@ public class JointDriver : MonoBehaviour
     {
 
 
-        BodyPart newBodyPart = new BodyPart(bodyPartTransform, transform.GetComponent<Agent>(), this);
+        BodyPart newBodyPart = new BodyPart(bodyPartTransform);
 
         BodyParts.Add(bodyPartTransform, newBodyPart);
     }
@@ -24,53 +22,53 @@ public class JointDriver : MonoBehaviour
 
 public class BodyPart
 {
-    public ConfigurableJoint Joint;
+    public ArticulationBody Joint;
     public GroundContact groundContact;
+    public Quaternion spriteStartRotation;
+    public Vector3 spriteStartPosition;
     public Transform partTransform;
     public Quaternion startRotation;
     public Vector3 startPosition;
-    public Rigidbody partRigidBody;
-    public JointDriver jointDriver;
+    public ArticulationReducedSpace startPositionJoint;
 
-    public BodyPart(Transform thisTransform, Agent thisAgent, JointDriver? jd = null)
+
+    public BodyPart(Transform thisTransform)
     {
-        if (jd)
-        {
-            jointDriver = jd;
-            Joint = thisTransform.GetComponent<ConfigurableJoint>();
 
-            Joint.angularXDrive = new JointDrive
-            {
-                positionSpring = jointDriver.jointSpring,
-                positionDamper = jointDriver.jointDampen,
-                maximumForce = jointDriver.maxJointForce
-            };
-            Joint.angularYZDrive = new JointDrive
-            {
-                positionSpring = jointDriver.jointSpring,
-                positionDamper = jointDriver.jointDampen,
-                maximumForce = jointDriver.maxJointForce
-            };
-        }
+            Joint = thisTransform.GetComponent<ArticulationBody>();
+
+        
 
 
         partTransform = thisTransform;
 
-        groundContact = thisTransform.GetComponent<GroundContact>();
+        foreach(Transform child in thisTransform)
+        {
+            groundContact = child.GetComponent<GroundContact>();
+            if (groundContact)
+            {
+                break;
+            }
+        }
 
         if (!groundContact)
         {
-            groundContact = thisTransform.gameObject.AddComponent<GroundContact>();
+            throw new System.Exception($"EVERY TRANSFORM NEEDS TO HAVE A CHILD WITH A GROUNDCONTACT, this error was thrown at {thisTransform.transform}");
         }
 
-        groundContact.agent = thisAgent;
+        spriteStartPosition = groundContact.transform.position;
+        spriteStartRotation = groundContact.transform.rotation;
+
 
         startRotation = thisTransform.localRotation;
         startPosition = thisTransform.position;
+        startPositionJoint = Joint.jointPosition;
+        this.SetTargetRotation(0f, 0f, 0f);
 
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 10);
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 10);
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 10);
 
-
-        partRigidBody = thisTransform.GetComponent<Rigidbody>();
 
     }
 
@@ -79,32 +77,61 @@ public class BodyPart
 
     public void SetTargetRotation(float x, float y, float z)
     {
-        float targetX = Mathf.Lerp(Joint.lowAngularXLimit.limit, Joint.highAngularXLimit.limit, (x + 1f) * 0.5f);
-        float targetY = Mathf.Lerp(-Joint.angularYLimit.limit, Joint.angularYLimit.limit, (y + 1f) * 0.5f);
-        float targetZ = Mathf.Lerp(-Joint.angularZLimit.limit, Joint.angularZLimit.limit, (z + 1f) * 0.5f);
+        Joint.SetDriveTarget(ArticulationDriveAxis.X, Mathf.Lerp(Joint.xDrive.lowerLimit, Joint.xDrive.upperLimit, (x+1f)/2f));
+        Joint.SetDriveTarget(ArticulationDriveAxis.Y, Mathf.Lerp(Joint.yDrive.lowerLimit, Joint.yDrive.upperLimit, (y+1f)/2f));
+        Joint.SetDriveTarget(ArticulationDriveAxis.Z, Mathf.Lerp(Joint.zDrive.lowerLimit, Joint.zDrive.upperLimit, (z+1f)/2f));
 
-        Quaternion localRotation = Quaternion.Euler(targetX, targetY, targetZ);
 
-        // targetRotation is relative to the "rest rotation"
-        Joint.targetRotation = Quaternion.Inverse(localRotation) * startRotation;
-        Debug.Log($"{Joint.name} targetRotation = {Joint.targetRotation.eulerAngles} axisParalel = {(Joint.axis.normalized + Joint.secondaryAxis.normalized).magnitude == 2 || (Joint.axis.normalized + Joint.secondaryAxis.normalized).magnitude == 0}");
     }
 
 
-    public void Reset()
+    public void Reset(bool isRoot = false)
     {
-        partTransform.position = startPosition;
-        partTransform.localRotation = startRotation;
+        // Reset drive targets (neutral position)
 
-        partRigidBody.angularVelocity = Vector3.zero;
-        partRigidBody.linearVelocity = Vector3.zero;
 
-        if (groundContact)
+        // Reset velocities
+        Joint.linearVelocity = Vector3.zero;
+        Joint.angularVelocity = Vector3.zero;
+
+        
+        if (isRoot)
+        {
+            // Only the root articulation body can be teleported
+            Joint.TeleportRoot(startPosition, startRotation);
+        }
+
+        else
+        {
+
+            SetTargetRotation(0f, 0f, 0f);
+
+            Joint.jointPosition = startPositionJoint;
+
+            if (Joint.dofCount == 1)
+            {
+                Joint.jointForce = new ArticulationReducedSpace(0f);
+                Joint.jointVelocity = new ArticulationReducedSpace(0f);
+            }
+            else if (Joint.dofCount == 3)
+            {
+                Joint.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
+                Joint.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
+            }
+            else
+            {
+                Joint.jointForce = new ArticulationReducedSpace();
+                Joint.jointVelocity = new ArticulationReducedSpace();
+            }
+        }
+
+        // Reset ground contact sensor state
+        if (groundContact != null)
         {
             groundContact.touchingGround = false;
         }
     }
-    
+
 }
 
 

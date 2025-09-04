@@ -15,37 +15,14 @@ public class GroundContact : MonoBehaviour
     public bool touchingGround;
     const string k_Ground = "ground"; // Tag of ground object.
 
-    /// <summary>
-    /// Check for collision with ground, and optionally penalize agent.
-    /// </summary>
-    void OnCollisionStay(Collision col)
-    {
-        if (col.transform.CompareTag(k_Ground) && col.contacts[0].thisCollider == thisCollider)
-        {
-            Debug.Log($"collided {transform.name}");
-            touchingGround = true;
-            if (penalizeGroundContact)
-            {
-                agent.AddReward(groundContactPenalty);
-            }
-
-            if (agentDoneOnGroundContact)
-            {
-
-                agent.EndEpisode();
-            }
-        }
-    }
 
     /// <summary>
     /// Check for end of ground collision and reset flag appropriately.
     /// </summary>
     void OnCollisionExit(Collision other)
     {
-        Debug.Log(other.contacts.Length);
-        if (other.transform.CompareTag(k_Ground) && other.contacts[0].thisCollider == thisCollider)
-        {
+
             touchingGround = false;
-        }
+        
     }
 }
