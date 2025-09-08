@@ -68,9 +68,7 @@ public class BodyPart
         Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 10);
         Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 10);
         Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 10);
-
-
-    }
+}
 
 
 

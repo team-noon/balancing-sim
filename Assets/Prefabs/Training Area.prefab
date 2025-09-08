@@ -207,6 +207,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Robot_ArticulatedJoint1
       objectReference: {fileID: 0}
+    - target: {fileID: 7553163262478434828, guid: 324a16d4d89e0bd4fbdf9fe390a1d1cd, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 45516a1aa68f46d4a87cf8ce8eba5081, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

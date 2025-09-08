@@ -21,8 +21,18 @@ public class GroundContact : MonoBehaviour
     /// </summary>
     void OnCollisionExit(Collision other)
     {
-
+        if (other.gameObject.layer == 7)
+        {
             touchingGround = false;
+        }
         
+    }
+
+    private void FixedUpdate()
+    {
+        if(touchingGround &&penalizeGroundContact && !agentDoneOnGroundContact)
+        {
+            agent.AddReward(groundContactPenalty*2);
+        }
     }
 }

@@ -46,6 +46,12 @@ public class RobotAgent : Agent
     [SerializeField] Transform leftLowerArm;
     [SerializeField] Transform leftUpperArm;
 
+    [Header("Penalty / reward settings")]
+    [SerializeField] AnimationCurve balancePenalty;
+    [SerializeField] float maxBalancePenalty;
+
+    [SerializeField] float largeMovementPenaltyMultiplier = -1;
+
 
     void Start()
     {
@@ -77,10 +83,14 @@ public class RobotAgent : Agent
     {
         if (Vector3.Distance(startingPos, transform.position) > 1000)
         {
-            SetReward(-100f);
+            SetReward(-1000f);
             EndEpisode();
         }
+
+        AddReward(maxBalancePenalty * balancePenalty.Evaluate(Vector3.Angle(transform.up, Vector3.up) / 180));
     }
+
+    ActionBuffers? lastBuffer = null;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
@@ -105,8 +115,19 @@ public class RobotAgent : Agent
         jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
 
+        if (lastBuffer.HasValue)
+        {
+            int j = 0;
 
-        AddReward(-0.1f*(math.abs(body.rotation.z) * math.abs(body.rotation.x))); 
+            while(j < lastBuffer.Value.ContinuousActions.Length)
+            {
+                AddReward(math.abs(actions.ContinuousActions[j] - lastBuffer.Value.ContinuousActions[j]) * largeMovementPenaltyMultiplier);
+                j++;
+            }
+        }
+
+        lastBuffer = actions;
+
     }
 
     public override void CollectObservations(VectorSensor sensor)
