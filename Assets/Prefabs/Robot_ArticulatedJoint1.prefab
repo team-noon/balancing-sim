@@ -127,6 +127,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 7333607104622247223}
   touchingGround: 0
 --- !u!1 &416348770578908398
@@ -285,8 +286,8 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -10
+    upperLimit: 80
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -303,8 +304,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_ZDrive:
-    lowerLimit: -50
-    upperLimit: 50
+    lowerLimit: -12.5
+    upperLimit: 32.5
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -455,6 +456,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 3211753145861117298}
   touchingGround: 0
 --- !u!1 &1524874215744710560
@@ -584,6 +586,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 3210447766483162733}
   touchingGround: 0
 --- !u!1 &1613948231564181638
@@ -813,6 +816,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 868170216018370555}
   touchingGround: 0
 --- !u!1 &1674874567102008979
@@ -1072,7 +1076,7 @@ ArticulationBody:
   m_Twist: 1
   m_XDrive:
     lowerLimit: -90
-    upperLimit: 10
+    upperLimit: 0
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -1143,7 +1147,7 @@ Transform:
   m_GameObject: {fileID: 2475024684715858833}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 34.99994, z: 0}
+  m_LocalPosition: {x: 0, y: 35, z: 0}
   m_LocalScale: {x: 70, y: 70, z: 70}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1241,6 +1245,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 1933056008739959005}
   touchingGround: 0
 --- !u!1 &2614219129561950719
@@ -1453,9 +1458,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 8971872744345493908}
-  agentDoneOnGroundContact: 1
+  agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: -10
+  groundContactPenalty: -5
+  groundContactPenaltyMultipier: 0
   thisCollider: {fileID: 487279105528293899}
   touchingGround: 0
 --- !u!1 &3489448984666579938
@@ -1624,8 +1630,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_YDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -45
+    upperLimit: 45
     stiffness: 10000
     damping: 1000
     forceLimit: 10
@@ -1633,8 +1639,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_ZDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -22.5
+    upperLimit: 22.5
     stiffness: 10000
     damping: 1000
     forceLimit: 10
@@ -1674,6 +1680,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: 1
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 7307267223760739925}
   touchingGround: 0
 --- !u!1 &4513384238685342488
@@ -1827,8 +1834,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_YDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -45
+    upperLimit: 45
     stiffness: 10000
     damping: 1000
     forceLimit: 10
@@ -1836,8 +1843,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_ZDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -22.5
+    upperLimit: 22.5
     stiffness: 10000
     damping: 1000
     forceLimit: 10
@@ -2229,6 +2236,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 6955601407685625552}
   touchingGround: 0
 --- !u!1 &5367500960601815185
@@ -2356,6 +2364,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
   groundContactPenalty: 1
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 7307267223760739925}
   touchingGround: 0
 --- !u!1 &5591117776770665264
@@ -2582,6 +2591,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 7739341460549757764}
   touchingGround: 0
 --- !u!1 &5836709820502774619
@@ -2642,7 +2652,7 @@ ArticulationBody:
   m_Twist: 1
   m_XDrive:
     lowerLimit: -90
-    upperLimit: 10
+    upperLimit: 0
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -2809,6 +2819,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 5900721754752610658}
   touchingGround: 0
 --- !u!1 &5894147148186892716
@@ -2868,8 +2879,8 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -40
-    upperLimit: 40
+    lowerLimit: -80
+    upperLimit: 10
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -2886,8 +2897,8 @@ ArticulationBody:
     targetVelocity: 0
     driveType: 0
   m_ZDrive:
-    lowerLimit: -50
-    upperLimit: 50
+    lowerLimit: -32.5
+    upperLimit: 12.5
     stiffness: 10000
     damping: 1000
     forceLimit: 3.4028235e+38
@@ -3036,6 +3047,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
   groundContactPenalty: 1
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 1211308359286366578}
   touchingGround: 0
 --- !u!1 &6946870123041537286
@@ -3262,9 +3274,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 8971872744345493908}
-  agentDoneOnGroundContact: 1
+  agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: -10
+  groundContactPenalty: -5
+  groundContactPenaltyMultipier: 0
   thisCollider: {fileID: 530268706660950160}
   touchingGround: 0
 --- !u!1 &9092982733478568552
@@ -3394,6 +3407,7 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 2172912947765389319}
   touchingGround: 0
 --- !u!1 &9096791122683776016
@@ -3521,5 +3535,6 @@ MonoBehaviour:
   agentDoneOnGroundContact: 1
   penalizeGroundContact: 1
   groundContactPenalty: -10
+  groundContactPenaltyMultipier: 1
   thisCollider: {fileID: 2289702474407319711}
   touchingGround: 0

@@ -12,14 +12,12 @@ public class RobotAgent : Agent
 
     [SerializeField] JointDriver jointDriver;
 
-
     [Header("Body Parts")]
     [SerializeField] Transform body;
     BodyPart bodyBP;
 
     [SerializeField] Transform head;
     BodyPart headBP;
-
 
     [SerializeField] Transform leftPalm;
     BodyPart leftPalmBP;
@@ -52,15 +50,12 @@ public class RobotAgent : Agent
 
     [SerializeField] float largeMovementPenaltyMultiplier = -1;
 
-
     void Start()
     {
         bodyBP = new BodyPart(body);
         headBP = new BodyPart(head);
         leftPalmBP = new BodyPart(leftPalm);
         rightPalmBP = new BodyPart(rightPalm);
-
-
 
         // legs
         jointDriver.addBodyPart(rightFoot);
@@ -83,23 +78,23 @@ public class RobotAgent : Agent
     {
         if (Vector3.Distance(startingPos, transform.position) > 1000)
         {
+            Debug.Log($"[RobotAgent] Out of bounds! Adding reward: -1000f and ending episode.");
             SetReward(-1000f);
             EndEpisode();
         }
 
-        AddReward(maxBalancePenalty * balancePenalty.Evaluate(Vector3.Angle(transform.up, Vector3.up) / 180));
+        float balanceReward = maxBalancePenalty * balancePenalty.Evaluate(Vector3.Angle(transform.up, Vector3.up) / 180);
+        Debug.Log($"[RobotAgent] Adding balance reward: {balanceReward}");
+        AddReward(balanceReward);
     }
 
     ActionBuffers? lastBuffer = null;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        
         int i = -1;
 
-        
-
-        jointDriver.BodyParts[rightFoot].SetTargetRotation(actions.ContinuousActions[++i],0, actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[rightFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
         jointDriver.BodyParts[leftFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
 
         jointDriver.BodyParts[rightLowerLeg].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
@@ -108,31 +103,30 @@ public class RobotAgent : Agent
         jointDriver.BodyParts[rightUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
         jointDriver.BodyParts[leftUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
 
-        jointDriver.BodyParts[rightUpperArm].SetTargetRotation(actions.ContinuousActions[++i],0, actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[rightUpperArm].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
         jointDriver.BodyParts[leftUpperArm].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
 
         jointDriver.BodyParts[rightLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
         jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
-
         if (lastBuffer.HasValue)
         {
             int j = 0;
 
-            while(j < lastBuffer.Value.ContinuousActions.Length)
+            while (j < lastBuffer.Value.ContinuousActions.Length)
             {
-                AddReward(math.abs(actions.ContinuousActions[j] - lastBuffer.Value.ContinuousActions[j]) * largeMovementPenaltyMultiplier);
+                float movementPenalty = math.abs(actions.ContinuousActions[j] - lastBuffer.Value.ContinuousActions[j]) * largeMovementPenaltyMultiplier;
+                Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
+                AddReward(movementPenalty);
                 j++;
             }
         }
 
         lastBuffer = actions;
-
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        
         // rotation and velocity of the body
         sensor.AddObservation(body.transform.rotation.eulerAngles);
         sensor.AddObservation(bodyBP.Joint.linearVelocity);
@@ -165,7 +159,6 @@ public class RobotAgent : Agent
 
         sensor.AddObservation(leftLowerLeg.eulerAngles.z - leftFoot.eulerAngles.z);
         sensor.AddObservation(rightLowerLeg.eulerAngles.z - rightFoot.eulerAngles.z);
-        
     }
 
     public override void OnEpisodeBegin()
@@ -204,6 +197,6 @@ public class RobotAgent : Agent
         // Set indices 9, 10, 11 (upper leg control)
         continuousActions[9] = value;
         continuousActions[10] = value;
-        continuousActions[11] = value; 
+        continuousActions[11] = value;
     }
 }

@@ -15,14 +15,15 @@ public class Floor : MonoBehaviour
             if (GC.penalizeGroundContact)
             {
                 GC.agent.AddReward(GC.groundContactPenalty);
+                Debug.Log($"[Floor] Penalized agent '{GC.agent.name}' with {GC.groundContactPenalty} for ground contact.");
             }
 
             if (GC.agentDoneOnGroundContact)
             {
+                GC.agent.SetReward(-100f);
                 GC.agent.EndEpisode();
+                Debug.Log($"[Floor] Agent '{GC.agent.name}' episode ended due to ground contact. Reward set to -100.");
             }
-
-            
         }
     }
 }

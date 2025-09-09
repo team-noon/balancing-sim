@@ -11,6 +11,7 @@ public class GroundContact : MonoBehaviour
     public bool agentDoneOnGroundContact = true; // Whether to reset agent on ground contact.
     public bool penalizeGroundContact = true; // Whether to penalize on contact.
     public float groundContactPenalty = -1; // Penalty amount (ex: -1).
+    public float groundContactPenaltyMultipier = 1;
     public Collider thisCollider;
     public bool touchingGround;
     const string k_Ground = "ground"; // Tag of ground object.
@@ -29,10 +30,11 @@ public class GroundContact : MonoBehaviour
     }
 
     private void FixedUpdate()
-    {
-        if(touchingGround &&penalizeGroundContact && !agentDoneOnGroundContact)
         {
-            agent.AddReward(groundContactPenalty*2);
+            if (touchingGround && penalizeGroundContact && !agentDoneOnGroundContact)
+            {
+                Debug.Log($"Penalty applied to agent '{agent.name}' for ground contact: {groundContactPenalty * groundContactPenaltyMultipier}");
+                agent.AddReward(groundContactPenalty * groundContactPenaltyMultipier);
+            }
         }
-    }
 }
