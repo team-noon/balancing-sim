@@ -1,4 +1,5 @@
 using System;
+using Unity.InferenceEngine;
 using Unity.Mathematics;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -50,8 +51,24 @@ public class RobotAgent : Agent
 
     [SerializeField] float largeMovementPenaltyMultiplier = -1;
 
+
+
+
+    [Header("Box Throwing parameters")]
+    [SerializeField] GameObject box;
+    [Tooltip("Min time between box throws (in steps)")]
+    [SerializeField] int minBoxTime;
+    [Tooltip("Max time between box throws (in steps)")]
+    [SerializeField] int maxBoxTime;
+    [SerializeField] float minBoxDistance = 2;
+    [SerializeField] float maxBoxDistance = 5;
+    [SerializeField] Transform boxHolder;
+
+    private int nextBoxThrow;
     void Start()
     {
+        nextBoxThrow = StepCount + maxBoxTime;
+
         bodyBP = new BodyPart(body);
         headBP = new BodyPart(head);
         leftPalmBP = new BodyPart(leftPalm);
@@ -74,6 +91,8 @@ public class RobotAgent : Agent
         jointDriver.addBodyPart(leftUpperArm);
     }
 
+    
+
     private void FixedUpdate()
     {
         if (Vector3.Distance(startingPos, transform.position) > 1000)
@@ -84,14 +103,34 @@ public class RobotAgent : Agent
         }
 
         float balanceReward = maxBalancePenalty * balancePenalty.Evaluate(Vector3.Angle(transform.up, Vector3.up) / 180);
-        Debug.Log($"[RobotAgent] Adding balance reward: {balanceReward}");
+        //Debug.Log($"[RobotAgent] Adding balance reward: {balanceReward}");
         AddReward(balanceReward);
+
+        if(StepCount >= nextBoxThrow)
+        {
+            ThrowBox();
+            nextBoxThrow = StepCount + Mathf.FloorToInt(UnityEngine.Random.Range(minBoxTime, maxBoxTime));
+        }
+
+        
     }
 
-    ActionBuffers? lastBuffer = null;
+    float[] lastBuffer = null;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+
+        if (lastBuffer == null)
+        {
+            lastBuffer = new float[actions.ContinuousActions.Length];
+            int k = 0;
+            while (k < actions.ContinuousActions.Length)
+            {
+                lastBuffer[k++] = 0f;
+            }
+            
+        }
+
         int i = -1;
 
         jointDriver.BodyParts[rightFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
@@ -109,20 +148,23 @@ public class RobotAgent : Agent
         jointDriver.BodyParts[rightLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
         jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
-        if (lastBuffer.HasValue)
-        {
+
             int j = 0;
 
-            while (j < lastBuffer.Value.ContinuousActions.Length)
+            while (j < lastBuffer.Length)
             {
-                float movementPenalty = math.abs(actions.ContinuousActions[j] - lastBuffer.Value.ContinuousActions[j]) * largeMovementPenaltyMultiplier;
-                Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
+                float movementPenalty = math.abs(actions.ContinuousActions[j] - lastBuffer[j]) * largeMovementPenaltyMultiplier;
+                if(movementPenalty != 0)
+                {
+                    Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
+                }
+
                 AddReward(movementPenalty);
+
+            lastBuffer[j] = actions.ContinuousActions[j];
                 j++;
             }
-        }
 
-        lastBuffer = actions;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -163,6 +205,14 @@ public class RobotAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        nextBoxThrow = StepCount + maxBoxTime;
+
+        // Delete all children of boxHolder
+        for (int i = boxHolder.childCount - 1; i >= 0; i--)
+        {
+            Destroy(boxHolder.GetChild(i).gameObject);
+        }
+
         startingPos = transform.position;
         // Reset the root first
         bodyBP.Reset(isRoot: true);
@@ -194,9 +244,31 @@ public class RobotAgent : Agent
             value = -0.5f;
         }
 
+        if (Input.GetMouseButton(1))
+        {
+            ThrowBox();
+        }
+
         // Set indices 9, 10, 11 (upper leg control)
         continuousActions[9] = value;
         continuousActions[10] = value;
         continuousActions[11] = value;
     }
+
+    private void ThrowBox()
+    {
+        Vector3 targetPos;
+        do
+        {
+            Vector3 randomOffset = UnityEngine.Random.insideUnitSphere * maxBoxDistance;
+            randomOffset.y = math.abs(randomOffset.y);
+            targetPos = transform.position + randomOffset;
+        }
+        while (Vector3.Distance(targetPos, transform.position) < minBoxDistance);
+
+        boxScript bScript = Instantiate(box, targetPos, Quaternion.identity, boxHolder).GetComponent<boxScript>();
+        bScript.Init(transform);
+    }
+
+    
 }

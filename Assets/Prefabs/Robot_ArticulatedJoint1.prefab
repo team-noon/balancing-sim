@@ -1998,7 +1998,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 0c1051f755e9d0e4a82d2d2d0846848f, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: RobotAgent
@@ -2022,7 +2022,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 15000000
+  MaxStep: 150000
   jointDriver: {fileID: 4515682427489820478}
   body: {fileID: 1604619741884286138}
   head: {fileID: 6809957439280144396}
@@ -2080,8 +2080,14 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxBalancePenalty: -60
-  largeMovementPenaltyMultiplier: -1
+  maxBalancePenalty: -100
+  largeMovementPenaltyMultiplier: -5
+  box: {fileID: 6542455436248007271, guid: 872303f005929a64383ee4681a234b17, type: 3}
+  minBoxTime: 30
+  maxBoxTime: 200
+  minBoxDistance: 2
+  maxBoxDistance: 6
+  boxHolder: {fileID: 0}
 --- !u!114 &2439858645332276759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2363,8 +2369,8 @@ MonoBehaviour:
   agent: {fileID: 8971872744345493908}
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: 1
-  groundContactPenaltyMultipier: 1
+  groundContactPenalty: 0.5
+  groundContactPenaltyMultipier: 1.5
   thisCollider: {fileID: 7307267223760739925}
   touchingGround: 0
 --- !u!1 &5591117776770665264
@@ -3046,8 +3052,8 @@ MonoBehaviour:
   agent: {fileID: 8971872744345493908}
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: 1
-  groundContactPenaltyMultipier: 1
+  groundContactPenalty: 0.5
+  groundContactPenaltyMultipier: 1.5
   thisCollider: {fileID: 1211308359286366578}
   touchingGround: 0
 --- !u!1 &6946870123041537286

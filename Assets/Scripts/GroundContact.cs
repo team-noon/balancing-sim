@@ -33,7 +33,7 @@ public class GroundContact : MonoBehaviour
         {
             if (touchingGround && penalizeGroundContact && !agentDoneOnGroundContact)
             {
-                Debug.Log($"Penalty applied to agent '{agent.name}' for ground contact: {groundContactPenalty * groundContactPenaltyMultipier}");
+                //Debug.Log($"Penalty applied to agent '{agent.name}' for ground contact: {groundContactPenalty * groundContactPenaltyMultipier}");
                 agent.AddReward(groundContactPenalty * groundContactPenaltyMultipier);
             }
         }

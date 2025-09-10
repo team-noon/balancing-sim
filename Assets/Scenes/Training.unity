@@ -377,7 +377,7 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
---- !u!1001 &1310963318
+--- !u!1001 &1527742696
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -385,41 +385,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 219547651815615471, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 13400000, guid: 88e3c1ec4d27d934ea384e34a47b4a14, type: 2}
     - target: {fileID: 3334965490510393194, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: m_Model
-      value: 
-      objectReference: {fileID: 5022602860645237092, guid: 7ce38febcd4aeae4fbc79958279d5222, type: 3}
-    - target: {fileID: 4186212609746849010, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: maxBalancePenalty
-      value: -100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4186212609746849010, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: largeMovementPenaltyMultiplier
-      value: -5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5011888542993810219, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenalty
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5011888542993810219, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenaltyMultipier
-      value: 1.5
+      propertyPath: m_BehaviorType
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6312934954202134813, guid: 2321a952914ea974da798573d60af5b3, type: 3}
       propertyPath: m_Name
       value: Training Area
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073625265484998890, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenalty
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073625265484998890, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenaltyMultipier
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 7314164137730405510, guid: 2321a952914ea974da798573d60af5b3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -466,10 +438,10 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2321a952914ea974da798573d60af5b3, type: 3}
---- !u!1 &1310963319 stripped
+--- !u!1 &1864717450 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6312934954202134813, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-  m_PrefabInstance: {fileID: 1310963318}
+  m_PrefabInstance: {fileID: 1527742696}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2011960059
 GameObject:
@@ -500,7 +472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc26c3bda6fe4937b2264ffe43190b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseArea: {fileID: 1310963319}
+  baseArea: {fileID: 1864717450}
   numAreas: 64
   separation: 100
   buildOnly: 1
@@ -526,4 +498,4 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 2011960061}
-  - {fileID: 1310963318}
+  - {fileID: 1527742696}
