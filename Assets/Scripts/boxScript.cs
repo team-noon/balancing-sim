@@ -40,7 +40,7 @@ public class boxScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Vector3.Distance(target.position, transform.position) >100)
+        if (Vector3.Distance(target.position, transform.position) > 100)
         {
             Destroy(gameObject);
             return;
@@ -66,6 +66,6 @@ public class boxScript : MonoBehaviour
     {
         yield return new WaitForSeconds(secs);
         Destroy(gameObject);
-        
+
     }
 }

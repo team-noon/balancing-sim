@@ -1,5 +1,3 @@
-using System;
-using Unity.InferenceEngine;
 using Unity.Mathematics;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -51,6 +49,7 @@ public class RobotAgent : Agent
 
     [SerializeField] float largeMovementPenaltyMultiplier = -1;
 
+    [SerializeField] float distancePenalty = -1;
 
 
 
@@ -91,7 +90,7 @@ public class RobotAgent : Agent
         jointDriver.addBodyPart(leftUpperArm);
     }
 
-    
+
 
     private void FixedUpdate()
     {
@@ -106,29 +105,62 @@ public class RobotAgent : Agent
         //Debug.Log($"[RobotAgent] Adding balance reward: {balanceReward}");
         AddReward(balanceReward);
 
-        if(StepCount >= nextBoxThrow)
+        if (StepCount >= nextBoxThrow)
         {
             ThrowBox();
             nextBoxThrow = StepCount + Mathf.FloorToInt(UnityEngine.Random.Range(minBoxTime, maxBoxTime));
         }
 
-        
+        // reward for being as close to the starting position.
+        float distanceReward = Vector2.Distance(new Vector2(bodyBP.startPosition.x, bodyBP.startPosition.z), new Vector2(body.position.x, body.position.z)) * distancePenalty;
+        AddReward(distanceReward);
     }
 
     float[] lastBuffer = null;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-
         if (lastBuffer == null)
         {
             lastBuffer = new float[actions.ContinuousActions.Length];
-            int k = 0;
-            while (k < actions.ContinuousActions.Length)
-            {
-                lastBuffer[k++] = 0f;
-            }
-            
+
+            // right foot
+            lastBuffer[0] = jointDriver.BodyParts[rightFoot].startingJointRotation.x;
+            lastBuffer[1] = jointDriver.BodyParts[rightFoot].startingJointRotation.z;
+
+            // left foot
+            lastBuffer[2] = jointDriver.BodyParts[leftFoot].startingJointRotation.x;
+            lastBuffer[3] = jointDriver.BodyParts[leftFoot].startingJointRotation.z;
+
+            // right lower leg
+            lastBuffer[4] = jointDriver.BodyParts[rightLowerLeg].startingJointRotation.x;
+
+            // left lower leg
+            lastBuffer[5] = jointDriver.BodyParts[leftLowerLeg].startingJointRotation.x;
+
+            // right upper leg
+            lastBuffer[6] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.x;
+            lastBuffer[7] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.y;
+            lastBuffer[8] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.z;
+
+            // left upper leg
+            lastBuffer[9] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.x;
+            lastBuffer[10] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.y;
+            lastBuffer[11] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.z;
+
+            // right upper arm
+            lastBuffer[12] = jointDriver.BodyParts[rightUpperArm].startingJointRotation.x;
+            lastBuffer[13] = jointDriver.BodyParts[rightUpperArm].startingJointRotation.z;
+
+            // left upper arm
+            lastBuffer[14] = jointDriver.BodyParts[leftUpperArm].startingJointRotation.x;
+            lastBuffer[15] = jointDriver.BodyParts[leftUpperArm].startingJointRotation.z;
+
+            // right lower arm
+            lastBuffer[16] = jointDriver.BodyParts[rightLowerArm].startingJointRotation.x;
+
+            // left lower arm
+            lastBuffer[17] = jointDriver.BodyParts[leftLowerArm].startingJointRotation.x;
         }
 
         int i = -1;
@@ -149,21 +181,21 @@ public class RobotAgent : Agent
         jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
 
-            int j = 0;
+        int j = 0;
 
-            while (j < lastBuffer.Length)
+        while (j < lastBuffer.Length)
+        {
+            float movementPenalty = math.pow(actions.ContinuousActions[j] - lastBuffer[j], 2) * largeMovementPenaltyMultiplier;
+            if (movementPenalty != 0)
             {
-                float movementPenalty = math.abs(actions.ContinuousActions[j] - lastBuffer[j]) * largeMovementPenaltyMultiplier;
-                if(movementPenalty != 0)
-                {
-                    Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
-                }
+                Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
+            }
 
-                AddReward(movementPenalty);
+            AddReward(movementPenalty);
 
             lastBuffer[j] = actions.ContinuousActions[j];
-                j++;
-            }
+            j++;
+        }
 
     }
 
@@ -270,5 +302,5 @@ public class RobotAgent : Agent
         bScript.Init(transform);
     }
 
-    
+
 }

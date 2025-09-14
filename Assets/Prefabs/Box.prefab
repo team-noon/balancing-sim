@@ -156,4 +156,4 @@ MonoBehaviour:
   VelocityDeviation: 5
   Mass: 0.08
   MassDeviation: 0.02
-  AngularVelocityDeviation: 2
+  AngularVelocityDeviation: 1

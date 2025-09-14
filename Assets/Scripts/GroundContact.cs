@@ -7,7 +7,7 @@ public class GroundContact : MonoBehaviour
 {
     public Agent agent;
 
-    [Header("Ground Check")] 
+    [Header("Ground Check")]
     public bool agentDoneOnGroundContact = true; // Whether to reset agent on ground contact.
     public bool penalizeGroundContact = true; // Whether to penalize on contact.
     public float groundContactPenalty = -1; // Penalty amount (ex: -1).
@@ -26,15 +26,15 @@ public class GroundContact : MonoBehaviour
         {
             touchingGround = false;
         }
-        
+
     }
 
     private void FixedUpdate()
+    {
+        if (touchingGround && penalizeGroundContact && !agentDoneOnGroundContact)
         {
-            if (touchingGround && penalizeGroundContact && !agentDoneOnGroundContact)
-            {
-                //Debug.Log($"Penalty applied to agent '{agent.name}' for ground contact: {groundContactPenalty * groundContactPenaltyMultipier}");
-                agent.AddReward(groundContactPenalty * groundContactPenaltyMultipier);
-            }
+            //Debug.Log($"Penalty applied to agent '{agent.name}' for ground contact: {groundContactPenalty * groundContactPenaltyMultipier}");
+            agent.AddReward(groundContactPenalty * groundContactPenaltyMultipier);
         }
+    }
 }

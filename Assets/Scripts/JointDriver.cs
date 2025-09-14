@@ -36,14 +36,14 @@ public class BodyPart
     public BodyPart(Transform thisTransform)
     {
 
-            Joint = thisTransform.GetComponent<ArticulationBody>();
+        Joint = thisTransform.GetComponent<ArticulationBody>();
 
-        
+
 
 
         partTransform = thisTransform;
 
-        foreach(Transform child in thisTransform)
+        foreach (Transform child in thisTransform)
         {
             groundContact = child.GetComponent<GroundContact>();
             if (groundContact)
@@ -64,7 +64,7 @@ public class BodyPart
         startRotation = thisTransform.localRotation;
         startPosition = thisTransform.position;
         startPositionJoint = Joint.jointPosition;
-        /*
+        
     float xRange = Joint.xDrive.upperLimit - Joint.xDrive.lowerLimit;
     float yRange = Joint.yDrive.upperLimit - Joint.yDrive.lowerLimit;
     float zRange = Joint.zDrive.upperLimit - Joint.zDrive.lowerLimit;
@@ -75,47 +75,25 @@ public class BodyPart
         float zRot = zRange != 0 ? Mathf.Clamp(((0 - Joint.zDrive.lowerLimit) / zRange) * 2f - 1f, -1f, 1f) : 0f;
 
 startingJointRotation = new Vector3(xRot, yRot, zRot);
-        Debug.Log($"Listen here you fat fuck: {startingJointRotation.x} {startingJointRotation.y} {startingJointRotation.z}");
-this.SetTargetRotation(startingJointRotation.x, startingJointRotation.y, startingJointRotation.z); */
+        Debug.Log($"Listen here you fat fuck: {startingJointRotation.x} {startingJointRotation.y} {startingJointRotation.z} {thisTransform.name}");
+this.SetTargetRotation(startingJointRotation.x, startingJointRotation.y, startingJointRotation.z); 
 
-        startingJointRotation = new Vector3(0, 0, 0);
-        SetTargetRotation(0, 0, 0);
 
         Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 30);
         Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 30);
         Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 30);
-}
+    }
 
 
 
 
     public void SetTargetRotation(float x, float y, float z)
     {
-        // old approach, -1 is lower limit 1 is upper limit, 0 is the avarage of the two
-        //Joint.SetDriveTarget(ArticulationDriveAxis.X, Mathf.Lerp(Joint.xDrive.lowerLimit, Joint.xDrive.upperLimit, (x + 1f) / 2f));
-        //Joint.SetDriveTarget(ArticulationDriveAxis.Y, Mathf.Lerp(Joint.yDrive.lowerLimit, Joint.yDrive.upperLimit, (y+1f)/2f));
-        //Joint.SetDriveTarget(ArticulationDriveAxis.Z, Mathf.Lerp(Joint.zDrive.lowerLimit, Joint.zDrive.upperLimit, (z+1f)/2f));
+        Joint.SetDriveTarget(ArticulationDriveAxis.X, Mathf.Lerp(Joint.xDrive.lowerLimit, Joint.xDrive.upperLimit, (x + 1f) / 2f));
+        Joint.SetDriveTarget(ArticulationDriveAxis.Y, Mathf.Lerp(Joint.yDrive.lowerLimit, Joint.yDrive.upperLimit, (y+1f)/2f));
+        Joint.SetDriveTarget(ArticulationDriveAxis.Z, Mathf.Lerp(Joint.zDrive.lowerLimit, Joint.zDrive.upperLimit, (z+1f)/2f));
 
 
-        // Maps -1 to lowerLimit, 0 to 0, 1 to upperLimit for each axis
-
-        float MapToLimit(float value, float lowerLimit, float upperLimit)
-        {
-            if (value < 0)
-            {
-                // value in [-1, 0): map to [lowerLimit, 0]
-                return Mathf.Lerp(lowerLimit, 0f, value + 1f);
-            }
-            else
-            {
-                // value in [0, 1]: map to [0, upperLimit]
-                return Mathf.Lerp(0f, upperLimit, value);
-            }
-        }
-
-        Joint.SetDriveTarget(ArticulationDriveAxis.X, MapToLimit(x, Joint.xDrive.lowerLimit, Joint.xDrive.upperLimit));
-        Joint.SetDriveTarget(ArticulationDriveAxis.Y, MapToLimit(y, Joint.yDrive.lowerLimit, Joint.yDrive.upperLimit));
-        Joint.SetDriveTarget(ArticulationDriveAxis.Z, MapToLimit(z, Joint.zDrive.lowerLimit, Joint.zDrive.upperLimit));
     }
 
 
@@ -128,7 +106,7 @@ this.SetTargetRotation(startingJointRotation.x, startingJointRotation.y, startin
         Joint.linearVelocity = Vector3.zero;
         Joint.angularVelocity = Vector3.zero;
 
-        
+
         if (isRoot)
         {
             // Only the root articulation body can be teleported

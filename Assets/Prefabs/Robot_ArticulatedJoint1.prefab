@@ -2043,27 +2043,18 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 0.35714287
-      outSlope: 0.35714287
+      value: -1
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.2
+      outWeight: 0
     - serializedVersion: 3
-      time: 0.1655844
-      value: 0.09147066
-      inSlope: 1.25745
-      outSlope: 1.25745
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.10116733
-    - serializedVersion: 3
-      time: 0.4944808
-      value: 0.816613
-      inSlope: 1.0384032
-      outSlope: 1.0384032
+      time: 0.3233061
+      value: -0.8027083
+      inSlope: 1.0728025
+      outSlope: 1.0728025
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
@@ -2071,17 +2062,18 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxBalancePenalty: -100
-  largeMovementPenaltyMultiplier: -5
+  maxBalancePenalty: -12
+  largeMovementPenaltyMultiplier: -2.2
+  distancePenalty: -0.7
   box: {fileID: 6542455436248007271, guid: 872303f005929a64383ee4681a234b17, type: 3}
   minBoxTime: 30
   maxBoxTime: 200
@@ -2100,7 +2092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 5
+  DecisionPeriod: 3
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
 --- !u!114 &4515682427489820478
@@ -2340,7 +2332,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5367500960601815185}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 88e3c1ec4d27d934ea384e34a47b4a14, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -3023,7 +3015,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6021829550252754946}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 88e3c1ec4d27d934ea384e34a47b4a14, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

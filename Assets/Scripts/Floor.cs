@@ -20,7 +20,7 @@ public class Floor : MonoBehaviour
 
             if (GC.agentDoneOnGroundContact)
             {
-                GC.agent.SetReward(-100f);
+                //GC.agent.SetReward(-100f);
                 GC.agent.EndEpisode();
                 //Debug.Log($"[Floor] Agent '{GC.agent.name}' episode ended due to ground contact. Reward set to -100.");
             }
