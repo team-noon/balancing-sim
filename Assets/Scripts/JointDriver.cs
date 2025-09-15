@@ -79,9 +79,9 @@ startingJointRotation = new Vector3(xRot, yRot, zRot);
 this.SetTargetRotation(startingJointRotation.x, startingJointRotation.y, startingJointRotation.z); 
 
 
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 30);
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 30);
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 30);
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 6);
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 6);
+        Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 6);
     }
 
 

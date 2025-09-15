@@ -2072,11 +2072,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   maxBalancePenalty: -12
-  largeMovementPenaltyMultiplier: -2.2
-  distancePenalty: -0.7
+  largeMovementPenaltyMultiplier: -0.3
+  distancePenalty: -4
+  directionChangePenalty: 0
   box: {fileID: 6542455436248007271, guid: 872303f005929a64383ee4681a234b17, type: 3}
-  minBoxTime: 30
-  maxBoxTime: 200
+  minBoxTime: 60
+  maxBoxTime: 150
   minBoxDistance: 2
   maxBoxDistance: 6
   boxHolder: {fileID: 0}

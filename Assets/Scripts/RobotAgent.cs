@@ -50,6 +50,7 @@ public class RobotAgent : Agent
     [SerializeField] float largeMovementPenaltyMultiplier = -1;
 
     [SerializeField] float distancePenalty = -1;
+    [SerializeField] float directionChangePenalty = -0.1f; // Add to Penalty / reward settings
 
 
 
@@ -116,51 +117,73 @@ public class RobotAgent : Agent
         AddReward(distanceReward);
     }
 
+
+
     float[] lastBuffer = null;
+    float[] lastLastBuffer = null;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         if (lastBuffer == null)
         {
             lastBuffer = new float[actions.ContinuousActions.Length];
+            lastLastBuffer = new float[actions.ContinuousActions.Length];
 
             // right foot
             lastBuffer[0] = jointDriver.BodyParts[rightFoot].startingJointRotation.x;
             lastBuffer[1] = jointDriver.BodyParts[rightFoot].startingJointRotation.z;
+            lastLastBuffer[0] = lastBuffer[0];
+            lastLastBuffer[1] = lastBuffer[1];
 
             // left foot
             lastBuffer[2] = jointDriver.BodyParts[leftFoot].startingJointRotation.x;
             lastBuffer[3] = jointDriver.BodyParts[leftFoot].startingJointRotation.z;
+            lastLastBuffer[2] = lastBuffer[2];
+            lastLastBuffer[3] = lastBuffer[3];
 
             // right lower leg
             lastBuffer[4] = jointDriver.BodyParts[rightLowerLeg].startingJointRotation.x;
+            lastLastBuffer[4] = lastBuffer[4];
 
             // left lower leg
             lastBuffer[5] = jointDriver.BodyParts[leftLowerLeg].startingJointRotation.x;
+            lastLastBuffer[5] = lastBuffer[5];
 
             // right upper leg
             lastBuffer[6] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.x;
             lastBuffer[7] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.y;
             lastBuffer[8] = jointDriver.BodyParts[rightUpperLeg].startingJointRotation.z;
+            lastLastBuffer[6] = lastBuffer[6];
+            lastLastBuffer[7] = lastBuffer[7];
+            lastLastBuffer[8] = lastBuffer[8];
 
             // left upper leg
             lastBuffer[9] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.x;
             lastBuffer[10] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.y;
             lastBuffer[11] = jointDriver.BodyParts[leftUpperLeg].startingJointRotation.z;
+            lastLastBuffer[9] = lastBuffer[9];
+            lastLastBuffer[10] = lastBuffer[10];
+            lastLastBuffer[11] = lastBuffer[11];
 
             // right upper arm
             lastBuffer[12] = jointDriver.BodyParts[rightUpperArm].startingJointRotation.x;
             lastBuffer[13] = jointDriver.BodyParts[rightUpperArm].startingJointRotation.z;
+            lastLastBuffer[12] = lastBuffer[12];
+            lastLastBuffer[13] = lastBuffer[13];
 
             // left upper arm
             lastBuffer[14] = jointDriver.BodyParts[leftUpperArm].startingJointRotation.x;
             lastBuffer[15] = jointDriver.BodyParts[leftUpperArm].startingJointRotation.z;
+            lastLastBuffer[14] = lastBuffer[14];
+            lastLastBuffer[15] = lastBuffer[15];
 
             // right lower arm
             lastBuffer[16] = jointDriver.BodyParts[rightLowerArm].startingJointRotation.x;
+            lastLastBuffer[16] = lastBuffer[16];
 
             // left lower arm
             lastBuffer[17] = jointDriver.BodyParts[leftLowerArm].startingJointRotation.x;
+            lastLastBuffer[17] = lastBuffer[17];
         }
 
         int i = -1;
@@ -180,7 +203,6 @@ public class RobotAgent : Agent
         jointDriver.BodyParts[rightLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
         jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
-
         int j = 0;
 
         while (j < lastBuffer.Length)
@@ -190,13 +212,21 @@ public class RobotAgent : Agent
             {
                 Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
             }
-
             AddReward(movementPenalty);
 
+            // Direction change penalty
+            float prevDelta = lastBuffer[j] - lastLastBuffer[j];
+            float currDelta = actions.ContinuousActions[j] - lastBuffer[j];
+            if (math.sign(prevDelta) != 0 && math.sign(currDelta) != 0 && math.sign(prevDelta) != math.sign(currDelta))
+            {
+                AddReward(directionChangePenalty);
+                Debug.Log($"[RobotAgent] Adding direction change penalty: {directionChangePenalty} for action index {j}");
+            }
+
+            lastLastBuffer[j] = lastBuffer[j];
             lastBuffer[j] = actions.ContinuousActions[j];
             j++;
         }
-
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -259,6 +289,9 @@ public class RobotAgent : Agent
         headBP.Reset();
         leftPalmBP.Reset();
         rightPalmBP.Reset();
+
+        lastBuffer = null;
+        lastLastBuffer = null;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
