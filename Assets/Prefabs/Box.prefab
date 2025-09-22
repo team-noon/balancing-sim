@@ -152,8 +152,8 @@ MonoBehaviour:
   Size: 1
   SizeDeviation: 0.5
   AngleDeviation: 10
-  InitialVelocity: 7
-  VelocityDeviation: 2
-  Mass: 0.05
+  InitialVelocity: 6
+  VelocityDeviation: 1
+  Mass: 0.04
   MassDeviation: 0.02
-  AngularVelocityDeviation: 1
+  AngularVelocityDeviation: 0

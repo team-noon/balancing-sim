@@ -24,7 +24,7 @@ public class GroundContact : MonoBehaviour
     {
         if (other.gameObject.layer == 7)
         {
-            touchingGround = false;
+            thisCollider.transform.GetComponent<GroundContact>().touchingGround = false;
         }
 
     }

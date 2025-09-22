@@ -75,13 +75,8 @@ public class BodyPart
         float zRot = zRange != 0 ? Mathf.Clamp(((0 - Joint.zDrive.lowerLimit) / zRange) * 2f - 1f, -1f, 1f) : 0f;
 
 startingJointRotation = new Vector3(xRot, yRot, zRot);
-        Debug.Log($"Listen here you fat fuck: {startingJointRotation.x} {startingJointRotation.y} {startingJointRotation.z} {thisTransform.name}");
 this.SetTargetRotation(startingJointRotation.x, startingJointRotation.y, startingJointRotation.z); 
 
-
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.X, 6);
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.Y, 6);
-        Joint.SetDriveForceLimit(ArticulationDriveAxis.Z, 6);
     }
 
 

@@ -187,21 +187,21 @@ public class RobotAgent : Agent
         }
 
         int i = -1;
-
+        
         jointDriver.BodyParts[rightFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
         jointDriver.BodyParts[leftFoot].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
 
         jointDriver.BodyParts[rightLowerLeg].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
         jointDriver.BodyParts[leftLowerLeg].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
 
-        jointDriver.BodyParts[rightUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
+        jointDriver.BodyParts[rightUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]); 
         jointDriver.BodyParts[leftUpperLeg].SetTargetRotation(actions.ContinuousActions[++i], actions.ContinuousActions[++i], actions.ContinuousActions[++i]);
 
         jointDriver.BodyParts[rightUpperArm].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
         jointDriver.BodyParts[leftUpperArm].SetTargetRotation(actions.ContinuousActions[++i], 0, actions.ContinuousActions[++i]);
 
         jointDriver.BodyParts[rightLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
-        jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0);
+        jointDriver.BodyParts[leftLowerArm].SetTargetRotation(actions.ContinuousActions[++i], 0, 0); 
 
         int j = 0;
 
@@ -210,7 +210,7 @@ public class RobotAgent : Agent
             float movementPenalty = math.pow(actions.ContinuousActions[j] - lastBuffer[j], 2) * largeMovementPenaltyMultiplier;
             if (movementPenalty != 0)
             {
-                Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
+                //Debug.Log($"[RobotAgent] Adding movement penalty reward: {movementPenalty} for action index {j}");
             }
             AddReward(movementPenalty);
 
@@ -220,7 +220,7 @@ public class RobotAgent : Agent
             if (math.sign(prevDelta) != 0 && math.sign(currDelta) != 0 && math.sign(prevDelta) != math.sign(currDelta))
             {
                 AddReward(directionChangePenalty);
-                Debug.Log($"[RobotAgent] Adding direction change penalty: {directionChangePenalty} for action index {j}");
+                //Debug.Log($"[RobotAgent] Adding direction change penalty: {directionChangePenalty} for action index {j}");
             }
 
             lastLastBuffer[j] = lastBuffer[j];

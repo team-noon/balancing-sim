@@ -274,9 +274,9 @@ ArticulationBody:
   serializedVersion: 5
   m_Mass: 0.067
   m_ParentAnchorPosition: {x: 70, y: -140.00002, z: 0}
-  m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_ParentAnchorRotation: {x: 0.6743797, y: 0.6743797, z: -0.2126311, w: -0.2126311}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
-  m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_AnchorRotation: {x: 0.6743797, y: 0.6743797, z: -0.2126311, w: -0.2126311}
   m_MatchAnchors: 1
   m_ArticulationJointType: 3
   m_LinearX: 2
@@ -290,7 +290,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -299,7 +299,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 10
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -308,7 +308,7 @@ ArticulationBody:
     upperLimit: 32.5
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -650,7 +650,7 @@ ArticulationBody:
     upperLimit: 10
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 5
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -889,7 +889,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -898,7 +898,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1079,7 +1079,7 @@ ArticulationBody:
     upperLimit: 0
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 10
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1525,7 +1525,7 @@ ArticulationBody:
     upperLimit: 10
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 5
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1643,7 +1643,7 @@ ArticulationBody:
     upperLimit: 22.5
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1847,7 +1847,7 @@ ArticulationBody:
     upperLimit: 22.5
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2076,8 +2076,8 @@ MonoBehaviour:
   distancePenalty: -4
   directionChangePenalty: 0
   box: {fileID: 6542455436248007271, guid: 872303f005929a64383ee4681a234b17, type: 3}
-  minBoxTime: 60
-  maxBoxTime: 150
+  minBoxTime: 150
+  maxBoxTime: 300
   minBoxDistance: 2
   maxBoxDistance: 6
   boxHolder: {fileID: 0}
@@ -2093,9 +2093,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 3
+  DecisionPeriod: 8
   DecisionStep: 0
-  TakeActionsBetweenDecisions: 1
+  TakeActionsBetweenDecisions: 0
 --- !u!114 &4515682427489820478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2333,7 +2333,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5367500960601815185}
-  m_Material: {fileID: 13400000, guid: 88e3c1ec4d27d934ea384e34a47b4a14, type: 2}
+  m_Material: {fileID: 13400000, guid: c3632726389dca24e90122cccc93db15, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2362,7 +2362,7 @@ MonoBehaviour:
   agent: {fileID: 8971872744345493908}
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: 0.5
+  groundContactPenalty: 2
   groundContactPenaltyMultipier: 1.5
   thisCollider: {fileID: 7307267223760739925}
   touchingGround: 0
@@ -2654,7 +2654,7 @@ ArticulationBody:
     upperLimit: 0
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 10
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2866,9 +2866,9 @@ ArticulationBody:
   serializedVersion: 5
   m_Mass: 0.067
   m_ParentAnchorPosition: {x: -70, y: -140.00002, z: 0}
-  m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_ParentAnchorRotation: {x: 0.21263117, y: 0.21263117, z: -0.6743797, w: -0.6743797}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
-  m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_AnchorRotation: {x: 0.21263117, y: 0.21263117, z: -0.6743797, w: -0.6743797}
   m_MatchAnchors: 1
   m_ArticulationJointType: 3
   m_LinearX: 2
@@ -2882,7 +2882,7 @@ ArticulationBody:
     upperLimit: 10
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2891,16 +2891,16 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 10
     target: 0
     targetVelocity: 0
     driveType: 0
   m_ZDrive:
-    lowerLimit: -32.5
-    upperLimit: 12.5
+    lowerLimit: -12.5
+    upperLimit: 32.5
     stiffness: 10000
     damping: 1000
-    forceLimit: 3.4028235e+38
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -3016,7 +3016,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6021829550252754946}
-  m_Material: {fileID: 13400000, guid: 88e3c1ec4d27d934ea384e34a47b4a14, type: 2}
+  m_Material: {fileID: 13400000, guid: c3632726389dca24e90122cccc93db15, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -3045,7 +3045,7 @@ MonoBehaviour:
   agent: {fileID: 8971872744345493908}
   agentDoneOnGroundContact: 0
   penalizeGroundContact: 1
-  groundContactPenalty: 0.5
+  groundContactPenalty: 2
   groundContactPenaltyMultipier: 1.5
   thisCollider: {fileID: 1211308359286366578}
   touchingGround: 0
@@ -3119,7 +3119,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -3128,7 +3128,7 @@ ArticulationBody:
     upperLimit: 80
     stiffness: 10000
     damping: 1000
-    forceLimit: 10
+    forceLimit: 6
     target: 0
     targetVelocity: 0
     driveType: 0

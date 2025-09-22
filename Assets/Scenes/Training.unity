@@ -389,14 +389,6 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 20dff89d5cb9ec54d93d0d3a422bd07a, type: 3}
-    - target: {fileID: 5011888542993810219, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenalty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5011888542993810219, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenaltyMultipier
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5827329915126000092, guid: 2321a952914ea974da798573d60af5b3, type: 3}
       propertyPath: m_LocalPosition.y
       value: 2.5
@@ -404,14 +396,6 @@ PrefabInstance:
     - target: {fileID: 6312934954202134813, guid: 2321a952914ea974da798573d60af5b3, type: 3}
       propertyPath: m_Name
       value: Training Area
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073625265484998890, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenalty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7073625265484998890, guid: 2321a952914ea974da798573d60af5b3, type: 3}
-      propertyPath: groundContactPenaltyMultipier
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7314164137730405510, guid: 2321a952914ea974da798573d60af5b3, type: 3}
       propertyPath: m_LocalPosition.x
