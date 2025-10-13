@@ -11,6 +11,9 @@ PROTO noonRobot [
   field SFVec3f bodySize 0.15 0.25 0.06
   field SFFloat bodyMass 0.456
   
+  field SFFloat headSize 0.04
+  field SFFloat headMass 0.06
+  
 ]
 {
   Robot {
@@ -19,25 +22,67 @@ PROTO noonRobot [
     name IS name
     controller IS controller
     children [
+      # BODY
       Solid{
+        name "body"
         children [
           DEF BODYSHAPE Shape {
             geometry Box{
               size IS bodySize
             }
+            appearance DEF MATERIAL PBRAppearance{
+              metalness 0      
+            }
           }
         ]
       }
       
+      # HEAD
+      HingeJoint{
+        jointParameters HingeJointParameters{
+          #TODO
+        }
+        device [
+          RotationalMotor{
+            # TODO
+          }
+          PositionSensor{
+            # TODO
+          }
+        ]
+        
+        endPoint Solid{
+          translation %<=`0 ${fields.bodySize.value.y / 2 + fields.headSize.value / 2} 0`>%
+          name "head"
+          children [
+            DEF HEADSHAPE Shape{
+              geometry Box{
+                %<=`size ${fields.headSize.value} ${fields.headSize.value} ${fields.headSize.value}`>%
+              }
+              appearance USE MATERIAL
+            }
+          ]
+          
+          physics Physics{
+            mass IS headMass
+            density -1
+          }
+          
+          boundingObject USE HEADSHAPE
+        }
+        
+        
+      }
+      
     ]
     
-        # Physics must be on the Robot itself:
+
     physics Physics {
       mass IS bodyMass
       density -1
     }
 
-    # boundingObject must also be defined here:
+
     boundingObject USE BODYSHAPE
   }
 }
