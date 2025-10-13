@@ -1,0 +1,43 @@
+#VRML_SIM R2025a utf8
+# The robot that we will be training
+# template language: javascript
+
+
+PROTO noonRobot [
+  field SFVec3f translation 0 0 0
+  field SFString name "robot"
+  field SFString controller "<generic>"
+  
+  field SFVec3f bodySize 0.15 0.25 0.06
+  field SFFloat bodyMass 0.456
+  
+]
+{
+  Robot {
+    translation IS translation
+    rotation 1 0 0 1.570796
+    name IS name
+    controller IS controller
+    children [
+      Solid{
+        children [
+          DEF BODYSHAPE Shape {
+            geometry Box{
+              size IS bodySize
+            }
+          }
+        ]
+      }
+      
+    ]
+    
+        # Physics must be on the Robot itself:
+    physics Physics {
+      mass IS bodyMass
+      density -1
+    }
+
+    # boundingObject must also be defined here:
+    boundingObject USE BODYSHAPE
+  }
+}
