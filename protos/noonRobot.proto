@@ -4,15 +4,39 @@
 
 
 PROTO noonRobot [
+
+  # ----- GENERAL ------
   field SFVec3f translation 0 0 0
   field SFString name "robot"
   field SFString controller "<generic>"
   
-  field SFVec3f bodySize 0.15 0.25 0.06
-  field SFFloat bodyMass 0.456
+  # ----- BODY ------
+  field SFVec3f bodySize 0.15 0.25 0.06 # [m, m, m]
+  field SFFloat bodyMass 0.456 # [m]
   
-  field SFFloat headSize 0.04
-  field SFFloat headMass 0.06
+  # ----- HEAD ------
+  field SFFloat headSize 0.04 # [m]
+  field SFFloat headMass 0.06 # [kg]
+
+  field SFFloat headMaxAngle 1 # the amount the head will be able to turn, in each direction (left and right) [rad]
+
+  # ----- ARM ------
+  field SFFloat armRadius 0.01 # [m]
+
+  field SFFloat upperArmLength 0.121 # [m]
+  field SFFloat upperArmMass 0.028 # [kg] 
+  field SFFloat lowerArmLength 0.1515 # [m]
+  field SFFloat lowerArmMass 0.014 # [kg] 
+
+  field SFFloat handRadius 0.015 # [m]
+  field SFFloat handMass 0.01 # [kg]
+
+  field SFFloat armOffset 0.01 # the offset of the arm calculated from the top of the body, armRadius will always be given to this, so it will always be offset by at least armRadius (i mean unless the arm offset is negative but why the fuck would you do that tbh) #[m]
+
+  field SFVec2f shoulderYLimits -1 1# [rad, rad] min and then max, forward and backwards rotation
+  field SFVec2f shoulderZLimits -1 1# [rad, rad] min and then max, up and down rotation
+
+  field SFVec2f elbowYLimits 0 1 # [rad, rad] forward and backwards
   
 ]
 {
@@ -31,7 +55,7 @@ PROTO noonRobot [
               size IS bodySize
             }
             appearance DEF MATERIAL PBRAppearance{
-              metalness 0      
+              metalness 0.1      
             }
           }
         ]
@@ -40,14 +64,16 @@ PROTO noonRobot [
       # HEAD
       HingeJoint{
         jointParameters HingeJointParameters{
-          #TODO
+          axis 0 1 0
+          anchor %<=`0 ${fields.bodySize.value.y / 2} 0`>%
         }
         device [
           RotationalMotor{
+            name "RM_HEAD"
             # TODO
           }
           PositionSensor{
-            # TODO
+            name "PS_HEAD"
           }
         ]
         
@@ -61,6 +87,33 @@ PROTO noonRobot [
               }
               appearance USE MATERIAL
             }
+
+            # EYES
+            Pose{
+              translation %<=`${fields.headSize.value / 2}`>% 0 %<=`${fields.headSize.value / 2}`>%
+              children[
+                Shape{
+                  geometry DEF EYEGEOMETRY Sphere{
+                    subdivision 5
+                    radius %<=`${fields.headSize.value / 6}`>%
+                  }
+                  appearance DEF EYEMATERIAL PBRAppearance{
+                    baseColor 1 0 0
+                    metalness 0.1      
+                  }
+                }
+              ]
+            }
+
+            Pose{
+              translation %<=`${fields.headSize.value / -2}`>% 0 %<=`${fields.headSize.value / 2}`>%
+              children[
+                Shape{
+                  geometry USE EYEGEOMETRY
+                  appearance USE EYEMATERIAL
+                }
+              ]
+            }
           ]
           
           physics Physics{
@@ -73,7 +126,65 @@ PROTO noonRobot [
         
         
       }
+      # LEFT ARM
+      Hinge2Joint{
+        device [
+          RotationalMotor{
+            # TODO
+          }
+          PositionSensor{
+            # TODO
+          }
+        ]
+
+        device2 [
+          RotationalMotor{
+            # TODO
+          }
+          PositionSensor{
+            # TODO
+          }
+        ]
+
+        endPoint Solid{
+          translation %<= `${fields.bodySize.value.x / 2 + fields.upperArmLength.value / 2} ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          rotation 0 1 0 1.570796
+
+          name "left_upper_arm"
+          children [
+            DEF UpperArmShape Shape{
+              geometry Cylinder{
+                height IS upperArmLength
+                radius IS armRadius
+              }
+              appearance USE MATERIAL
+            }
+          ]
+          
+          physics Physics{
+            mass IS upperArmMass
+            density -1
+          }
+          
+          boundingObject USE UpperArmShape
+        }
+      }
+
+      # RIGHT ARM
+      Hinge2Joint{
+
+
+      }
+
+      # LEFT LEG
+      BallJoint{
+
+      }
       
+      # RIGHT LEG
+      BallJoint{
+
+      }
     ]
     
 
