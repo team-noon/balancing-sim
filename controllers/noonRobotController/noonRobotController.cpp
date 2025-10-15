@@ -1,55 +1,45 @@
-// You may need to add webots include files such as
-// <webots/DistanceSensor.hpp>, <webots/Motor.hpp>, etc.
-// and/or to add some other includes
 #include <webots/Robot.hpp>
 #include <webots/Motor.hpp>
-#include <webots/PositionSensor.hpp>
 
-// All the webots classes are defined in the "webots" namespace
 using namespace webots;
 
-// This is the main program of your controller.
-// It creates an instance of your Robot instance, launches its
-// function(s) and destroys it at the end of the execution.
-// Note that only one instance of Robot should be created in
-// a controller program.
-// The arguments of the main function can be specified by the
-// "controllerArgs" field of the Robot node
-int main(int argc, char **argv)
-{
-  // create the Robot instance.
+int main(int argc, char **argv) {
   Robot *robot = new Robot();
-
-  // get the time step of the current world.
   int timeStep = (int)robot->getBasicTimeStep();
 
-  // You should insert a getDevice-like function in order to get the
-  // instance of a device of the robot. Something like:
-  //  Motor *motor = robot->getMotor("motorname");
-  //  DistanceSensor *ds = robot->getDistanceSensor("dsname");
-  //  ds->enable(timeStep);
+  // Get the left shoulder Y and Z motors, and the left elbow Y motor
+  Motor *shoulderY = robot->getMotor("RM_Y_LEFT_SHOULDER");
+  Motor *shoulderZ = robot->getMotor("RM_Z_LEFT_SHOULDER");
+  Motor *elbowY = robot->getMotor("RM_Y_LEFT_ELBOW");
 
-  Motor *motor = robot->getMotor("RM_HEAD");
-  PositionSensor *sensor = robot->getPositionSensor("PS_HEAD");
-  sensor->enable(timeStep);
+  // Set initial positions
+  double posY = 0.0;
+  double posZ = 0.0;
+  double posElbow = 0.0;
+  double step = 0.05;
+  int direction = 1;
+  int count = 0;
 
-  // Main loop:
-  // - perform simulation steps until Webots is stopping the controller
-  while (robot->step(timeStep) != -1)
-  {
-    // Read the sensors:
-    // Enter here functions to read sensor data, like:
-    //  double val = ds->getValue();
+  while (robot->step(timeStep) != -1) {
+    // Alternate direction every 100 steps
+    if (++count % 100 == 0) direction *= -1;
 
-    // Process sensor data here.
+    posY += direction * step;
+    posZ += direction * step;
+    posElbow += direction * step;
 
-    // Enter here functions to send actuator commands, like:
-    motor->setPosition(10.0);
+    // Clamp positions to [-1.0, 1.0] for demonstration
+    if (posY > 1.0) posY = 1.0;
+    if (posY < -1.0) posY = -1.0;
+    if (posZ > 1.0) posZ = 1.0;
+    if (posZ < -1.0) posZ = -1.0;
+    if (posElbow > 1.0) posElbow = 1.0;
+    if (posElbow < -1.0) posElbow = -1.0;
 
-    printf("\n %f",sensor->getValue());
-  };
-
-  // Enter here exit cleanup code.
+    shoulderY->setPosition(posY);
+    shoulderZ->setPosition(posZ);
+    elbowY->setPosition(posElbow);
+  }
 
   delete robot;
   return 0;
