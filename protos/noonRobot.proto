@@ -25,6 +25,7 @@ PROTO noonRobot [
 
   field SFFloat upperArmLength 0.121 # [m]
   field SFFloat upperArmMass 0.028 # [kg] 
+
   field SFFloat lowerArmLength 0.1515 # [m]
   field SFFloat lowerArmMass 0.014 # [kg] 
 
@@ -66,11 +67,12 @@ PROTO noonRobot [
         jointParameters HingeJointParameters{
           axis 0 1 0
           anchor %<=`0 ${fields.bodySize.value.y / 2} 0`>%
+          # TODO JOINT HARD LIMITS
         }
         device [
           RotationalMotor{
             name "RM_HEAD"
-            # TODO
+            # TODO MOTOR LIMITS
           }
           PositionSensor{
             name "PS_HEAD"
@@ -90,7 +92,7 @@ PROTO noonRobot [
 
             # EYES
             Pose{
-              translation %<=`${fields.headSize.value / 2}`>% 0 %<=`${fields.headSize.value / 2}`>%
+              translation %<=`${fields.headSize.value / 2}`>% 0 %<=`${fields.headSize.value / -2}`>%
               children[
                 Shape{
                   geometry DEF EYEGEOMETRY Sphere{
@@ -106,7 +108,7 @@ PROTO noonRobot [
             }
 
             Pose{
-              translation %<=`${fields.headSize.value / -2}`>% 0 %<=`${fields.headSize.value / 2}`>%
+              translation %<=`${fields.headSize.value / -2}`>% 0 %<=`${fields.headSize.value / -2}`>%
               children[
                 Shape{
                   geometry USE EYEGEOMETRY
@@ -123,31 +125,44 @@ PROTO noonRobot [
           
           boundingObject USE HEADSHAPE
         }
-        
-        
       }
+
       # LEFT ARM
       Hinge2Joint{
+        jointParameters HingeJointParameters{
+          anchor %<= `${-fields.bodySize.value.x / 2 } ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          axis 0 1 0
+          # TODO JOINT HARD LIMITS
+        }
+
         device [
           RotationalMotor{
-            # TODO
+            name "RM_Y_LEFT_ARM"
+            # TODO MOTOR LIMITS
           }
           PositionSensor{
-            # TODO
+            name "PS_Y_LEFT_ARM"
           }
         ]
 
+        jointParameters2 JointParameters{
+          anchor %<= `${-fields.bodySize.value.x / 2 } ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          axis 0 0 1
+          # TODO JOINT HARD LIMITS
+        }
+
         device2 [
           RotationalMotor{
-            # TODO
+            name "RM_Z_LEFT_ARM"
+            # TODO MOTOR LIMITS
           }
           PositionSensor{
-            # TODO
+            name "PS_Z_LEFT_ARM"
           }
         ]
 
         endPoint Solid{
-          translation %<= `${fields.bodySize.value.x / 2 + fields.upperArmLength.value / 2} ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          translation %<= `${-fields.bodySize.value.x / 2 - fields.upperArmLength.value / 2} ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
           rotation 0 1 0 1.570796
 
           name "left_upper_arm"
