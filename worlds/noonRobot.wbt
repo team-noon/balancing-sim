@@ -9,7 +9,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.20579907115561655 0.034424491925344726 -0.9779885974116301 3.947600026500286
-  position 0.6245884273489777 -0.9623150904562666 0.725712959452405
+  position 1.7047889409334709 -1.987269391694873 1.1472374839883395
 }
 TexturedBackground {
 }
@@ -18,6 +18,6 @@ TexturedBackgroundLight {
 RectangleArena {
 }
 noonRobot {
-  translation 0 6.20903e-08 0.19
+  translation 0 5.22866e-08 0.16
   controller "noonRobotController"
 }

@@ -40,10 +40,46 @@ PROTO noonRobot [
   field SFVec2f shoulderZMotorLimits -1 1# [rad, rad] min and then max, up and down rotation
   field SFVec2f shoulderZHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad] 
 
+  field SFVec2f elbowYMotorLimits -1 1 # [rad, rad] forward and backwards
+  field SFVec2f elbowYHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
 
-  field SFVec2f elbowYMotorLimits 0 1 # [rad, rad] forward and backwards
-  field SFVec2f elbowYHardLimits 0 1.5707963267948966 # [rad, rad]
+  # ------- LEGS -------
 
+  field SFFloat legRadius 0.015 # [m]
+
+  field SFFloat upperLegLength 0.18 # [m]
+  field SFFloat upperLegMass 0.05 # [kg]
+
+  field SFFloat lowerLegLength 0.18 # [m]
+  field SFFloat lowerLegMass 0.04 # [kg]
+
+  field SFFloat footLength 0.06 # [m]
+  field SFFloat footWidth 0.03 # [m]
+  field SFFloat footHeight 0.02 # [m]
+  field SFFloat footMass 0.02 # [kg]
+  field SFFloat footOffset 0.01 # [m] basically how in the foot (rectangle is) 0 is the legradius and anything more just pushes it more in (SAME AS THE OTHER 2 OFFSETS MAN)
+
+  field SFFloat legOffset 0.02 # [m] offset from the side of the body, basically how in the legs are modeled to be, 0 is basically equal to the legRadius and it just add to that (same as the fucking arm offset i dont know why i am over explaining things (i will only ever be the only person reading this, if im not then this is my way of sending a message: SOMEONE END MY SUFFERING))
+
+  field SFVec2f hipXMotorLimits -1 1 # [rad, rad]
+  field SFVec2f hipXHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+
+  field SFVec2f hipYMotorLimits -1 1 # [rad, rad]
+  field SFVec2f hipYHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+
+  field SFVec2f hipZMotorLimits -1 1 # [rad, rad]
+  field SFVec2f hipZHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+
+
+  field SFVec2f kneeXMotorLimits -1 1 # [rad, rad]
+  field SFVec2f kneeXHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+
+
+  field SFVec2f footXMotorLimits -1 1 # [rad, rad]
+  field SFVec2f footXHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+
+  field SFVec2f footZMotorLimits -1 1 # [rad, rad]
+  field SFVec2f footZHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
 
   
 ]
@@ -175,6 +211,7 @@ PROTO noonRobot [
           }
         ]
 
+        # LEFT UPPER ARM
         endPoint Solid{
           translation %<= `${-fields.bodySize.value.x / 2 - fields.upperArmLength.value / 2} ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
           rotation 0 1 0 1.570796
@@ -224,6 +261,27 @@ PROTO noonRobot [
                     }
                     appearance USE MATERIAL
                   }
+                  Solid{
+                    name "left_hand"
+
+                    translation 0 0 %<=`${-fields.lowerArmLength.value/2 - fields.handRadius.value}`>%
+
+                    children [
+                      DEF HandShape Shape{
+                        geometry Sphere{
+                          radius IS handRadius
+                        }
+                        appearance USE MATERIAL
+                      }
+                    ]
+
+                    physics Physics {
+                      mass  IS handMass
+                      density -1
+                    }
+                    boundingObject USE HandShape
+                  }
+
                 ]
                 physics Physics { 
                   mass IS lowerArmMass
@@ -246,13 +304,13 @@ PROTO noonRobot [
 
       # RIGHT ARM
       Hinge2Joint{
-
+        
 
       }
 
       # LEFT LEG
       BallJoint{
-
+        
       }
       
       # RIGHT LEG

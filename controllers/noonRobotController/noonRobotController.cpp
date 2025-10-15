@@ -3,7 +3,8 @@
 
 using namespace webots;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   Robot *robot = new Robot();
   int timeStep = (int)robot->getBasicTimeStep();
 
@@ -12,33 +13,38 @@ int main(int argc, char **argv) {
   Motor *shoulderZ = robot->getMotor("RM_Z_LEFT_SHOULDER");
   Motor *elbowY = robot->getMotor("RM_Y_LEFT_ELBOW");
 
-  // Set initial positions
-  double posY = 0.0;
-  double posZ = 0.0;
-  double posElbow = 0.0;
-  double step = 0.05;
-  int direction = 1;
-  int count = 0;
+  // Set initial velocities
+  double velY = 1;
+  double velZ = 0.0;
+  double velElbow = 0.0;
+  int stepCount = 0;
+  const int switchSteps = 100;
+  bool reverse = false;
 
-  while (robot->step(timeStep) != -1) {
-    // Alternate direction every 100 steps
-    if (++count % 100 == 0) direction *= -1;
+  // Set initial positions for the motors so they are enabled
+  shoulderY->setPosition(INFINITY);
+  shoulderZ->setPosition(INFINITY);
+  elbowY->setPosition(INFINITY);
 
-    posY += direction * step;
-    posZ += direction * step;
-    posElbow += direction * step;
+  while (robot->step(timeStep) != -1)
+  {
+    // Set velocities (reverse if needed)
+    shoulderY->setVelocity(reverse ? -velY : velY);
+    shoulderZ->setVelocity(reverse ? -velZ : velZ);
+    elbowY->setVelocity(reverse ? -velElbow : velElbow);
 
-    // Clamp positions to [-1.0, 1.0] for demonstration
-    if (posY > 1.0) posY = 1.0;
-    if (posY < -1.0) posY = -1.0;
-    if (posZ > 1.0) posZ = 1.0;
-    if (posZ < -1.0) posZ = -1.0;
-    if (posElbow > 1.0) posElbow = 1.0;
-    if (posElbow < -1.0) posElbow = -1.0;
+    // Every switchSteps, shift velocities between motors
+    stepCount++;
+    if (stepCount % switchSteps == 0) {
+      // Rotate velocities: Y -> Z, Z -> Elbow, Elbow -> Y
+      double temp = velY;
+      velY = velElbow;
+      velElbow = velZ;
+      velZ = temp;
 
-    shoulderY->setPosition(posY);
-    shoulderZ->setPosition(posZ);
-    elbowY->setPosition(posElbow);
+      // Reverse direction every other switch
+      reverse = !reverse;
+    }
   }
 
   delete robot;
