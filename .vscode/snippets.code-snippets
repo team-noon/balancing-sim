@@ -1,0 +1,80 @@
+{
+  // === COMMON CONSTANTS ===
+  "PI": {
+    "prefix": "pi",
+    "body": ["3.141592653589793"],
+    "description": "π (pi)"
+  },
+  "HALF_PI": {
+    "prefix": "0.5pi",
+    "body": ["1.5707963267948966"],
+    "description": "π/2 (half pi)"
+  },
+  "ONE_AND_HALF_PI": {
+    "prefix": "1.5pi",
+    "body": ["4.71238898038469"],
+    "description": "1.5 × π"
+  },
+  "TWO_PI": {
+    "prefix": "2pi",
+    "body": ["6.283185307179586"],
+    "description": "2 × π"
+  },
+
+
+  // === COMMON NODES ===
+  "Solid Node": {
+    "prefix": "solid",
+    "body": [
+      "Solid {",
+      "  translation ${1:0 0 0}",
+      "  rotation ${2:0 1 0 0}",
+      "  name \"${3:part_name}\"",
+      "  children [",
+      "    Shape {",
+      "      geometry Box { size ${4:0.1 0.1 0.1} }",
+      "      appearance PBRAppearance { metalness 0.1 }",
+      "    }",
+      "  ]",
+      "  physics Physics { mass ${5:0.1} density -1 }",
+      "  boundingObject Box { size ${4:0.1 0.1 0.1} }",
+      "}"
+    ],
+    "description": "Creates a basic Solid node with shape, appearance, and physics"
+  },
+
+
+  "PBRAppearance Node": {
+    "prefix": "pbr",
+    "body": [
+      "PBRAppearance {",
+      "  baseColor ${1:1 1 1}",
+      "  roughness ${2:0.4}",
+      "  metalness ${3:0.1}",
+      "}"
+    ],
+    "description": "Basic PBRAppearance template"
+  },
+
+  "Shape Node": {
+    "prefix": "shape",
+    "body": [
+      "Shape {",
+      "  geometry ${1:Box} { size ${2:0.1 0.1 0.1} }",
+      "  appearance PBRAppearance { baseColor ${3:1 1 1} }",
+      "}"
+    ],
+    "description": "Basic Shape node"
+  },
+
+  "Physics Node": {
+    "prefix": "physics",
+    "body": [
+      "Physics {",
+      "  mass ${1:0.1}",
+      "  density -1",
+      "}"
+    ],
+    "description": "Physics definition for a Solid"
+  }
+}

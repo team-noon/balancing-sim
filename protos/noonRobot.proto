@@ -34,10 +34,17 @@ PROTO noonRobot [
 
   field SFFloat armOffset 0.01 # the offset of the arm calculated from the top of the body, armRadius will always be given to this, so it will always be offset by at least armRadius (i mean unless the arm offset is negative but why the fuck would you do that tbh) #[m]
 
-  field SFVec2f shoulderYLimits -1 1# [rad, rad] min and then max, forward and backwards rotation
-  field SFVec2f shoulderZLimits -1 1# [rad, rad] min and then max, up and down rotation
+  field SFVec2f shoulderYMotorLimits -1 1# [rad, rad] min and then max, forward and backwards rotation
+  field SFVec2f shoulderYHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
 
-  field SFVec2f elbowYLimits 0 1 # [rad, rad] forward and backwards
+  field SFVec2f shoulderZMotorLimits -1 1# [rad, rad] min and then max, up and down rotation
+  field SFVec2f shoulderZHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad] 
+
+
+  field SFVec2f elbowYMotorLimits 0 1 # [rad, rad] forward and backwards
+  field SFVec2f elbowYHardLimits 0 1.5707963267948966 # [rad, rad]
+
+
   
 ]
 {
@@ -127,37 +134,44 @@ PROTO noonRobot [
         }
       }
 
-      # LEFT ARM
+      # LEFT (UPPER) ARM
       Hinge2Joint{
         jointParameters HingeJointParameters{
           anchor %<= `${-fields.bodySize.value.x / 2 } ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
           axis 0 1 0
-          # TODO JOINT HARD LIMITS
+
+          minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderYHardLimits.value.y}`>%
         }
 
         device [
           RotationalMotor{
-            name "RM_Y_LEFT_ARM"
-            # TODO MOTOR LIMITS
+            name "RM_Y_LEFT_SHOULDER"
+
+            minPosition %<=`${fields.shoulderYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderYMotorLimits.value.y}`>%
           }
           PositionSensor{
-            name "PS_Y_LEFT_ARM"
+            name "PS_Y_LEFT_SHOULDER"
           }
         ]
 
         jointParameters2 JointParameters{
-          anchor %<= `${-fields.bodySize.value.x / 2 } ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
           axis 0 0 1
-          # TODO JOINT HARD LIMITS
+          
+          minStop %<=`${fields.shoulderZHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderZHardLimits.value.y}`>%
         }
 
         device2 [
           RotationalMotor{
-            name "RM_Z_LEFT_ARM"
-            # TODO MOTOR LIMITS
+            name "RM_Z_LEFT_SHOULDER"
+            
+            minPosition %<=`${fields.shoulderZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderZMotorLimits.value.y}`>%
           }
           PositionSensor{
-            name "PS_Z_LEFT_ARM"
+            name "PS_Z_LEFT_SHOULDER"
           }
         ]
 
@@ -166,6 +180,7 @@ PROTO noonRobot [
           rotation 0 1 0 1.570796
 
           name "left_upper_arm"
+
           children [
             DEF UpperArmShape Shape{
               geometry Cylinder{
@@ -173,6 +188,50 @@ PROTO noonRobot [
                 radius IS armRadius
               }
               appearance USE MATERIAL
+            }
+
+            # LEFT LOWER ARM
+            HingeJoint{
+              jointParameters HingeJointParameters{
+                anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
+                axis 0 1 0
+
+                minStop %<=`${fields.elbowYHardLimits.value.x}`>%
+                maxStop %<=`${fields.elbowYHardLimits.value.y}`>%
+              }
+
+              device[
+                RotationalMotor{
+                  name "RM_Y_LEFT_ELBOW"
+
+                  minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
+                }
+                PositionSensor{
+                  name "PS_Y_LEFT_ELBOW"
+                }
+              ]
+              
+              endPoint Solid {
+                translation 0 0 %<=`${-fields.lowerArmLength.value / 2 - fields.upperArmLength.value/2}`>% 
+
+                name "left_lower_arm"
+                children [
+                  DEF LowerArmShape Shape{
+                    geometry Cylinder{
+                      height IS lowerArmLength
+                      radius IS armRadius
+                    }
+                    appearance USE MATERIAL
+                  }
+                ]
+                physics Physics { 
+                  mass IS lowerArmMass
+                  density -1  
+                }
+                boundingObject USE LowerArmShape
+              }
+
             }
           ]
           
