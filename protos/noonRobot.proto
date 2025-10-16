@@ -11,7 +11,7 @@ PROTO noonRobot [
   field SFString controller "<generic>"
   
   # ----- BODY ------
-  field SFVec3f bodySize 0.15 0.25 0.06 # [m, m, m]
+  field SFVec3f bodySize 0.15 0.06 0.25 # [m, m, m]
   field SFFloat bodyMass 0.456 # [m]
   
   # ----- HEAD ------
@@ -47,14 +47,14 @@ PROTO noonRobot [
 
   field SFFloat legRadius 0.015 # [m]
 
-  field SFFloat upperLegLength 0.18 # [m]
+  field SFFloat upperLegLength 0.105 # [m]
   field SFFloat upperLegMass 0.05 # [kg]
 
   field SFFloat lowerLegLength 0.18 # [m]
   field SFFloat lowerLegMass 0.04 # [kg]
 
-  field SFFloat footLength 0.06 # [m]
-  field SFFloat footWidth 0.03 # [m]
+  field SFFloat footLength 0.1 # [m]
+  field SFFloat footWidth 0.07 # [m]
   field SFFloat footHeight 0.02 # [m]
   field SFFloat footMass 0.02 # [kg]
   field SFFloat footOffset 0.01 # [m] basically how in the foot (rectangle is) 0 is the legradius and anything more just pushes it more in (SAME AS THE OTHER 2 OFFSETS MAN)
@@ -78,15 +78,14 @@ PROTO noonRobot [
   field SFVec2f footXMotorLimits -1 1 # [rad, rad]
   field SFVec2f footXHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
 
-  field SFVec2f footZMotorLimits -1 1 # [rad, rad]
-  field SFVec2f footZHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
+  field SFVec2f footYMotorLimits -1 1 # [rad, rad]
+  field SFVec2f footYHardLimits -1.5707963267948966 1.5707963267948966 # [rad, rad]
 
   
 ]
 {
   Robot {
     translation IS translation
-    rotation 1 0 0 1.570796
     name IS name
     controller IS controller
     children [
@@ -123,7 +122,7 @@ PROTO noonRobot [
         ]
         
         endPoint Solid{
-          translation %<=`0 ${fields.bodySize.value.y / 2 + fields.headSize.value / 2} 0`>%
+          translation %<=`0 0 ${fields.bodySize.value.z / 2 + fields.headSize.value / 2}`>%
           name "head"
           children [
             DEF HEADSHAPE Shape{
@@ -135,7 +134,7 @@ PROTO noonRobot [
 
             # EYES
             Pose{
-              translation %<=`${fields.headSize.value / 2}`>% 0 %<=`${fields.headSize.value / -2}`>%
+              translation %<=` ${fields.headSize.value / 2} ${fields.headSize.value / 2} 0`>%
               children[
                 Shape{
                   geometry DEF EYEGEOMETRY Sphere{
@@ -151,7 +150,7 @@ PROTO noonRobot [
             }
 
             Pose{
-              translation %<=`${fields.headSize.value / -2}`>% 0 %<=`${fields.headSize.value / -2}`>%
+              translation %<=` ${fields.headSize.value / -2}  ${fields.headSize.value / 2} 0`>%
               children[
                 Shape{
                   geometry USE EYEGEOMETRY
@@ -173,7 +172,7 @@ PROTO noonRobot [
       # LEFT (UPPER) ARM
       Hinge2Joint{
         jointParameters HingeJointParameters{
-          anchor %<= `${-fields.bodySize.value.x / 2 } ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          anchor %<= `${-fields.bodySize.value.x / 2} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
           axis 0 1 0
 
           minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
@@ -213,7 +212,7 @@ PROTO noonRobot [
 
         # LEFT UPPER ARM
         endPoint Solid{
-          translation %<= `${-fields.bodySize.value.x / 2 - fields.upperArmLength.value / 2} ${fields.bodySize.value.y / 2 - (fields.armOffset.value + fields.armRadius.value)} 0` >%
+          translation %<= `${-fields.bodySize.value.x / 2 - fields.upperArmLength.value / 2} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
           rotation 0 1 0 1.570796
 
           name "left_upper_arm"
@@ -310,12 +309,149 @@ PROTO noonRobot [
 
       # LEFT LEG
       BallJoint{
-        
+        jointParameters BallJointParameters{
+          minStop %<=`${fields.hipXHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipXHardLimits.value.y}`>%
+        }
+
+        jointParameters2 JointParameters{
+          axis 0 1 0
+          minStop %<=`${fields.hipYHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipYHardLimits.value.y}`>%
+        }
+
+        jointParameters3 JointParameters{
+          axis 0 0 1
+          minStop %<=`${fields.hipZHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipZHardLimits.value.y}`>%
+        }
+
+        device[
+          RotationalMotor{
+            name "RM_X_LEFT_HIP"
+            minPosition %<=`${fields.hipXMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipXMotorLimits.value.y}`>%
+          }
+          PositionSensor{
+            name "PS_X_LEFT_HIP"
+          }
+        ]
+
+        device2[
+          RotationalMotor{
+            name "RM_Y_LEFT_HIP"
+            minPosition %<=`${fields.hipYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipYMotorLimits.value.y}`>%
+          }
+          PositionSensor{
+            name "PS_Y_LEFT_HIP"
+          }
+        ]
+
+        device3[
+          RotationalMotor{
+            name "RM_Z_LEFT_HIP"
+            minPosition %<=`${fields.hipZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipZMotorLimits.value.y}`>%
+          }
+          PositionSensor{
+            name "PS_Z_LEFT_HIP"
+          }
+        ]
+
+        endPoint Solid{
+          name "left_upper_leg"
+          translation %<=`${fields.bodySize.value.x / -2 + fields.legRadius.value/2 + fields.legOffset.value  } 0 ${fields.bodySize.value.z / -2 - fields.upperLegLength.value / 2}`>%
+          
+
+          children[
+            DEF UpperLegShape Shape{
+              geometry Cylinder{
+                radius IS legRadius
+                height IS upperLegLength
+              }
+              appearance USE MATERIAL
+            }
+
+            HingeJoint{
+              jointParameters HingeJointParameters{
+                anchor 0 0 %<=`${fields.lowerLegLength.value / 2}`>%
+                minStop %<=`${fields.kneeXHardLimits.value.x}`>%
+                maxStop %<=`${fields.kneeXHardLimits.value.y}`>%
+              }
+
+              device[
+                RotationalMotor{
+                  name "RM_X_LEFT_KNEE"
+                  minPosition %<=`${fields.kneeXMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.kneeXMotorLimits.value.y}`>%
+                }
+                PositionSensor{
+                  name "PS_X_LEFT_KNEE"
+                }
+              ]
+
+              endPoint Solid{
+                name "left_lower_leg"
+
+                translation 0 0 %<=`${fields.lowerLegLength.value / -2 - fields.upperLegLength.value / 2}`>%
+
+                children [
+                  DEF LowerLegShape Shape{
+                    geometry Cylinder{
+                      height IS lowerLegLength
+                      radius IS legRadius
+                    }
+                    appearance USE MATERIAL
+                  }
+
+                  Hinge2Joint{
+                    endPoint Solid{
+                      name "left_foot"
+                      translation 0  %<=`${fields.footLength.value / 2 - fields.legRadius.value - fields.legOffset.value} ${fields.lowerLegLength.value/-2 - fields.footHeight.value / 2}`>%
+
+                      children[
+                        DEF FootShape Shape{
+                          geometry Box{
+                            size %<=`${fields.footWidth.value} ${fields.footLength.value} ${fields.footHeight.value}`>%
+                          }
+                          appearance USE MATERIAL
+                        }
+
+                      ]
+
+                      physics Physics {
+                        mass IS footMass
+                        density -1
+                      }
+
+                      boundingObject USE FootShape
+                    }
+                  }
+                ]
+                
+                physics Physics {
+                  mass IS lowerLegMass
+                  density -1
+                }
+
+                boundingObject USE LowerLegShape
+              }
+            }
+          ]
+
+          physics Physics {
+            mass IS upperLegMass
+            density -1
+          }
+
+          boundingObject USE UpperLegShape
+        }
       }
       
       # RIGHT LEG
       BallJoint{
-
+        
       }
     ]
     
