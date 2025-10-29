@@ -8,8 +8,8 @@ PROTO noonRobot [
   # ----- GENERAL ------
   field SFVec3f translation 0 0 0
   field SFString name "robot"
-  field SFString controller "<generic>"
-  
+  field SFString controller "noonRobotTrainer"
+
   # ----- BODY ------
   field SFVec3f bodySize 0.15 0.06 0.25 # [m, m, m]
   field SFFloat bodyMass 0.456 # [m]
@@ -18,7 +18,9 @@ PROTO noonRobot [
   field SFFloat headSize 0.04 # [m]
   field SFFloat headMass 0.06 # [kg]
 
-  field SFFloat headMaxAngle 1 # the amount the head will be able to turn, in each direction (left and right) [rad]
+  field SFFloat headMotorLimit 1 # the amount the head will be able to turn, in each direction (left and right) [rad]
+  field SFFloat headHardLimit 1.2
+
 
   # ----- ARM ------
   field SFFloat armRadius 0.01 # [m]
@@ -85,9 +87,10 @@ PROTO noonRobot [
 ]
 {
   Robot {
-    translation IS translation
+    translation  %<=`${fields.translation.value.x} ${fields.translation.value.y} ${fields.translation.value.z + fields.footHeight.value + fields.lowerLegLength.value + fields.upperLegLength.value + fields.bodySize.value.z / 2}`>%
     name IS name
     controller IS controller
+    supervisor TRUE
     children [
       # BODY
       Solid{
@@ -109,15 +112,18 @@ PROTO noonRobot [
         jointParameters HingeJointParameters{
           axis 0 0 1
           anchor %<=`0 0 ${fields.bodySize.value.z / 2}`>%
-          # TODO JOINT HARD LIMITS
+          minStop %<=`${-fields.headHardLimit.value}`>%
+          maxStop %<=`${fields.headHardLimit.value}`>%
+
         }
         device [
           RotationalMotor{
-            name "RM_HEAD"
-            # TODO MOTOR LIMITS
+            name "RM_Z_HEAD"
+            minPosition %<=`${-fields.headMotorLimit.value}`>%
+            maxPosition %<=`${fields.headMotorLimit.value}`>%
           }
           PositionSensor{
-            name "PS_HEAD"
+            name "PS_Z_HEAD"
           }
         ]
         
@@ -771,4 +777,5 @@ PROTO noonRobot [
 
     boundingObject USE BODYSHAPE
   }
+
 }

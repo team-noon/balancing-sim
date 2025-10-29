@@ -1,0 +1,30 @@
+#VRML_SIM R2025a utf8
+# A spawner that generates multiple noonRobot instances in a line.
+
+PROTO noonRobotSpawner [
+  field SFInt32 count 1                # number of robots to spawn
+  field SFVec3f translation 0 0 0  # starting translation
+  field SFFloat spacing 1.0            # distance between robots (along X)
+]
+{
+  Group {
+    children [
+      %<
+        let robots = "";
+        for (let i = 0; i < fields.count.value; ++i) {
+          const x = fields.translation.value.x + Math.cos((Math.PI *2 / fields.count.value ) * i) * fields.spacing.value;
+          const y = fields.translation.value.y + Math.sin((Math.PI *2 / fields.count.value ) * i) * fields.spacing.value;
+          const z = fields.translation.value.z;
+
+          robots += `
+            DEF NOONROBOT_${i} noonRobot {
+              translation ${x} ${y} ${z}
+              name "noonRobot_${i}"
+            }
+          `;
+        }
+      >%
+      %<=robots>%
+    ]
+  }
+}
