@@ -11,9 +11,15 @@ PROTO noonRobotSpawner [
     children [
       %<
         let robots = "";
+
+        let radius = fields.spacing.value
+        if(fields.count.value == 1){
+          radius = 0
+        }
+
         for (let i = 0; i < fields.count.value; ++i) {
-          const x = fields.translation.value.x + Math.cos((Math.PI *2 / fields.count.value ) * i) * fields.spacing.value;
-          const y = fields.translation.value.y + Math.sin((Math.PI *2 / fields.count.value ) * i) * fields.spacing.value;
+          const x = fields.translation.value.x + Math.cos((Math.PI *2 / fields.count.value ) * i) * radius;
+          const y = fields.translation.value.y + Math.sin((Math.PI *2 / fields.count.value ) * i) * radius;
           const z = fields.translation.value.z;
 
           robots += `

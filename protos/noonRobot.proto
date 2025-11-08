@@ -104,7 +104,19 @@ PROTO noonRobot [
               metalness 0.1      
             }
           }
-        ]
+
+          Gyro{
+            name "BODY_GYRO"
+          }
+
+          Accelerometer{
+            name "BODY_ACCELEROMETER"
+          }
+
+          InertialUnit{
+            name "BODY_INERTIALUNIT"
+          }
+        ]        
       }
       
       # HEAD

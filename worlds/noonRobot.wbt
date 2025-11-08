@@ -19,5 +19,4 @@ RectangleArena {
   floorSize 11 11
 }
 noonRobotSpawner {
-  spacing 0
 }

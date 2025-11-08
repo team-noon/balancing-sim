@@ -3,7 +3,7 @@
 # You may need to import some classes of the controller module. Ex:
 #  from controller import Robot, Motor, DistanceSensor
 import torch
-from controller import Robot, Motor, PositionSensor, Supervisor
+from controller import  Supervisor, InertialUnit, Gyro, Accelerometer
 from types import SimpleNamespace
 import gymnasium as gym
 import sys
@@ -81,9 +81,6 @@ for direction in directions:
 
             data.currentPos = axis.currentPos
             motors.append(data)
-
-            
-
             
 # INIT ASYMMETRIC
 for joint in joints.asymmetric:
@@ -98,18 +95,31 @@ for joint in joints.asymmetric:
 
         data.currentPos = axis.currentPos
         motors.append(data)
+        
+gyro = Gyro(name="BODY_GYRO", sampling_period=timestep)
+gyro.enable(timestep)
+accelerometer = Accelerometer(name="BODY_ACCELEROMETER",sampling_period=timestep)
+accelerometer.enable(timestep)
+inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
+inertialUnit.enable(timestep)
 
             
 def getObservationSpace() -> list[float]:
     ret = []
     for motor in motors:
         if motor.currentPos:
-            ret.append(motor.posSens.getValue())
+            ret.append(motor.positionSensor.getValue())
         else:
-            ret.append(motor.getTargetPosition())
+            ret.append(motor.motor.getTargetPosition())
     
-    return []
-    
+    ret.extend(gyro.getValues())
+    ret.extend(accelerometer.getValues())
+    ret.extend(inertialUnit.getRollPitchYaw())
+
+    return ret
+
+print(getObservationSpace())
+
 env = gym.Env()
 
 env.action_space = gym.spaces.Box(low=-1, high=1,shape=(18,), dtype=np.float32)
