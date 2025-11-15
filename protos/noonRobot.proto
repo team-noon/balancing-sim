@@ -92,6 +92,14 @@ PROTO noonRobot [
     controller IS controller
     supervisor TRUE
     children [
+                Accelerometer{
+            name "BODY_ACCELEROMETER"
+          }
+
+                    Gyro{
+            name "BODY_GYRO"
+          }
+
       # BODY
       Solid{
         name "body"
@@ -105,13 +113,9 @@ PROTO noonRobot [
             }
           }
 
-          Gyro{
-            name "BODY_GYRO"
-          }
 
-          Accelerometer{
-            name "BODY_ACCELEROMETER"
-          }
+
+
 
           InertialUnit{
             name "BODY_INERTIALUNIT"

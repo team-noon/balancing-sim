@@ -92,6 +92,8 @@ for joint in joints.asymmetric:
             posSens = robot.getDevice(f"PS_{axis.axis}_{joint.name}")
             posSens.enable(timestep)
             data.positionSensor = posSens
+        
+        data.motor.setPosition(0)
 
         data.currentPos = axis.currentPos
         motors.append(data)
@@ -103,6 +105,9 @@ accelerometer.enable(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
+
+turnRate = 0
+walkSpeed = 0
             
 def getObservationSpace() -> list[float]:
     ret = []
@@ -115,6 +120,9 @@ def getObservationSpace() -> list[float]:
     ret.extend(gyro.getValues())
     ret.extend(accelerometer.getValues())
     ret.extend(inertialUnit.getRollPitchYaw())
+    
+    ret.extend([turnRate, walkSpeed])
+
 
     return ret
 
@@ -124,12 +132,20 @@ env = gym.Env()
 
 env.action_space = gym.spaces.Box(low=-1, high=1,shape=(18,), dtype=np.float32)
 
-env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(30,), dtype=np.float32)
+env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
 
 def step(action):
     # perform one simulation step, apply action to motors, read sensors, compute reward/termination
     # (fill in your action -> motor commands here)
     # Example: advance simulation and read all position sensors as observation
+    i = 0
+    
+    for curAction in action:
+        motors[i].motor.setPosition(curAction)
+        
+        i+=1
+        
+    
     
     robot.step(timestep)
     
