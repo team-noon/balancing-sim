@@ -33,14 +33,14 @@ PROTO noonRobot [
 
   field SFFloat armOffset 0.01 # the offset of the arm calculated from the top of the body, armRadius will always be given to this, so it will always be offset by at least armRadius (i mean unless the arm offset is negative but why the fuck would you do that tbh) #[m]
 
-  field SFVec2f shoulderYMotorLimits -1.57079632679 1.57079632679 # [deg, deg] min and then max, up and down
-  field SFVec2f shoulderYHardLimits -3 3 # [deg, deg]
+  field SFVec2f shoulderYMotorLimits -75 75 # [deg, deg] min and then max, up and down
+  field SFVec2f shoulderYHardLimits -120 120 # [deg, deg]
 
-  field SFVec2f shoulderZMotorLimits -1.57079632679 1.57079632679 # [deg, deg] min and then max, forward and backward
-  field SFVec2f shoulderZHardLimits -3 3 # [deg, deg] 
+  field SFVec2f shoulderZMotorLimits -120 120 # [deg, deg] min and then max, forward and backward
+  field SFVec2f shoulderZHardLimits -150 150 # [deg, deg] 
 
-  field SFVec2f elbowZMotorLimits -1.57079632679 1.57079632679 # [deg, deg] forward and backwards
-  field SFVec2f elbowZHardLimits -3 3 # [deg, deg]
+  field SFVec2f elbowYMotorLimits -5 150 # [deg, deg] forward and backwards
+  field SFVec2f elbowYHardLimits -10 160 # [deg, deg]
 
   # ------- LEGS -------
 
@@ -60,25 +60,25 @@ PROTO noonRobot [
 
   field SFFloat legOffset 0.02 # [m] offset from the side of the body, basically how in the legs are modeled to be, 0 is basically equal to the legRadius and it just add to that (same as the fucking arm offset i dont know why i am over explaining things (i will only ever be the only person reading this, if im not then this is my way of sending a message: SOMEONE END MY SUFFERING))
 
-  field SFVec2f hipXMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f hipXHardLimits -3 3 # [deg, deg]
+  field SFVec2f hipXMotorLimits -30 120 # [deg, deg]
+  field SFVec2f hipXHardLimits -40 140 # [deg, deg]
 
-  field SFVec2f hipYMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f hipYHardLimits -3 3 # [deg, deg]
+  field SFVec2f hipYMotorLimits -45 45 # [deg, deg]
+  field SFVec2f hipYHardLimits -60 60 # [deg, deg]
 
-  field SFVec2f hipZMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f hipZHardLimits -3 3 # [deg, deg]
-
-
-  field SFVec2f kneeXMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f kneeXHardLimits -3 3 # [deg, deg]
+  field SFVec2f hipZMotorLimits -60 60# [deg, deg]
+  field SFVec2f hipZHardLimits -90 90 # [deg, deg]
 
 
-  field SFVec2f footXMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f footXHardLimits -3 3 # [deg, deg]
+  field SFVec2f kneeXMotorLimits -130 5 # [deg, deg]
+  field SFVec2f kneeXHardLimits -140 10 # [deg, deg]
 
-  field SFVec2f footYMotorLimits -1.57079632679 1.57079632679 # [deg, deg]
-  field SFVec2f footYHardLimits -1.57079632679 3 # [deg, deg]
+
+  field SFVec2f footXMotorLimits -30 45 # [deg, deg]
+  field SFVec2f footXHardLimits -45 60 # [deg, deg]
+
+  field SFVec2f footYMotorLimits -20 20 # [deg, deg]
+  field SFVec2f footYHardLimits -30 30 # [deg, deg]
 
   
 ]
@@ -265,18 +265,18 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
-                axis 0 0 1
+                axis 0 1 0
 
-                minStop %<=`${fields.elbowZHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.elbowZHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.elbowYHardLimits.value.x * (3.14159265359/180)}`>%
+                maxStop %<=`${fields.elbowYHardLimits.value.y * (3.14159265359/180)}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_Y_LEFT_ELBOW"
 
-                  minPosition %<=`${fields.elbowZMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.elbowZMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.elbowYMotorLimits.value.x * (3.14159265359/180)}`>%
+                  maxPosition %<=`${fields.elbowYMotorLimits.value.y * (3.14159265359/180)}`>%
                 }
                 PositionSensor{
                   name "PS_Y_LEFT_ELBOW"
@@ -415,18 +415,18 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
-                axis 0 0 1
+                axis 0 1 0
 
-                minStop %<=`${fields.elbowZHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.elbowZHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.elbowYHardLimits.value.x * (3.14159265359/180)}`>%
+                maxStop %<=`${fields.elbowYHardLimits.value.y * (3.14159265359/180)}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_Y_RIGHT_ELBOW"
 
-                  minPosition %<=`${fields.elbowZMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.elbowZMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.elbowYMotorLimits.value.x * (3.14159265359/180)}`>%
+                  maxPosition %<=`${fields.elbowYMotorLimits.value.y * (3.14159265359/180)}`>%
                 }
                 PositionSensor{
                   name "PS_Y_RIGHT_ELBOW"

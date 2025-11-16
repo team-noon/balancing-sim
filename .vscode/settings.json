@@ -10,7 +10,7 @@
         "**/.hg": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".vscode": false,
+        ".vscode": true,
         "worlds": true,
         "controllers/noonRobotControllerTest": true
     },

@@ -1,9 +1,7 @@
 """noonRobotTrainer controller."""
 
-# You may need to import some classes of the controller module. Ex:
-#  from controller import Robot, Motor, DistanceSensor
 import torch
-from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Motor, PositionSensor, Node, Field
+from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Motor, PositionSensor, Node, Field, TouchSensor
 from dataclasses import dataclass
 from typing import Optional, List, Tuple, Dict, Any
 import gymnasium as gym
@@ -17,6 +15,7 @@ timestep = int(robot.getBasicTimeStep())
 @dataclass
 class BodyPart:
     name: str
+    doneOnTouch : bool
 
 @dataclass
 class BodyPartCollection:
@@ -28,6 +27,10 @@ class BodyPartData:
     node: Node
     startingPosition: List[float]
     transField: Field
+    linearVelocityField : Field
+    angularVelocityField : Field
+    touchSensor : TouchSensor
+    doneOnTouch : bool
 
 @dataclass
 class JointAxis:
@@ -51,7 +54,7 @@ class MotorData:
     positionSensor: Optional[PositionSensor] = None
     
 # CHATGPT WROTE THIS FUNCTION
-def GetNodeByName(root_node, target_name):
+def GetNodeByName(root_node, target_name)-> Node:
     # If this node has a name field, check it
     name_field = root_node.getField("name")
     if name_field:
@@ -82,16 +85,16 @@ def GetNodeByName(root_node, target_name):
 # Initialize body parts
 bodyPartList = BodyPartCollection(
     asymmetric=[
-        BodyPart(name="head"),
-        BodyPart(name="body")
+        BodyPart(name="body", doneOnTouch=True),
+        BodyPart(name="head", doneOnTouch=True)
     ],
     symmetric=[
-        BodyPart(name="upper_arm"),
-        BodyPart(name="lower_arm"),
-        BodyPart(name="hand"),
-        BodyPart(name="upper_leg"),
-        BodyPart(name="lower_leg"),
-        BodyPart(name="foot")
+        BodyPart(name="upper_arm", doneOnTouch=True),
+        BodyPart(name="lower_arm", doneOnTouch=True),
+        BodyPart(name="hand", doneOnTouch=True),
+        BodyPart(name="upper_leg", doneOnTouch=True),
+        BodyPart(name="lower_leg", doneOnTouch=True),
+        BodyPart(name="foot", doneOnTouch=False)
     ]
 )
 
@@ -100,16 +103,39 @@ BodyParts: List[BodyPartData] = []
 # Initialize body part data (you'll need to implement this part)
 for bodyPart in bodyPartList.asymmetric:
     # You'll need to get the actual node and field references here
-    thisNode = GetNodeByName(robot.getSelf(),bodyPart.name)
+    thisNode = GetNodeByName(robot.getSelf(), bodyPart.name)
     
+    if thisNode == None:
+        print("AAAAAAH", f"{bodyPart.name}")
+        continue
+        
+    transField = thisNode.getField("translation")
+    linearVelocityField = thisNode.getField("linearVelocity")
+    angularVelocityField = thisNode.getField("angularVelocity")
     
+    touchSens = TouchSensor(f"TS_{bodyPart.name.upper()}")
+    touchSens.enable(timestep)
     
-    pass
+    BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch))
+
 
 directions = ["left", "right"]
 for direction in directions:
     for bodyPart in bodyPartList.symmetric:
-        pass
+        
+        thisNode = GetNodeByName(robot.getSelf(), f"{direction}_{bodyPart.name}")
+        
+        if thisNode == None:
+            print("AAAAAAH", f"{direction}_{bodyPart.name}")
+            continue
+        transField = thisNode.getField("translation")
+        linearVelocityField = thisNode.getField("linearVelocity")
+        angularVelocityField = thisNode.getField("angularVelocity")
+
+        touchSens = TouchSensor(f"TS_{direction.upper}_{bodyPart.name.upper()}")
+        touchSens.enable(timestep)
+    
+        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch))
 
 # Define joints
 joints = JointCollection(
@@ -225,15 +251,12 @@ def getObservationSpace() -> list[float]:
     ret.extend(inertialUnit.getRollPitchYaw())
     
     ret.extend([turnRate, walkSpeed])
-    
-    print(ret)
-
 
     return ret
 
 env = gym.Env()
 
-env.action_space = gym.spaces.Box(low=-1, high=1,shape=(18,), dtype=np.float32)
+env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
 env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
 
@@ -245,10 +268,19 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
     i = 0
     
     for curAction in action:
-        motors[i].motor.setPosition(curAction)
+        pos = ((curAction) * ((motors[i].motor.getMaxPosition()) - (motors[i].motor.getMinPosition()))) + motors[i].motor.getMinPosition()
+        motors[i].motor.setForce(1)
+        motors[i].motor.setVelocity(2.0)
+        motors[i].motor.setAcceleration(2.0)
+        motors[i].motor.setPosition(pos/1.2)
+
         
         i+=1
-        
+    
+    for bodyPart in BodyParts:
+        touch = bodyPart.touchSensor.getValue()
+        if touch != 0:
+            print(bodyPart.node.getField("name").getSFString())
     
     
     robot.step(timestep)
