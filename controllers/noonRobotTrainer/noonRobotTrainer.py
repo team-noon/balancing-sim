@@ -15,6 +15,38 @@ robot = Supervisor()
 
 timestep = int(robot.getBasicTimeStep())
 
+bodyParts = SimpleNamespace(
+    asymmetric=[
+        SimpleNamespace(
+            name="head"
+        ),
+        SimpleNamespace(
+            name="body"
+        )
+    ],
+    
+    symmetric=[
+        SimpleNamespace(
+            name="upper_arm"    
+        ),
+        SimpleNamespace(
+            name="lower_arm"
+        ),
+        SimpleNamespace(
+            name="hand"
+        ),
+        SimpleNamespace(
+            name="upper_leg"    
+        ),
+        SimpleNamespace(
+            name="lower_leg"
+        ),
+        SimpleNamespace(
+            name="foot"
+        ),
+    ]
+)
+
 
 # USE currentPos False for every motor that we just assumes is instantenious (alias for the shitty servo motors we will use)
 
@@ -78,6 +110,11 @@ for direction in directions:
                 posSens = robot.getDevice(f"PS_{axis.axis}_{direction}_{joint.name}")
                 posSens.enable(timestep)
                 data.positionSensor = posSens
+                
+            data.motor.setPosition(0)
+            
+            data.motor.setVelocity(2)
+            data.motor.setAcceleration(2)
 
             data.currentPos = axis.currentPos
             motors.append(data)
@@ -94,6 +131,9 @@ for joint in joints.asymmetric:
             data.positionSensor = posSens
         
         data.motor.setPosition(0)
+        
+        data.motor.setVelocity(2)
+        data.motor.setAcceleration(2)
 
         data.currentPos = axis.currentPos
         motors.append(data)
@@ -122,11 +162,11 @@ def getObservationSpace() -> list[float]:
     ret.extend(inertialUnit.getRollPitchYaw())
     
     ret.extend([turnRate, walkSpeed])
+    
+    print(ret)
 
 
     return ret
-
-print(getObservationSpace())
 
 env = gym.Env()
 
@@ -172,8 +212,7 @@ policy_kwargs = dict(
     activation_fn=torch.nn.LeakyReLU
 )
 
-print("asd")
-model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs)
+model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
 model.learn(10000)
 
 while robot.step(timestep) != -1:
