@@ -92,6 +92,7 @@ PROTO noonRobot [
       # BODY
       Solid{
         name "body"
+        
         children [
           DEF BODYSHAPE Shape {
             geometry Box{
