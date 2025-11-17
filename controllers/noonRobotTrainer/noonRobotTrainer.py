@@ -3,7 +3,7 @@
 import torch
 from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Motor, PositionSensor, Node, Field, TouchSensor
 from dataclasses import dataclass
-from typing import Optional, List, Tuple, Dict, Any
+from typing import Optional, List, Tuple, Dict, Any, Union
 import gymnasium as gym
 from stable_baselines3 import PPO
 import numpy as np
@@ -54,17 +54,20 @@ class MotorData:
     positionSensor: Optional[PositionSensor] = None
     
 # CHATGPT WROTE THIS FUNCTION
-def GetNodeByName(root_node, target_name)-> Node:
+def GetNodeByName(root_node, target_name)-> Optional[Node]:
     # If this node has a name field, check it
+    
     name_field = root_node.getField("name")
     if name_field:
+        print("THERE IS A NAMEFIELD : ", name_field.getSFString())
         if name_field.getSFString() == target_name:
             return root_node
 
     # Search children fields
-    for field_name in ["children", "endPoint", "endPointSolid"]:
+    for field_name in ["children", "endPoint"]:
         field = root_node.getField(field_name)
         if field is None:
+            print("WHAAAT THERE IS NO FUCKING ", field_name)
             continue
 
         if field.getTypeName() == "MFNode":
@@ -85,18 +88,20 @@ def GetNodeByName(root_node, target_name)-> Node:
 # Initialize body parts
 bodyPartList = BodyPartCollection(
     asymmetric=[
-        BodyPart(name="body", doneOnTouch=True),
-        BodyPart(name="head", doneOnTouch=True)
+        #BodyPart(name="body", doneOnTouch=True),
+        #BodyPart(name="head", doneOnTouch=True)
     ],
     symmetric=[
-        BodyPart(name="upper_arm", doneOnTouch=True),
-        BodyPart(name="lower_arm", doneOnTouch=True),
-        BodyPart(name="hand", doneOnTouch=True),
-        BodyPart(name="upper_leg", doneOnTouch=True),
-        BodyPart(name="lower_leg", doneOnTouch=True),
-        BodyPart(name="foot", doneOnTouch=False)
+        #BodyPart(name="upper_arm", doneOnTouch=True),
+        #BodyPart(name="lower_arm", doneOnTouch=True),
+        #BodyPart(name="hand", doneOnTouch=True),
+        #BodyPart(name="upper_leg", doneOnTouch=True),
+        #BodyPart(name="lower_leg", doneOnTouch=True),
+        #BodyPart(name="foot", doneOnTouch=False)
     ]
 )
+
+print(GetNodeByName(robot.getRoot(), "body"))
 
 BodyParts: List[BodyPartData] = []
 
@@ -105,8 +110,8 @@ for bodyPart in bodyPartList.asymmetric:
     # You'll need to get the actual node and field references here
     thisNode = GetNodeByName(robot.getSelf(), bodyPart.name)
     
-    if thisNode == None:
-        print("AAAAAAH", f"{bodyPart.name}")
+    if thisNode is None:
+        print("AAAAAAH", bodyPart.name)
         continue
         
     transField = thisNode.getField("translation")
@@ -125,7 +130,7 @@ for direction in directions:
         
         thisNode = GetNodeByName(robot.getSelf(), f"{direction}_{bodyPart.name}")
         
-        if thisNode == None:
+        if thisNode is None:
             print("AAAAAAH", f"{direction}_{bodyPart.name}")
             continue
         transField = thisNode.getField("translation")
