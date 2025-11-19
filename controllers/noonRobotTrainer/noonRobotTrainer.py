@@ -36,6 +36,8 @@ class BodyPartData:
 class JointAxis:
     axis: str
     currentPos: bool
+    minPos : float
+    maxPos : float
 
 @dataclass
 class Joint:
@@ -146,35 +148,35 @@ joints = JointCollection(
         Joint(
             name="SHOULDER",
             axes=[
-                JointAxis(axis="Y", currentPos=False),
-                JointAxis(axis="Z", currentPos=False)
+                JointAxis(axis="Y", currentPos=False, minPos=-75, maxPos=75),
+                JointAxis(axis="Z", currentPos=False, minPos=-120, maxPos=120)
             ]
         ),
         Joint(
             name="ELBOW",
             axes=[
-                JointAxis(axis="Y", currentPos=False)
+                JointAxis(axis="Y", currentPos=False, minPos=-5, maxPos=150)
             ]
         ),
         Joint(
             name="HIP",
             axes=[
-                JointAxis(axis="X", currentPos=True),
-                JointAxis(axis="Y", currentPos=False),
-                JointAxis(axis="Z", currentPos=False)
+                JointAxis(axis="X", currentPos=True, minPos=-30 , maxPos=120),
+                JointAxis(axis="Y", currentPos=False,minPos=-45 , maxPos=45),
+                JointAxis(axis="Z", currentPos=False,minPos=-90 , maxPos=90)
             ]
         ),
         Joint(
             name="KNEE",
             axes=[
-                JointAxis(axis="X", currentPos=True)
+                JointAxis(axis="X", currentPos=True, minPos=-130, maxPos=5)
             ]
         ),
         Joint(
             name="FOOT",
             axes=[
-                JointAxis(axis="X", currentPos=True),
-                JointAxis(axis="Y", currentPos=False)
+                JointAxis(axis="X", currentPos=True , minPos=-30, maxPos=45),
+                JointAxis(axis="Y", currentPos=False, minPos=-20, maxPos=20)
             ]
         )
     ]
