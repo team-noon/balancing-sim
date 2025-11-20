@@ -33,14 +33,18 @@ PROTO noonRobot [
 
   field SFFloat armOffset 0.01 # the offset of the arm calculated from the top of the body, armRadius will always be given to this, so it will always be offset by at least armRadius (i mean unless the arm offset is negative but why the fuck would you do that tbh) #[m]
 
-  field SFVec2f shoulderYMotorLimits -75 75 # [deg, deg] min and then max, up and down
-  field SFVec2f shoulderYHardLimits -120 120 # [deg, deg]
+  field SFVec2f shoulderYMotorLimits -145 145 # -75 75 # [deg, deg] min and then max, up and down
+  field SFVec2f shoulderYHardLimits -145 145 #-120 120 # [deg, deg]
 
-  field SFVec2f shoulderZMotorLimits -120 120 # [deg, deg] min and then max, forward and backward
-  field SFVec2f shoulderZHardLimits -150 150 # [deg, deg] 
+  # original: field SFVec2f shoulderZMotorLimits -120 120 # [deg, deg] min and then max, forward and backward
+  field SFVec2f shoulderZMotorLimits -145 145 # [deg, deg] min and then max, forward and backward
+  # original: field SFVec2f shoulderZHardLimits -150 150 # [deg, deg] 
+  field SFVec2f shoulderZHardLimits -145 145 # [deg, deg] 
 
-  field SFVec2f elbowYMotorLimits -5 150 # [deg, deg] forward and backwards
-  field SFVec2f elbowYHardLimits -10 160 # [deg, deg]
+  # original: field SFVec2f elbowYMotorLimits -5 150 # [deg, deg] forward and backwards
+  field SFVec2f elbowYMotorLimits -145 145 # [deg, deg] forward and backwards
+  # original: field SFVec2f elbowYHardLimits -10 160 # [deg, deg]
+  field SFVec2f elbowYHardLimits -145 145 # [deg, deg]
 
   # ------- LEGS -------
 
@@ -60,25 +64,37 @@ PROTO noonRobot [
 
   field SFFloat legOffset 0.02 # [m] offset from the side of the body, basically how in the legs are modeled to be, 0 is basically equal to the legRadius and it just add to that (same as the fucking arm offset i dont know why i am over explaining things (i will only ever be the only person reading this, if im not then this is my way of sending a message: SOMEONE END MY SUFFERING))
 
-  field SFVec2f hipXMotorLimits -30 120 # [deg, deg]
-  field SFVec2f hipXHardLimits -40 140 # [deg, deg]
+  # original: field SFVec2f hipXMotorLimits -30 120 # [deg, deg]
+  field SFVec2f hipXMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f hipXHardLimits -40 140 # [deg, deg]
+  field SFVec2f hipXHardLimits -145 145 # [deg, deg]
 
-  field SFVec2f hipYMotorLimits -45 45 # [deg, deg]
-  field SFVec2f hipYHardLimits -60 60 # [deg, deg]
+  # original: field SFVec2f hipYMotorLimits -45 45 # [deg, deg]
+  field SFVec2f hipYMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f hipYHardLimits -60 60 # [deg, deg]
+  field SFVec2f hipYHardLimits -145 145 # [deg, deg]
 
-  field SFVec2f hipZMotorLimits -60 60# [deg, deg]
-  field SFVec2f hipZHardLimits -90 90 # [deg, deg]
+  # original: field SFVec2f hipZMotorLimits -60 60# [deg, deg]
+  field SFVec2f hipZMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f hipZHardLimits -90 90 # [deg, deg]
+  field SFVec2f hipZHardLimits -145 145 # [deg, deg]
 
 
-  field SFVec2f kneeXMotorLimits -130 5 # [deg, deg]
-  field SFVec2f kneeXHardLimits -140 10 # [deg, deg]
+  # original: field SFVec2f kneeXMotorLimits -130 5 # [deg, deg]
+  field SFVec2f kneeXMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f kneeXHardLimits -140 10 # [deg, deg]
+  field SFVec2f kneeXHardLimits -145 145 # [deg, deg]
 
 
-  field SFVec2f footXMotorLimits -30 45 # [deg, deg]
-  field SFVec2f footXHardLimits -45 60 # [deg, deg]
+  # original: field SFVec2f footXMotorLimits -30 45 # [deg, deg]
+  field SFVec2f footXMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f footXHardLimits -45 60 # [deg, deg]
+  field SFVec2f footXHardLimits -145 145 # [deg, deg]
 
-  field SFVec2f footYMotorLimits -20 20 # [deg, deg]
-  field SFVec2f footYHardLimits -30 30 # [deg, deg]
+  # original: field SFVec2f footYMotorLimits -20 20 # [deg, deg]
+  field SFVec2f footYMotorLimits -145 145 # [deg, deg]
+  # original: field SFVec2f footYHardLimits -30 30 # [deg, deg]
+  field SFVec2f footYHardLimits -145 145 # [deg, deg]
 
   
 ]
@@ -124,15 +140,15 @@ PROTO noonRobot [
         jointParameters HingeJointParameters{
           axis 0 0 1
           anchor %<=`0 0 ${fields.bodySize.value.z / 2}`>%
-          minStop %<=`${-fields.headHardLimit.value * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.headHardLimit.value * (3.14159265359/180)}`>%
+          minStop %<=`${-fields.headHardLimit.value }`>%
+          maxStop %<=`${fields.headHardLimit.value }`>%
 
         }
         device [
           RotationalMotor{
             name "RM_Z_HEAD"
-            minPosition %<=`${-fields.headMotorLimit.value * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.headMotorLimit.value * (3.14159265359/180)}`>%
+            minPosition %<=`${-fields.headMotorLimit.value}`>%
+            maxPosition %<=`${fields.headMotorLimit.value}`>%
           }
           PositionSensor{
             name "PS_Z_HEAD"
@@ -201,16 +217,16 @@ PROTO noonRobot [
           anchor %<= `${-fields.bodySize.value.x / 2} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
           axis 0 1 0
 
-          minStop %<=`${fields.shoulderYHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.shoulderYHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderYHardLimits.value.y}`>%
         }
 
         device [
           RotationalMotor{
             name "RM_Y_LEFT_SHOULDER"
 
-            minPosition %<=`${fields.shoulderYMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.shoulderYMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.shoulderYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderYMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Y_LEFT_SHOULDER"
@@ -220,16 +236,16 @@ PROTO noonRobot [
         jointParameters2 JointParameters{
           axis 0 0 1
           
-          minStop %<=`${fields.shoulderZHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.shoulderZHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.shoulderZHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderZHardLimits.value.y}`>%
         }
 
         device2 [
           RotationalMotor{
             name "RM_Z_LEFT_SHOULDER"
             
-            minPosition %<=`${fields.shoulderZMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.shoulderZMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.shoulderZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderZMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Z_LEFT_SHOULDER"
@@ -267,16 +283,16 @@ PROTO noonRobot [
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
                 axis 0 1 0
 
-                minStop %<=`${fields.elbowYHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.elbowYHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.elbowYHardLimits.value.x}`>%
+                maxStop %<=`${fields.elbowYHardLimits.value.y}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_Y_LEFT_ELBOW"
 
-                  minPosition %<=`${fields.elbowYMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.elbowYMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
                 }
                 PositionSensor{
                   name "PS_Y_LEFT_ELBOW"
@@ -357,16 +373,16 @@ PROTO noonRobot [
           anchor %<= `${-(-fields.bodySize.value.x / 2)} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
           axis 0 1 0
 
-          minStop %<=`${fields.shoulderYHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.shoulderYHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderYHardLimits.value.y}`>%
         }
 
         device [
           RotationalMotor{
             name "RM_Y_RIGHT_SHOULDER"
 
-            minPosition %<=`${fields.shoulderYMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.shoulderYMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.shoulderYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderYMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Y_RIGHT_SHOULDER"
@@ -376,16 +392,16 @@ PROTO noonRobot [
         jointParameters2 JointParameters{
           axis 0 0 1
           
-          minStop %<=`${fields.shoulderZHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.shoulderZHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.shoulderZHardLimits.value.x}`>%
+          maxStop %<=`${fields.shoulderZHardLimits.value.y}`>%
         }
 
         device2 [
           RotationalMotor{
             name "RM_Z_RIGHT_SHOULDER"
             
-            minPosition %<=`${fields.shoulderZMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.shoulderZMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.shoulderZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.shoulderZMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Z_RIGHT_SHOULDER"
@@ -417,16 +433,16 @@ PROTO noonRobot [
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
                 axis 0 1 0
 
-                minStop %<=`${fields.elbowYHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.elbowYHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.elbowYHardLimits.value.x}`>%
+                maxStop %<=`${fields.elbowYHardLimits.value.y}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_Y_RIGHT_ELBOW"
 
-                  minPosition %<=`${fields.elbowYMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.elbowYMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
                 }
                 PositionSensor{
                   name "PS_Y_RIGHT_ELBOW"
@@ -495,27 +511,27 @@ PROTO noonRobot [
       BallJoint{
         jointParameters BallJointParameters{
           anchor %<=`${fields.bodySize.value.x / -2 + fields.legRadius.value/2 + fields.legOffset.value  } 0 ${fields.bodySize.value.z / -2}`>%
-          minStop %<=`${fields.hipXHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipXHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipXHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipXHardLimits.value.y}`>%
         }
 
         jointParameters2 JointParameters{
           axis 0 1 0
-          minStop %<=`${fields.hipYHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipYHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipYHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipYHardLimits.value.y}`>%
         }
 
         jointParameters3 JointParameters{
           axis 0 0 1
-          minStop %<=`${fields.hipZHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipZHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipZHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipZHardLimits.value.y}`>%
         }
 
         device[
           RotationalMotor{
             name "RM_X_LEFT_HIP"
-            minPosition %<=`${fields.hipXMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipXMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipXMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipXMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_X_LEFT_HIP"
@@ -525,8 +541,8 @@ PROTO noonRobot [
         device2[
           RotationalMotor{
             name "RM_Y_LEFT_HIP"
-            minPosition %<=`${fields.hipYMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipYMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipYMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Y_LEFT_HIP"
@@ -536,8 +552,8 @@ PROTO noonRobot [
         device3[
           RotationalMotor{
             name "RM_Z_LEFT_HIP"
-            minPosition %<=`${fields.hipZMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipZMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipZMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Z_LEFT_HIP"
@@ -570,15 +586,15 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor 0 0 %<=`${fields.upperLegLength.value / -2}`>%
-                minStop %<=`${fields.kneeXHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.kneeXHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.kneeXHardLimits.value.x}`>%
+                maxStop %<=`${fields.kneeXHardLimits.value.y}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_X_LEFT_KNEE"
-                  minPosition %<=`${fields.kneeXMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.kneeXMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.kneeXMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.kneeXMotorLimits.value.y}`>%
                 }
                 PositionSensor{
                   name "PS_X_LEFT_KNEE"
@@ -611,23 +627,23 @@ PROTO noonRobot [
                     jointParameters HingeJointParameters{
                       axis 1 0 0
                       anchor 0 0 %<=`${fields.lowerLegLength.value / -2}`>%
-                      minStop %<=`${fields.footXHardLimits.value.x * (3.14159265359/180)}`>%
-                      maxStop %<=`${fields.footXHardLimits.value.y * (3.14159265359/180)}`>%
+                      minStop %<=`${fields.footXHardLimits.value.x}`>%
+                      maxStop %<=`${fields.footXHardLimits.value.y}`>%
 
                     }
 
                     jointParameters2 JointParameters{
                       axis 0 1 0
-                      minStop %<=`${fields.footYHardLimits.value.x * (3.14159265359/180)}`>%
-                      maxStop %<=`${fields.footYHardLimits.value.y * (3.14159265359/180)}`>%
+                      minStop %<=`${fields.footYHardLimits.value.x}`>%
+                      maxStop %<=`${fields.footYHardLimits.value.y}`>%
                     }
 
 
                     device [
                       RotationalMotor{
                         name "RM_X_LEFT_FOOT"
-                        minPosition %<=`${fields.footXMotorLimits.value.x * (3.14159265359/180)}`>%
-                        maxPosition %<=`${fields.footXMotorLimits.value.y * (3.14159265359/180)}`>%
+                        minPosition %<=`${fields.footXMotorLimits.value.x}`>%
+                        maxPosition %<=`${fields.footXMotorLimits.value.y}`>%
                       }
                       PositionSensor{
                         name "PS_X_LEFT_FOOT"
@@ -637,8 +653,8 @@ PROTO noonRobot [
                     device2 [
                       RotationalMotor{
                         name "RM_Y_LEFT_FOOT"
-                        minPosition %<=`${fields.footYMotorLimits.value.x * (3.14159265359/180)}`>%
-                        maxPosition %<=`${fields.footYMotorLimits.value.y * (3.14159265359/180)}`>%
+                        minPosition %<=`${fields.footYMotorLimits.value.x}`>%
+                        maxPosition %<=`${fields.footYMotorLimits.value.y}`>%
                       }
                       PositionSensor{
                         name "PS_Y_LEFT_FOOT"
@@ -698,27 +714,27 @@ PROTO noonRobot [
       BallJoint{
         jointParameters BallJointParameters{
           anchor %<=`${-(fields.bodySize.value.x / -2 + fields.legRadius.value/2 + fields.legOffset.value  )} 0 ${fields.bodySize.value.z / -2}`>%
-          minStop %<=`${fields.hipXHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipXHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipXHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipXHardLimits.value.y}`>%
         }
 
         jointParameters2 JointParameters{
           axis 0 1 0
-          minStop %<=`${fields.hipYHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipYHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipYHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipYHardLimits.value.y}`>%
         }
 
         jointParameters3 JointParameters{
           axis 0 0 1
-          minStop %<=`${fields.hipZHardLimits.value.x * (3.14159265359/180)}`>%
-          maxStop %<=`${fields.hipZHardLimits.value.y * (3.14159265359/180)}`>%
+          minStop %<=`${fields.hipZHardLimits.value.x}`>%
+          maxStop %<=`${fields.hipZHardLimits.value.y}`>%
         }
 
         device[
           RotationalMotor{
             name "RM_X_RIGHT_HIP"
-            minPosition %<=`${fields.hipXMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipXMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipXMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipXMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_X_RIGHT_HIP"
@@ -728,8 +744,8 @@ PROTO noonRobot [
         device2[
           RotationalMotor{
             name "RM_Y_RIGHT_HIP"
-            minPosition %<=`${fields.hipYMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipYMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipYMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipYMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Y_RIGHT_HIP"
@@ -739,8 +755,8 @@ PROTO noonRobot [
         device3[
           RotationalMotor{
             name "RM_Z_RIGHT_HIP"
-            minPosition %<=`${fields.hipZMotorLimits.value.x * (3.14159265359/180)}`>%
-            maxPosition %<=`${fields.hipZMotorLimits.value.y * (3.14159265359/180)}`>%
+            minPosition %<=`${fields.hipZMotorLimits.value.x}`>%
+            maxPosition %<=`${fields.hipZMotorLimits.value.y}`>%
           }
           PositionSensor{
             name "PS_Z_RIGHT_HIP"
@@ -766,15 +782,15 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor 0 0 %<=`${fields.upperLegLength.value / -2}`>%
-                minStop %<=`${fields.kneeXHardLimits.value.x * (3.14159265359/180)}`>%
-                maxStop %<=`${fields.kneeXHardLimits.value.y * (3.14159265359/180)}`>%
+                minStop %<=`${fields.kneeXHardLimits.value.x}`>%
+                maxStop %<=`${fields.kneeXHardLimits.value.y}`>%
               }
 
               device[
                 RotationalMotor{
                   name "RM_X_RIGHT_KNEE"
-                  minPosition %<=`${fields.kneeXMotorLimits.value.x * (3.14159265359/180)}`>%
-                  maxPosition %<=`${fields.kneeXMotorLimits.value.y * (3.14159265359/180)}`>%
+                  minPosition %<=`${fields.kneeXMotorLimits.value.x}`>%
+                  maxPosition %<=`${fields.kneeXMotorLimits.value.y}`>%
                 }
                 PositionSensor{
                   name "PS_X_RIGHT_KNEE"
@@ -801,23 +817,23 @@ PROTO noonRobot [
                     jointParameters HingeJointParameters{
                       axis 1 0 0
                       anchor 0 0 %<=`${fields.lowerLegLength.value / -2}`>%
-                      minStop %<=`${fields.footXHardLimits.value.x * (3.14159265359/180)}`>%
-                      maxStop %<=`${fields.footXHardLimits.value.y * (3.14159265359/180)}`>%
+                      minStop %<=`${fields.footXHardLimits.value.x}`>%
+                      maxStop %<=`${fields.footXHardLimits.value.y}`>%
 
                     }
 
                     jointParameters2 JointParameters{
                       axis 0 1 0
-                      minStop %<=`${fields.footYHardLimits.value.x * (3.14159265359/180)}`>%
-                      maxStop %<=`${fields.footYHardLimits.value.y * (3.14159265359/180)}`>%
+                      minStop %<=`${fields.footYHardLimits.value.x}`>%
+                      maxStop %<=`${fields.footYHardLimits.value.y}`>%
                     }
 
 
                     device [
                       RotationalMotor{
                         name "RM_X_RIGHT_FOOT"
-                        minPosition %<=`${fields.footXMotorLimits.value.x * (3.14159265359/180)}`>%
-                        maxPosition %<=`${fields.footXMotorLimits.value.y * (3.14159265359/180)}`>%
+                        minPosition %<=`${fields.footXMotorLimits.value.x}`>%
+                        maxPosition %<=`${fields.footXMotorLimits.value.y}`>%
                       }
                       PositionSensor{
                         name "PS_X_RIGHT_FOOT"
@@ -827,8 +843,8 @@ PROTO noonRobot [
                     device2 [
                       RotationalMotor{
                         name "RM_Y_RIGHT_FOOT"
-                        minPosition %<=`${fields.footYMotorLimits.value.x * (3.14159265359/180)}`>%
-                        maxPosition %<=`${fields.footYMotorLimits.value.y * (3.14159265359/180)}`>%
+                        minPosition %<=`${fields.footYMotorLimits.value.x}`>%
+                        maxPosition %<=`${fields.footYMotorLimits.value.y}`>%
                       }
                       PositionSensor{
                         name "PS_Y_RIGHT_FOOT"
