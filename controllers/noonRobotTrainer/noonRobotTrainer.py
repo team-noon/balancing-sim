@@ -8,6 +8,7 @@ from stable_baselines3 import PPO
 import numpy as np
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
+from util import exportONNX
 
 robot = Supervisor()
 timestep = int(robot.getBasicTimeStep())
@@ -62,8 +63,6 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
     
     for curAction in action:
         pos = ((curAction) * ((motors[i].maxPos) - (motors[i].minPos))) + motors[i].minPos
-        #motors[i].motor.setForce(0.1)
-        #motors[i].motor.setVelocity(1.0)
         motors[i].motor.setPosition(pos)
         motors[i].motor.setVelocity(1.0)
 
@@ -74,6 +73,8 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
         touch = bodyPart.touchSensor.getValue()
         if touch != 0 and bodyPart.doneOnTouch:
             terminated = True
+            reward = -10
+            break
             
     
     
@@ -87,8 +88,39 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
 
 env.step = step
 
+robot.getSelf().saveState(robot.getSelf().getDef())
+
 def reset(seed=None, options=None):
-    obs = env.observation_space.sample()
+    #for bodyPart in BodyParts:
+    #    bodyPart.angularVelocityField.setSFVec3f([0,0,0])
+    #    bodyPart.linearVelocityField.setSFVec3f([0,0,0])
+    #    bodyPart.transField.setSFVec3f(bodyPart.startingPosition)
+    #    bodyPart.rotField.setSFRotation(bodyPart.startingRotation)
+    #    
+    #    bodyPart.node.setVelocity([0,0,0])
+    #    bodyPart.node.resetPhysics()
+    #    
+    #    robot.getSelf().saveState()
+    #    
+    #
+    #    
+    #for motor in motors:
+    #    motor.motor.setPosition(0)
+    
+    global motors, BodyParts
+    
+    robot.getSelf().loadState(robot.getSelf().getDef())    
+    
+    BodyParts = InitBodyParts(robotSupervisor=robot, timestep=timestep)
+
+    motors = InitMotors(timestep=timestep)
+    
+    obs = getObservationSpace()
+    i = 0
+    for t in obs:
+        obs[i] = 0
+        i+=1
+        
     info = {}
     return obs, info
 
@@ -100,8 +132,11 @@ policy_kwargs = dict(
 )
 
 model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
-model.learn(10000)
+model.learn(1000000)
+
+exportONNX(model, robot.getSelf().getDef())
+
 
 while robot.step(timestep) != -1:
-    print("stepping cause i dont know waht the fuck to do")
+    #print("stepping cause i dont know waht the fuck to do")
     pass

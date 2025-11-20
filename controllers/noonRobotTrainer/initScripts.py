@@ -1,5 +1,4 @@
 from classes import *
-from webotsUtil import GetNodeByName
 from controller import Supervisor
 
 # MOTOR INITITATION ----------
@@ -139,10 +138,10 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
         transField = thisNode.getField("translation")
         linearVelocityField = thisNode.getField("linearVelocity")
         angularVelocityField = thisNode.getField("angularVelocity")
-
+        rotField = thisNode.getField("rotation")
         
 
-        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch))
+        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation()))
 
 
     directions = ["left", "right"]
@@ -155,12 +154,12 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
             
             
             
-            
+            rotField = thisNode.getField("rotation")
             transField = thisNode.getField("translation")
             linearVelocityField = thisNode.getField("linearVelocity")
             angularVelocityField = thisNode.getField("angularVelocity")
 
 
 
-            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch))
+            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation()))
     return BodyParts

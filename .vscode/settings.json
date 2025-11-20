@@ -5,14 +5,14 @@
         "/home/utelagazkodas/syspythonenv/lib/python3.11/site-packages"
     ],
     "files.exclude": {
-        "**/.git": false,
-        "**/.svn": false,
-        "**/.hg": false,
-        "**/.DS_Store": false,
-        "**/Thumbs.db": false,
-        ".vscode": false,
-        "worlds": false,
-        "controllers/noonRobotControllerTest": false
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        ".vscode": true,
+        "worlds": true,
+        "controllers/noonRobotControllerTest": true
     },
     "explorerExclude.backup": {}
 

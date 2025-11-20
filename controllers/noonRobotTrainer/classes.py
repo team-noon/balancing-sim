@@ -1,6 +1,7 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from controller import Node, Field, TouchSensor, Motor, PositionSensor
+import torch
 
 # Define data structures using dataclasses
 @dataclass
@@ -20,6 +21,8 @@ class BodyPartData:
     transField: Field
     linearVelocityField : Field
     angularVelocityField : Field
+    rotField : Field
+    startingRotation : List[float]
     touchSensor : TouchSensor
     doneOnTouch : bool
 
@@ -47,3 +50,14 @@ class MotorData:
     minPos : float
     maxPos : float
     positionSensor: Optional[PositionSensor] = None
+    
+    
+
+class OnnxableSB3Policy(torch.nn.Module):
+    def __init__(self, policy):
+        super().__init__()
+        self.policy = policy
+
+    def forward(self, observation: torch.Tensor):
+        # Note: Uses deterministic=True for deterministic actions
+        return self.policy(observation, deterministic=True)
