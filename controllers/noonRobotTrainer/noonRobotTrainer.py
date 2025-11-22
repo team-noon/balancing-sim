@@ -1,11 +1,27 @@
 """noonRobotTrainer controller."""
 
+import math
+
 # PARAMETERS
 
 maxSteps = 10000 # MAX STEPS AN INSTANCE CAN LIVE
 
+uprightRewardWeight = 1
+maxUprightReward = 1
 
+movementPenaltyWeight = 0.05
 
+turnRateRewardWeight = 1
+maxTurnRateReward = 1
+
+walkSpeedRewardWeight = 1
+maxWalkSpeedReward = 1
+
+servoTorque = 10 * 2.2 * 9.81 # in mNm
+servoSpeed = 39/50 * math.pi # in rad/sec
+
+brushlessTorque = 13750 / 3 # in mNm
+brushlessSpeed = 2 * math.pi # in rad/sec
 
 import datetime
 import torch
@@ -16,7 +32,7 @@ from stable_baselines3 import PPO
 import numpy as np
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from util import exportONNX
+from util import exportONNX, canImportONNX
 
 robot = Supervisor()
 timestep = int(robot.getBasicTimeStep())
@@ -66,13 +82,16 @@ env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dt
 stepsSinceReset = 0
 
 
-prevActions: np.ndarray = np.zeros(env.observation_space.shape, dtype=np.float32)
+prevActions: np.ndarray = np.zeros(env.action_space.shape, dtype=np.float32)
 
 def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, Any]]:
+    global prevActions, stepsSinceReset
+    
     reward = 1
     terminated = False
     truncated = False
     
+    robot.step(timestep)
 
 
     
@@ -83,11 +102,21 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
     for curAction in action:
         pos = ((curAction) * ((motors[i].maxPos) - (motors[i].minPos))) + motors[i].minPos
         motors[i].motor.setPosition(pos)
-        motors[i].motor.setVelocity(3.0)
-        motors[i].motor.setAcceleration(5)
+        
+        if(motors[i].currentPos):
+            motors[i].motor.setVelocity(brushlessSpeed)
+            motors[i].motor.setAcceleration(10)
+            motors[i].motor.setAvailableTorque(brushlessTorque/1000)
+        else:
+            motors[i].motor.setVelocity(servoSpeed)
+            motors[i].motor.setAcceleration(10)
+            motors[i].motor.setAvailableTorque(servoTorque/1000)
 
+        reward -= movementPenaltyWeight*((curAction - prevActions[i]) ** 2)
         
         i+=1
+        
+    prevActions = action
     
     # checks if any parts of the body that shouldnt be is touching the floor
     for bodyPart in BodyParts:
@@ -101,11 +130,24 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
     if(stepsSinceReset >= maxSteps):
         truncated=True
             
+    # calcualate reward based on how upright it is *
+    bodyRot =  inertialUnit.getRollPitchYaw()
+    reward += max(0, maxUprightReward - (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
     
+    # calculate reward based on turnspeed 
+    bodyAngVelocity = BodyParts[0].angularVelocityField.getSFVec3f()
+    reward += max(0, maxTurnRateReward - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
     
-    robot.step(timestep)
+    # calculate reward based on walkspeed
+    bodyLinVelocityVector = BodyParts[0].linearVelocityField.getSFVec3f()
+    bodyVelocityMagnitude = math.sqrt( bodyLinVelocityVector[0] ** 2 + bodyLinVelocityVector[1] ** 2) # calc the velocity that we care about (we dont care about the z component)
+    reward += max(0, maxWalkSpeedReward - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    
+
     
     observation = getObservationSpace()
+    
+    stepsSinceReset+=timestep
     
 
     info = {}
@@ -116,6 +158,7 @@ env.step = step
 robot.getSelf().saveState(robot.getSelf().getDef())
 
 def reset(seed=None, options=None):
+    global stepsSinceReset
     #for bodyPart in BodyParts:
     #    bodyPart.angularVelocityField.setSFVec3f([0,0,0])
     #    bodyPart.linearVelocityField.setSFVec3f([0,0,0])
@@ -136,9 +179,7 @@ def reset(seed=None, options=None):
     
     robot.getSelf().loadState(robot.getSelf().getDef())    
     
-    BodyParts = InitBodyParts(robotSupervisor=robot, timestep=timestep)
-
-    motors = InitMotors(timestep=timestep)
+    stepsSinceReset = 0
     
     obs = getObservationSpace()
     i = 0
@@ -154,10 +195,19 @@ env.reset = reset
 policy_kwargs = dict(
     net_arch=dict(pi=[64, 64], vf=[128, 64]),
     activation_fn=torch.nn.LeakyReLU
-)
+    )
 
-model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
-model.learn(100)
+
+model : PPO
+
+if(canImportONNX):
+    model = PPO.load("../../models/continue", env=env, device="cpu", policy_kwargs=policy_kwargs)
+    print("Sucessfully imported PPO to continue training")
+else:
+    model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
+    
+
+model.learn(3000000)
 
 exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
 

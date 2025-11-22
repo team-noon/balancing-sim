@@ -104,10 +104,12 @@ def InitMotors(timestep : float) -> List[MotorData]:
 
 # BODY PART INITIALISATION --------
 
+# THE BODY HAS TO BE THE FIRST ONE IN THE ASSYMETRIC COLLECTION !!!!
+
 # Initialize body parts
 bodyPartList = BodyPartCollection(
     asymmetric=[
-        BodyPart(name="body", doneOnTouch=True),
+        BodyPart(name="body", doneOnTouch=True), # HAS TO BE THE FIRST ONE
         BodyPart(name="head", doneOnTouch=True)
     ],
     symmetric=[

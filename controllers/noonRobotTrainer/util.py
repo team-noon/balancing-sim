@@ -42,3 +42,19 @@ def exportONNX(model : PPO, robotDef : str, titleField : Field):
         input_names=["input"], # Input name in ONNX model
         output_names=["output"] # Output name in ONNX model
     )
+    
+    model.save(f"../../models/{folderName}/continue.zip")
+    
+def canImportONNX() -> bool:
+    try:
+        os.mkdir("../../models")
+        print(f"Directory '../../models' created successfully.")
+        return False
+    except FileExistsError:
+        print(f"Directory '../../models' already exists.")
+    except PermissionError:
+        print(f"Permission denied: Unable to create '../../models'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
+    return os.path.exists("../../models/continue.zip")
