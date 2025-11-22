@@ -1,5 +1,13 @@
 """noonRobotTrainer controller."""
 
+# PARAMETERS
+
+maxSteps = 10000 # MAX STEPS AN INSTANCE CAN LIVE
+
+
+
+
+import datetime
 import torch
 from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
 from typing import List, Tuple, Dict, Any
@@ -18,14 +26,17 @@ BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=ti
 
 motors: List[MotorData] = InitMotors(timestep=timestep)
 
+worldInfoTitleField = robot.getFromDef("WorldInfo").getField("title")
+worldInfoTitleField.setSFString(datetime.datetime.now().__str__())
 
-        
+
 gyro = Gyro(name="BODY_GYRO", sampling_period=timestep)
 gyro.enable(timestep)
 accelerometer = Accelerometer(name="BODY_ACCELEROMETER",sampling_period=timestep)
 accelerometer.enable(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
+
 
 
 turnRate = 0
@@ -52,29 +63,43 @@ env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
 env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
 
+stepsSinceReset = 0
+
+
+prevActions: np.ndarray = np.zeros(env.observation_space.shape, dtype=np.float32)
 
 def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, Any]]:
-    # perform one simulation step, apply action to motors, read sensors, compute reward/termination
     reward = 1
     terminated = False
     truncated = False
-
-    i = 0
     
+
+
+    
+    
+    # applies the actions to the motors
+    
+    i = 0
     for curAction in action:
         pos = ((curAction) * ((motors[i].maxPos) - (motors[i].minPos))) + motors[i].minPos
         motors[i].motor.setPosition(pos)
-        motors[i].motor.setVelocity(1.0)
+        motors[i].motor.setVelocity(3.0)
+        motors[i].motor.setAcceleration(5)
 
         
         i+=1
     
+    # checks if any parts of the body that shouldnt be is touching the floor
     for bodyPart in BodyParts:
         touch = bodyPart.touchSensor.getValue()
         if touch != 0 and bodyPart.doneOnTouch:
             terminated = True
             reward = -10
             break
+        
+    # truncates the robot if it reaches a specified limit of steps
+    if(stepsSinceReset >= maxSteps):
+        truncated=True
             
     
     
@@ -132,9 +157,9 @@ policy_kwargs = dict(
 )
 
 model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
-model.learn(1000000)
+model.learn(100)
 
-exportONNX(model, robot.getSelf().getDef())
+exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
 
 
 while robot.step(timestep) != -1:
