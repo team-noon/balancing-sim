@@ -9,7 +9,7 @@ maxSteps = 10000 # MAX STEPS AN INSTANCE CAN LIVE
 uprightRewardWeight = 1
 maxUprightReward = 1
 
-movementPenaltyWeight = 0.05
+movementPenaltyWeight = 0.03
 
 turnRateRewardWeight = 1
 maxTurnRateReward = 1
@@ -132,16 +132,16 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
             
     # calcualate reward based on how upright it is *
     bodyRot =  inertialUnit.getRollPitchYaw()
-    reward += max(0, maxUprightReward - (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
+    reward += max(-2, maxUprightReward - (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
     
     # calculate reward based on turnspeed 
     bodyAngVelocity = BodyParts[0].angularVelocityField.getSFVec3f()
-    reward += max(0, maxTurnRateReward - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+    reward += max(-2, maxTurnRateReward - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
     
     # calculate reward based on walkspeed
     bodyLinVelocityVector = BodyParts[0].linearVelocityField.getSFVec3f()
     bodyVelocityMagnitude = math.sqrt( bodyLinVelocityVector[0] ** 2 + bodyLinVelocityVector[1] ** 2) # calc the velocity that we care about (we dont care about the z component)
-    reward += max(0, maxWalkSpeedReward - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    reward += max(-2, maxWalkSpeedReward - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
     
 
     
@@ -207,7 +207,7 @@ else:
     model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
     
 
-model.learn(3000000)
+model.learn(10000000)
 
 exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
 
