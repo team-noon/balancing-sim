@@ -7,6 +7,8 @@ PROTO noonRobot [
   field SFString name "robot"
   field SFString controller "noonRobotTrainer"
 
+  field SFBool inference FALSE
+
   # ----- BODY ------
   field SFVec3f bodySize 0.15 0.06 0.25 # [m, m, m]
   field SFFloat bodyMass 0.456 # [kg]

@@ -4,7 +4,7 @@ import math
 
 # PARAMETERS
 
-maxSteps = 10000 # MAX STEPS AN INSTANCE CAN LIVE
+maxSteps = 20000 # MAX STEPS AN INSTANCE CAN LIVE
 
 uprightRewardWeight = 1
 maxUprightReward = 1
@@ -32,7 +32,7 @@ from stable_baselines3 import PPO
 import numpy as np
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from util import exportONNX, canImportONNX
+from util import exportONNX
 
 robot = Supervisor()
 timestep = int(robot.getBasicTimeStep())
@@ -199,19 +199,32 @@ policy_kwargs = dict(
 
 
 model : PPO
-
-if(canImportONNX):
+try:
     model = PPO.load("../../models/continue", env=env, device="cpu", policy_kwargs=policy_kwargs)
     print("Sucessfully imported PPO to continue training")
-else:
-    model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
     
+    if(robot.getSelf().getField("inference").getSFBool()): 
+        model.policy.eval()
 
-model.learn(10000000)
+        obs, info = env.reset()
+        while True:
+            # model.predict already runs under torch.no_grad internally
+            # ensure observation is a numpy array (stable-baselines3 expects ndarray)
+            obs_array = np.asarray(obs, dtype=np.float32)
+            action, _ = model.predict(obs_array, deterministic=True)
+            obs, reward, terminated, truncated, info = env.step(action)
+            if terminated or truncated:
+                obs, info = env.reset()
+except:
+    model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
+    if(robot.getSelf().getField("inference").getSFBool()):
+        raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
+    
+ 
+while True:
+    model.learn(10000)
+    exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
 
-exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
 
 
-while robot.step(timestep) != -1:
-    #print("stepping cause i dont know waht the fuck to do")
-    pass
+
