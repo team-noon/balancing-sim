@@ -5,6 +5,7 @@ PROTO noonRobotSpawner [
   field SFInt32 count 1                # number of robots to spawn
   field SFVec3f translation 0 0 0  # starting translation
   field SFFloat spacing 1.0            # distance between robots (along X)
+  field SFBool inference FALSE
 ]
 {
   Group {
@@ -26,6 +27,7 @@ PROTO noonRobotSpawner [
             DEF NOONROBOT_${i} noonRobot {
               translation ${x} ${y} ${z}
               name "noonRobot_${i}"
+              inference IS inference
             }
           `;
         }
