@@ -1,6 +1,17 @@
 """noonRobotTrainer controller."""
 
 import math
+import datetime
+import torch
+from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
+from typing import List, Tuple, Dict, Any
+import gymnasium as gym
+from stable_baselines3 import PPO
+import numpy as np
+from classes import BodyPartData, MotorData
+from initScripts import InitBodyParts, InitMotors
+from util import exportONNX
+import subprocess
 
 # PARAMETERS
 
@@ -22,17 +33,6 @@ servoSpeed = 39/50 * math.pi # in rad/sec
 
 brushlessTorque = 13750 / 3 # in mNm
 brushlessSpeed = 2 * math.pi # in rad/sec
-
-import datetime
-import torch
-from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
-from typing import List, Tuple, Dict, Any
-import gymnasium as gym
-from stable_baselines3 import PPO
-import numpy as np
-from classes import BodyPartData, MotorData
-from initScripts import InitBodyParts, InitMotors
-from util import exportONNX
 
 robot = Supervisor()
 timestep = int(robot.getBasicTimeStep())
@@ -73,16 +73,12 @@ def getObservationSpace() -> list[float]:
     ret.extend([turnRate, walkSpeed])
     return ret
 
-env = gym.Env()
 
-env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
-
-env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
 
 stepsSinceReset = 0
 
 
-prevActions: np.ndarray = np.zeros(env.action_space.shape, dtype=np.float32)
+prevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
 
 def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, Any]]:
     global prevActions, stepsSinceReset
@@ -153,8 +149,6 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
     info = {}
     return observation, reward, terminated, truncated, info
 
-env.step = step
-
 robot.getSelf().saveState(robot.getSelf().getDef())
 
 def reset(seed=None, options=None):
@@ -190,22 +184,31 @@ def reset(seed=None, options=None):
     info = {}
     return obs, info
 
-env.reset = reset
 
-policy_kwargs = dict(
+
+
+# INFERENCE
+if(robot.getSelf().getField("inference").getSFBool()): 
+    env = gym.Env()
+
+    env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
+
+    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
+    env.reset = reset
+    env.step = step
+    
+    policy_kwargs = dict(
     net_arch=dict(pi=[64, 64], vf=[128, 64]),
     activation_fn=torch.nn.LeakyReLU
     )
-
-
-model : PPO
-try:
-    model = PPO.load("../../models/continue", env=env, device="cpu", policy_kwargs=policy_kwargs)
-    print("Sucessfully imported PPO to continue training")
     
-    if(robot.getSelf().getField("inference").getSFBool()): 
-        model.policy.eval()
+    model : PPO
+    try:
+        model = PPO.load("../../models/continue", env=env, device="cpu", policy_kwargs=policy_kwargs)
+        print("Sucessfully imported PPO for inference")
 
+
+        model.policy.eval()
         obs, info = env.reset()
         while True:
             # model.predict already runs under torch.no_grad internally
@@ -215,15 +218,14 @@ try:
             obs, reward, terminated, truncated, info = env.step(action)
             if terminated or truncated:
                 obs, info = env.reset()
-except:
-    model = PPO("MlpPolicy", env, verbose=1, policy_kwargs=policy_kwargs, device="cpu")
-    if(robot.getSelf().getField("inference").getSFBool()):
+    except:
+        
         raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
     
  
+# TRAINING LOOP
 while True:
-    model.learn(10000)
-    exportONNX(model, robot.getSelf().getDef(), worldInfoTitleField)
+    pass
 
 
 

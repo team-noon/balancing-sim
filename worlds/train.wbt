@@ -1,13 +1,12 @@
 #VRML_SIM R2025a utf8
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "../protos/noonRobotSpawner.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/noonRobot.proto"
 
 DEF WorldInfo WorldInfo {
-  title "2025-11-23 11:17:07.599680"
+  title "2025-11-27 20:12:36.922772"
   basicTimeStep 16
-  FPS 1
+  FPS 0.1
   physicsDisableLinearThreshold 0.005
   physicsDisableAngularThreshold 0.005
   contactProperties [
@@ -22,15 +21,14 @@ DEF WorldInfo WorldInfo {
 }
 Viewpoint {
   orientation 0.06956599517016107 0.06408593475701932 -0.9955167327987531 1.689412691110026
-  position 1.7145760182679082 16.634363605979814 2.430558845265838
+  position 0.5119981110121179 6.16046596540752 0.9281107140880115
 }
 RectangleArena {
   contactMaterial "floor"
-  floorSize 11 11
+  floorSize 30 30
   floorTileSize 1 1
+  floorAppearance NULL
 }
-noonRobotSpawner {
-  spacing 2
-}
-TexturedBackgroundLight {
+noonRobot {
+  controller "<extern>"
 }

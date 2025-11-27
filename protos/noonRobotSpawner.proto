@@ -4,7 +4,7 @@
 PROTO noonRobotSpawner [
   field SFInt32 count 1                # number of robots to spawn
   field SFVec3f translation 0 0 0  # starting translation
-  field SFFloat spacing 1.0            # distance between robots (along X)
+  field SFFloat spacing 1.0            
   field SFBool inference FALSE
 ]
 {
