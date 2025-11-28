@@ -2,16 +2,12 @@
 
 import math
 import datetime
-import torch
 from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
 from typing import List, Tuple, Dict, Any
-import gymnasium as gym
-from stable_baselines3 import PPO
 import numpy as np
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from util import exportONNX
-import subprocess
+import socket
 
 # PARAMETERS
 
@@ -176,10 +172,6 @@ def reset(seed=None, options=None):
     stepsSinceReset = 0
     
     obs = getObservationSpace()
-    i = 0
-    for t in obs:
-        obs[i] = 0
-        i+=1
         
     info = {}
     return obs, info
@@ -189,6 +181,8 @@ def reset(seed=None, options=None):
 
 # INFERENCE
 if(robot.getSelf().getField("inference").getSFBool()): 
+    from stable_baselines3 import PPO
+    import gymnasium as gym
     env = gym.Env()
 
     env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
@@ -197,14 +191,11 @@ if(robot.getSelf().getField("inference").getSFBool()):
     env.reset = reset
     env.step = step
     
-    policy_kwargs = dict(
-    net_arch=dict(pi=[64, 64], vf=[128, 64]),
-    activation_fn=torch.nn.LeakyReLU
-    )
+
     
     model : PPO
     try:
-        model = PPO.load("../../models/continue", env=env, device="cpu", policy_kwargs=policy_kwargs)
+        model = PPO.load("../../models/continue", env=env, device="cpu")
         print("Sucessfully imported PPO for inference")
 
 
@@ -222,9 +213,13 @@ if(robot.getSelf().getField("inference").getSFBool()):
         
         raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
     
- 
+serverSocket = socket.socket()
+
+
+obs, info = reset()
 # TRAINING LOOP
 while True:
+    
     pass
 
 
