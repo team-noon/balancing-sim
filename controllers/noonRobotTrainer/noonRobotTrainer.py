@@ -9,6 +9,7 @@ from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
 import socket
 
+
 # PARAMETERS
 
 maxSteps = 20000 # MAX STEPS AN INSTANCE CAN LIVE
@@ -147,7 +148,7 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
 
 robot.getSelf().saveState(robot.getSelf().getDef())
 
-def reset(seed=None, options=None):
+def reset(seed=None, options=None)-> tuple[list[float], dict]:
     global stepsSinceReset
     #for bodyPart in BodyParts:
     #    bodyPart.angularVelocityField.setSFVec3f([0,0,0])
