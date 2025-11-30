@@ -1,0 +1,82 @@
+import gymnasium as gym
+import numpy as np
+import subprocess
+import os
+import socket
+from typing import Dict, Any, Tuple
+
+subProcesses : list[subprocess.Popen[bytes]] = []
+
+def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket]):
+    """
+    Create and return an env instance for SubprocVecEnv.
+    Keep this function top-level so it's picklable for spawn/forkserver.
+    """
+    class DummyEnv(gym.Env):
+        thisRank : int
+        sockets : list[socket.socket]
+        
+        def __init__(self, rank):
+            super().__init__()
+            self.rank = rank
+            self.action_space = gym.spaces.Box(low=0.0, high=1.0, shape=(18,), dtype=np.float32)
+            self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
+            self.thisRank = rank
+            self.sockets = socketsRef
+
+        def reset(self, seed=None, options=None) -> tuple[list[float], dict]:
+            self.sockets[self.rank].sendall(b"r")
+            
+            
+            data = self.sockets[self.rank].recv(29 * 4)
+            
+            
+            return np.frombuffer(data, dtype=np.float32), {}
+
+        def step(self, action : np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
+            self.sockets[self.rank].sendall(b"s")
+            
+            self.sockets[self.rank].sendall(action.tobytes())
+            
+            data = self.sockets[self.rank].recv(29 * 4 + 4 + 1 + 1)
+                
+            
+            obs = np.frombuffer(data[0:29*4], dtype=np.float32)
+            reward = np.frombuffer(data[29*4:29*4+4], dtype=np.float32)[0]
+            terminated = bool(data[29*4+4])
+            truncated = bool(data[29*4+5])
+            info = {}
+            return obs, reward, terminated, truncated, info
+
+    env = DummyEnv(rank)
+
+    # Start Webots and the controller — log output to files for debugging
+    try:
+        
+        webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch" , "--mode=fast" , f"--port={BASEPORT + rank * 2 + 1}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+        webots_proc = subprocess.Popen(webots_cmd)
+    
+        
+        ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT + rank *2 + 1}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/try.c", f"{rank}"]  
+        controller_proc = subprocess.Popen(ctrl_cmd)
+        subProcesses.append(webots_proc)
+        subProcesses.append(controller_proc)
+        
+        
+
+        
+    except Exception as e:
+        # If launching webots fails, raise so SubprocVecEnv can detect crash
+        raise RuntimeError(f"Failed to launch Webots or controller for rank {rank}: {e}")
+    
+
+    
+
+    return env
+
+def cleanUp():
+    for process in subProcesses:
+        process.terminate()
+    os.system("pkill -9 webots")
+    os.system("pkill -9 webots-bin")
+    os.system("pkill -9 python3")

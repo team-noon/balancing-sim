@@ -7,49 +7,28 @@ import socket
 import gymnasium as gym
 import numpy as np
 from typing import Tuple, Dict, Any
+import multiprocessing as mp
+import functools
+import atexit
+import signal
+from envUtil import init_env, cleanUp
+import sys
+from multiprocessing import Manager
 
-NUM_ROBOTS = 1
+NUM_ENVS = int(sys.argv[1])
+NUM_ROBOTS_IN_ENV = int(sys.argv[2])
 
+if(not NUM_ENVS or not NUM_ROBOTS_IN_ENV):
+    raise "You need to pass how many robots to start"
 
 HOST = "127.0.0.1"
-PORT = 9876
+BASEPORT = 9876
+
 
 observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np. float32)
 
-
-def make_env(rank):
-    thisSocket : socket.socket
-    def reset(seed=None, options=None) -> tuple[list[float], dict]:
-        print("RESET ALREADY YOU CUNT")
-        return [0], {}
-    
-    def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, Any]]:
-        
-        print("STEP ALREADY YOU CUNT")
-        return [0], 0, False, False, {}
-    
-    def _init():
-        env : gym.Env = gym.Env()
-        
-        env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
-
-        env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np. float32)
-        
-        env.reset = reset
-        
-        # Start Webots without blocking
-        webots_process = subprocess.Popen(
-            ["webots", f"--port={4444+rank}", f"{__file__[:-17]}worlds/inference.wbt"]
-        )
-
-        # Start controller
-        webots_controller = os.path.join(os.environ["WEBOTS_HOME"], "webots-controller")
-        controller_process = subprocess.Popen(
-            [webots_controller, f"--port={4444+rank}", f"{__file__[:-17]}controllers/noonRobotTrainer/noonRobotTrainer.py"]
-        )
-        
-        return env
-    return _init
+manager = Manager()
+sockets : list[socket.socket] = manager.list()
 
 
 policy_kwargs = dict(
@@ -57,7 +36,39 @@ policy_kwargs = dict(
     activation_fn=torch.nn.LeakyReLU
 )
 
-env = SubprocVecEnv([make_env(i) for i in range(NUM_ROBOTS)])
+# CLEANUP
+atexit.register(cleanUp)
+def signal_handler(sig, frame):
+    cleanUp()
+    raise SystemExit("Exiting due to signal")
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
-model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
+if __name__ == "__main__":
+    
+    try:
+        mp.set_start_method("fork", force=True)
+    except RuntimeError:
+        # start method already set; ignore
+        pass
+    
+    env_fns = [functools.partial(init_env, i, BASEPORT, sockets) for i in range(NUM_ROBOTS)]
+    env = SubprocVecEnv(env_fns)
+    
+    i :int = 0
+    while(sockets.__len__() != NUM_ROBOTS_IN_ENV * NUM_ENVS):
+        
+        srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        srv.bind((HOST, BASEPORT + i * 2))
+        srv.listen()
+        print(f"Listening on {BASEPORT + i * 2}")
+        conn, addr = srv.accept()
+        print("YIPPI")
+        sockets.append(conn)
+        i+= 1
+        
+    
+    model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
+    
+    model.learn(100000)
 

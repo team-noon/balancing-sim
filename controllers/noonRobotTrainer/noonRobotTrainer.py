@@ -8,7 +8,23 @@ import numpy as np
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
 import socket
+import sys
+import time
 
+
+HOST = "127.0.0.1"
+BASEPORT = 9876
+
+
+
+if sys.argv.__len__() == 3:
+    env_num = int(sys.argv[1])
+    NUM_ROBOTS = int(sys.argv[2])
+    
+    
+
+
+rank = int(sys.argv[1])
 
 # PARAMETERS
 
@@ -25,7 +41,7 @@ maxTurnRateReward = 1
 walkSpeedRewardWeight = 1
 maxWalkSpeedReward = 1
 
-servoTorque = 10 * 2.2 * 9.81 # in mNm
+servoTorque = 10 * 10 * 9.81 # in mNm
 servoSpeed = 39/50 * math.pi # in rad/sec
 
 brushlessTorque = 13750 / 3 # in mNm
@@ -55,7 +71,7 @@ inertialUnit.enable(timestep)
 turnRate = 0
 walkSpeed = 0
             
-def getObservationSpace() -> list[float]:
+def getObservationSpace() -> np.ndarray:
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -68,8 +84,7 @@ def getObservationSpace() -> list[float]:
     ret.extend(inertialUnit.getRollPitchYaw())
     
     ret.extend([turnRate, walkSpeed])
-    return ret
-
+    return np.asarray(ret, dtype=np.float32)
 
 
 stepsSinceReset = 0
@@ -77,7 +92,7 @@ stepsSinceReset = 0
 
 prevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
 
-def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, Any]]:
+def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
     global prevActions, stepsSinceReset
     
     reward = 1
@@ -148,7 +163,7 @@ def step(action: np.ndarray) -> Tuple[list[float], float, bool, bool, Dict[str, 
 
 robot.getSelf().saveState(robot.getSelf().getDef())
 
-def reset(seed=None, options=None)-> tuple[list[float], dict]:
+def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     global stepsSinceReset
     #for bodyPart in BodyParts:
     #    bodyPart.angularVelocityField.setSFVec3f([0,0,0])
@@ -213,14 +228,38 @@ if(robot.getSelf().getField("inference").getSFBool()):
     except:
         
         raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
-    
-serverSocket = socket.socket()
+
+time.sleep(rank)
+
+thisSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+thisSocket.connect((HOST, BASEPORT + rank * 2))
+
 
 
 obs, info = reset()
 # TRAINING LOOP
 while True:
-    
+    data = thisSocket.recv(1)
+    if data == b'r':
+        obs, info = reset()
+        packet = obs.tobytes()
+        
+        thisSocket.sendall(packet)
+    elif data== b's':
+        actionData = thisSocket.recv(18*4)
+        actionToTake = np.frombuffer(actionData, dtype=np.float32)
+        observation, reward, terminated, truncated, info= step(actionToTake)
+        obs = observation.astype(np.float32)
+        reward32 = np.float32(reward)
+        terminated8 = np.int8(terminated)
+        truncated8 = np.int8(truncated)
+
+        # Build a single contiguous byte buffer
+        packet = obs.tobytes() + reward32.tobytes() + terminated8.tobytes() + truncated8.tobytes()
+
+        thisSocket.sendall(packet)
+        
+        
     pass
 
 

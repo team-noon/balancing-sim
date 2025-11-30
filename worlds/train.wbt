@@ -2,6 +2,7 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "../protos/noonRobot.proto"
+EXTERNPROTO "../protos/noonRobotSpawner.proto"
 
 DEF WorldInfo WorldInfo {
   title "2025-11-27 20:12:36.922772"
@@ -21,7 +22,7 @@ DEF WorldInfo WorldInfo {
 }
 Viewpoint {
   orientation 0.06956599517016107 0.06408593475701932 -0.9955167327987531 1.689412691110026
-  position 0.5119981110121179 6.16046596540752 0.9281107140880115
+  position 0.4875091635027713 5.947178553431404 0.8975152963625272
 }
 RectangleArena {
   contactMaterial "floor"
@@ -31,4 +32,8 @@ RectangleArena {
 }
 noonRobot {
   controller "<extern>"
+}
+DEF TRAINER noonRobotSpawner {
+  count 0
+  spacing 10
 }
