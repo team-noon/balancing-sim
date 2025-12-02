@@ -15,8 +15,10 @@ from envUtil import init_env, cleanUp
 import sys
 from multiprocessing import Manager
 
+
 NUM_ENVS = int(sys.argv[1])
 NUM_ROBOTS_IN_ENV = int(sys.argv[2])
+
 
 if(not NUM_ENVS or not NUM_ROBOTS_IN_ENV):
     raise "You need to pass how many robots to start"
@@ -52,16 +54,21 @@ if __name__ == "__main__":
         # start method already set; ignore
         pass
     
-    env_fns = [functools.partial(init_env, i, BASEPORT, sockets) for i in range(NUM_ROBOTS)]
+    env_fns : list[functools.partial] = []
+    
+
+    env_fns = [functools.partial(init_env, i, BASEPORT, sockets, NUM_ENVS, NUM_ROBOTS_IN_ENV) for i in range(NUM_ROBOTS_IN_ENV * NUM_ENVS)]
+    
+    
     env = SubprocVecEnv(env_fns)
     
     i :int = 0
     while(sockets.__len__() != NUM_ROBOTS_IN_ENV * NUM_ENVS):
         
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        srv.bind((HOST, BASEPORT + i * 2))
+        srv.bind((HOST, BASEPORT + i))
         srv.listen()
-        print(f"Listening on {BASEPORT + i * 2}")
+        print(f"Listening on {BASEPORT + i }")
         conn, addr = srv.accept()
         print("YIPPI")
         sockets.append(conn)

@@ -7,7 +7,7 @@ from typing import Dict, Any, Tuple
 
 subProcesses : list[subprocess.Popen[bytes]] = []
 
-def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket]):
+def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnvs : int, numRobotsInEnv : int):
     """
     Create and return an env instance for SubprocVecEnv.
     Keep this function top-level so it's picklable for spawn/forkserver.
@@ -50,24 +50,23 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket]):
 
     env = DummyEnv(rank)
 
-    # Start Webots and the controller — log output to files for debugging
-    try:
+    if rank % numRobotsInEnv == 0:
         
-        webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch" , "--mode=fast" , f"--port={BASEPORT + rank * 2 + 1}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
-        webots_proc = subprocess.Popen(webots_cmd)
-    
-        
-        ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT + rank *2 + 1}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/try.c", f"{rank}"]  
-        controller_proc = subprocess.Popen(ctrl_cmd)
-        subProcesses.append(webots_proc)
-        subProcesses.append(controller_proc)
-        
-        
+        # Start Webots and the controller — log output to files for debugging
+        try:
 
-        
-    except Exception as e:
-        # If launching webots fails, raise so SubprocVecEnv can detect crash
-        raise RuntimeError(f"Failed to launch Webots or controller for rank {rank}: {e}")
+            webots_cmd = ["webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+            webots_proc = subprocess.Popen(webots_cmd)
+
+
+            ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/noonRobotTrainer.py", f"{int(rank / numRobotsInEnv)}", f"{numRobotsInEnv}"]  
+            controller_proc = subprocess.Popen(ctrl_cmd)
+            subProcesses.append(webots_proc)
+            subProcesses.append(controller_proc)
+
+        except Exception as e:
+            # If launching webots fails, raise so SubprocVecEnv can detect crash
+            raise RuntimeError(f"Failed to launch Webots or controller for rank {rank}: {e}")
     
 
     

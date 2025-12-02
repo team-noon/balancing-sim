@@ -12,19 +12,37 @@ import sys
 import time
 
 
+
+
 HOST = "127.0.0.1"
 BASEPORT = 9876
 
-
+robot = Supervisor()
+worldInfoInfoField = robot.getFromDef("WorldInfo").getField("info")
+timestep = int(robot.getBasicTimeStep())
 
 if sys.argv.__len__() == 3:
     env_num = int(sys.argv[1])
     NUM_ROBOTS = int(sys.argv[2])
     
+    print("END MY SUFFERING PLEASE")
     
+    print(robot.getName(), robot.getSelf().getTypeName())
+    
+    worldInfoInfoField.insertMFString(0, f"{env_num}")
+    worldInfoInfoField.insertMFString(1, f"{NUM_ROBOTS}")
+    
+    robot.getFromDef("TRAINER").getField("count").setSFInt32(NUM_ROBOTS)
+    print(robot.step(timestep))
+    robot.getSelf().remove()
 
 
-rank = int(sys.argv[1])
+    exit()
+
+
+robotSelf : Node = robot.getSelf()
+
+print(robot.getSelf().getTypeName())
 
 # PARAMETERS
 
@@ -47,16 +65,11 @@ servoSpeed = 39/50 * math.pi # in rad/sec
 brushlessTorque = 13750 / 3 # in mNm
 brushlessSpeed = 2 * math.pi # in rad/sec
 
-robot = Supervisor()
-timestep = int(robot.getBasicTimeStep())
 
 BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=timestep)
 
 
 motors: List[MotorData] = InitMotors(timestep=timestep)
-
-worldInfoTitleField = robot.getFromDef("WorldInfo").getField("title")
-worldInfoTitleField.setSFString(datetime.datetime.now().__str__())
 
 
 gyro = Gyro(name="BODY_GYRO", sampling_period=timestep)
@@ -161,29 +174,14 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     info = {}
     return observation, reward, terminated, truncated, info
 
-robot.getSelf().saveState(robot.getSelf().getDef())
+robotSelf.saveState(robotSelf.getDef())
 
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     global stepsSinceReset
-    #for bodyPart in BodyParts:
-    #    bodyPart.angularVelocityField.setSFVec3f([0,0,0])
-    #    bodyPart.linearVelocityField.setSFVec3f([0,0,0])
-    #    bodyPart.transField.setSFVec3f(bodyPart.startingPosition)
-    #    bodyPart.rotField.setSFRotation(bodyPart.startingRotation)
-    #    
-    #    bodyPart.node.setVelocity([0,0,0])
-    #    bodyPart.node.resetPhysics()
-    #    
-    #    robot.getSelf().saveState()
-    #    
-    #
-    #    
-    #for motor in motors:
-    #    motor.motor.setPosition(0)
     
     global motors, BodyParts
     
-    robot.getSelf().loadState(robot.getSelf().getDef())    
+    robotSelf.loadState(robotSelf.getDef())    
     
     stepsSinceReset = 0
     
@@ -193,10 +191,8 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     return obs, info
 
 
-
-
 # INFERENCE
-if(robot.getSelf().getField("inference").getSFBool()): 
+if(robotSelf.getField("inference").getSFBool()): 
     from stable_baselines3 import PPO
     import gymnasium as gym
     env = gym.Env()
@@ -229,10 +225,18 @@ if(robot.getSelf().getField("inference").getSFBool()):
         
         raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
 
-time.sleep(rank)
+rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
+
 
 thisSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-thisSocket.connect((HOST, BASEPORT + rank * 2))
+
+while True:
+    try:
+        thisSocket.connect((HOST, BASEPORT + rank))
+        break
+    except:
+        pass
+    
 
 
 

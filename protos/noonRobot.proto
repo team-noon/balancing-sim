@@ -4,7 +4,7 @@ PROTO noonRobot [
 
   # ----- GENERAL ------
   field SFVec3f translation 0 0 0
-  field SFString name "robot"
+  field SFString name "0"
   field SFString controller "noonRobotTrainer"
 
   field SFBool inference FALSE

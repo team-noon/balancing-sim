@@ -26,7 +26,7 @@ PROTO noonRobotSpawner [
           robots += `
             DEF NOONROBOT_${i} noonRobot {
               translation ${x} ${y} ${z}
-              name "noonRobot_${i}"
+              name "${i}"
               inference IS inference
             }
           `;
