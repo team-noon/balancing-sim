@@ -26,14 +26,15 @@ Viewpoint {
 }
 RectangleArena {
   contactMaterial "floor"
-  floorSize 30 30
+  floorSize 200 200
   floorTileSize 1 1
   floorAppearance NULL
 }
 noonRobot {
   controller "<extern>"
+  name "trainer"
 }
 DEF TRAINER noonRobotSpawner {
   count 0
-  spacing 10
+  spacing 30
 }

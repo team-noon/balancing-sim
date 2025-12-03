@@ -1,8 +1,6 @@
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3 import PPO
 import torch
-import subprocess
-import os
 import socket
 import gymnasium as gym
 import numpy as np
@@ -14,7 +12,8 @@ import signal
 from envUtil import init_env, cleanUp
 import sys
 from multiprocessing import Manager
-
+from util import exportONNX
+import datetime
 
 NUM_ENVS = int(sys.argv[1])
 NUM_ROBOTS_IN_ENV = int(sys.argv[2])
@@ -46,6 +45,10 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
+startTime = datetime.datetime.now().__str__()
+
+print("WAAAH",startTime)
+
 if __name__ == "__main__":
     
     try:
@@ -66,6 +69,12 @@ if __name__ == "__main__":
     while(sockets.__len__() != NUM_ROBOTS_IN_ENV * NUM_ENVS):
         
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        srv.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        srv.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 256*1024)
+        srv.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 256*1024)
+        srv.setsockopt(socket.IPPROTO_TCP, 12, 1)
+
         srv.bind((HOST, BASEPORT + i))
         srv.listen()
         print(f"Listening on {BASEPORT + i }")
@@ -77,5 +86,8 @@ if __name__ == "__main__":
     
     model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
     
-    model.learn(100000)
+    while True:
+        model.learn(1000000)
+        
+        exportONNX(model, startTime)
 

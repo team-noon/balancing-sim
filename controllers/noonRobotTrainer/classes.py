@@ -52,12 +52,3 @@ class MotorData:
     positionSensor: Optional[PositionSensor] = None
     
     
-
-class OnnxableSB3Policy(torch.nn.Module):
-    def __init__(self, policy):
-        super().__init__()
-        self.policy = policy
-
-    def forward(self, observation: torch.Tensor):
-        # Note: Uses deterministic=True for deterministic actions
-        return self.policy(observation, deterministic=True)

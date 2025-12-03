@@ -1,7 +1,6 @@
 """noonRobotTrainer controller."""
 
 import math
-import datetime
 from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
 from typing import List, Tuple, Dict, Any
 import numpy as np
@@ -9,8 +8,6 @@ from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
 import socket
 import sys
-import time
-
 
 
 
@@ -21,32 +18,36 @@ robot = Supervisor()
 worldInfoInfoField = robot.getFromDef("WorldInfo").getField("info")
 timestep = int(robot.getBasicTimeStep())
 
-if sys.argv.__len__() == 3:
-    env_num = int(sys.argv[1])
-    NUM_ROBOTS = int(sys.argv[2])
-    
-    print("END MY SUFFERING PLEASE")
-    
-    print(robot.getName(), robot.getSelf().getTypeName())
-    
-    worldInfoInfoField.insertMFString(0, f"{env_num}")
-    worldInfoInfoField.insertMFString(1, f"{NUM_ROBOTS}")
-    
-    robot.getFromDef("TRAINER").getField("count").setSFInt32(NUM_ROBOTS)
-    print(robot.step(timestep))
+if robot.getName() == "trainer":
+    if sys.argv.__len__() == 3:
+        env_num = int(sys.argv[1])
+        NUM_ROBOTS = int(sys.argv[2])
+
+        worldInfoInfoField.insertMFString(0, f"{env_num}")
+        worldInfoInfoField.insertMFString(1, f"{NUM_ROBOTS}")
+
+
+
+
+        
+
+        robot.getFromDef("TRAINER").getField("count").setSFInt32(NUM_ROBOTS)
+        robot.simulationReset()
+
     robot.getSelf().remove()
-
-
+    robot.step(timestep)
     exit()
 
 
 robotSelf : Node = robot.getSelf()
 
-print(robot.getSelf().getTypeName())
+if(robot.getName() != "trainer" or  robot.getName() != "noonRobot"):
+
+    robotSelf = robot.getFromDef("TRAINER").getFromProtoDef(f"NOONROBOT_{robot.getName()}")
 
 # PARAMETERS
 
-maxSteps = 20000 # MAX STEPS AN INSTANCE CAN LIVE
+maxSteps = 40000 # MAX STEPS AN INSTANCE CAN LIVE
 
 uprightRewardWeight = 1
 maxUprightReward = 1
@@ -179,13 +180,18 @@ robotSelf.saveState(robotSelf.getDef())
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     global stepsSinceReset
     
-    global motors, BodyParts
+    global motors, BodyParts, turnRate, walkSpeed
     
     robotSelf.loadState(robotSelf.getDef())    
     
     stepsSinceReset = 0
     
     obs = getObservationSpace()
+    
+    step_size = 0.05
+    num_steps = int(0.3 / step_size) + 1
+    turnRate = np.random.choice([i * step_size for i in range(num_steps)])
+    walkSpeed = np.random.choice([i * step_size for i in range(num_steps)])
         
     info = {}
     return obs, info
@@ -230,6 +236,8 @@ rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFStri
 
 thisSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+thisSocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
 while True:
     try:
         thisSocket.connect((HOST, BASEPORT + rank))
@@ -240,7 +248,14 @@ while True:
 
 
 
-obs, info = reset()
+
+
+
+obs_buffer = np.empty(29, dtype=np.float32)
+action_buffer = np.empty(18, dtype=np.float32)
+
+obs_buffer, info = reset()
+
 # TRAINING LOOP
 while True:
     data = thisSocket.recv(1)
@@ -250,16 +265,15 @@ while True:
         
         thisSocket.sendall(packet)
     elif data== b's':
-        actionData = thisSocket.recv(18*4)
-        actionToTake = np.frombuffer(actionData, dtype=np.float32)
-        observation, reward, terminated, truncated, info= step(actionToTake)
-        obs = observation.astype(np.float32)
+        action_buffer = np.frombuffer(thisSocket.recv(18*4), dtype=np.float32)
+        obs_buffer, reward, terminated, truncated, info= step(action_buffer)
+        
         reward32 = np.float32(reward)
         terminated8 = np.int8(terminated)
         truncated8 = np.int8(truncated)
 
         # Build a single contiguous byte buffer
-        packet = obs.tobytes() + reward32.tobytes() + terminated8.tobytes() + truncated8.tobytes()
+        packet = memoryview(obs_buffer).tobytes() + reward32.tobytes() + terminated8.tobytes() + truncated8.tobytes()
 
         thisSocket.sendall(packet)
         

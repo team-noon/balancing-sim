@@ -34,9 +34,8 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             return np.frombuffer(data, dtype=np.float32), {}
 
         def step(self, action : np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-            self.sockets[self.rank].sendall(b"s")
             
-            self.sockets[self.rank].sendall(action.tobytes())
+            self.sockets[self.rank].sendall(b"s" + action.tobytes())
             
             data = self.sockets[self.rank].recv(29 * 4 + 4 + 1 + 1)
                 
@@ -45,6 +44,8 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             reward = np.frombuffer(data[29*4:29*4+4], dtype=np.float32)[0]
             terminated = bool(data[29*4+4])
             truncated = bool(data[29*4+5])
+        
+            
             info = {}
             return obs, reward, terminated, truncated, info
 
@@ -55,7 +56,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
         # Start Webots and the controller — log output to files for debugging
         try:
 
-            webots_cmd = ["webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+            webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
             webots_proc = subprocess.Popen(webots_cmd)
 
 
