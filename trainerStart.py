@@ -13,12 +13,23 @@ if __name__ == "__main__":
     from util import exportONNX
     import datetime
 
+    if(sys.argv.__len__() < 4):
+        raise "at least 3 arguments are needed, 1: NUM ENVS 2: NUM ROBOTS/ENV 3: CONTINUE?"
+
     NUM_ENVS = int(sys.argv[1])
     NUM_ROBOTS_IN_ENV = int(sys.argv[2])
+    arg = sys.argv[3].strip()
+    if arg.lower() == "true":
+        CONTINUE = True
+    else:
+        try:
+            CONTINUE = float(arg) > 0
+        except ValueError:
+            CONTINUE = False
 
 
     if(not NUM_ENVS or not NUM_ROBOTS_IN_ENV):
-        raise "You need to pass how many robots to start"
+        raise "You need to pass how many envs and robots to start"
 
     HOST = "127.0.0.1"
     BASEPORT = 9876
@@ -41,21 +52,28 @@ if __name__ == "__main__":
         srv.bind((HOST, BASEPORT + i))
         srv.listen()
         server_sockets.append(srv)
+        
+        
+    from stable_baselines3.common.vec_env import SubprocVecEnv
+    from stable_baselines3 import PPO
+    import torch
+        
+    model : PPO
+    startTime = datetime.datetime.now().__str__()
     
     # CLEANUP
     atexit.register(cleanUp)
     def signal_handler(sig, frame):
+        if(model):
+            exportONNX(model, startTime)
         cleanUp()
         raise SystemExit("Exiting due to signal")
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+
     
-    from stable_baselines3.common.vec_env import SubprocVecEnv
-    from stable_baselines3 import PPO
-    import torch
-    startTime = datetime.datetime.now().__str__()
+
     
-    print("WAAAH",startTime)
     
     
     policy_kwargs = dict(
@@ -81,14 +99,20 @@ if __name__ == "__main__":
     while(sockets.__len__() != NUM_ROBOTS_IN_ENV * NUM_ENVS):
         
 
-        print(f"Listening on {BASEPORT + i }")
+        
         conn, addr = server_sockets[i].accept()
-        print("YIPPI")
+        print(f"{i} / {NUM_ROBOTS_IN_ENV * NUM_ENVS} robot connected with port: {BASEPORT + i}")
         sockets.append(conn)
         i+= 1
         
     
-    model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
+        
+    if not CONTINUE:
+        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
+        
+    else:
+        model = PPO.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
+        print("imported model to continue training")
     
     while True:
         model.learn(1000000)

@@ -41,7 +41,7 @@ if robot.getName() == "trainer":
 
 robotSelf : Node = robot.getSelf()
 
-if(robot.getName() != "trainer" or  robot.getName() != "noonRobot"):
+if(robot.getName() != "trainer" and  robot.getName() != "noonRobot"):
 
     robotSelf = robot.getFromDef("TRAINER").getFromProtoDef(f"NOONROBOT_{robot.getName()}")
 
@@ -49,21 +49,20 @@ if(robot.getName() != "trainer" or  robot.getName() != "noonRobot"):
 
 maxSteps = 40000 # MAX STEPS AN INSTANCE CAN LIVE
 
-uprightRewardWeight = 1
-maxUprightReward = 1
+# REWARD PARAMETERS
+uprightRewardWeight = 0.7
 
-movementPenaltyWeight = 0.03
+movementPenaltyWeight = 0.02
 
 turnRateRewardWeight = 1
-maxTurnRateReward = 1
-
 walkSpeedRewardWeight = 1
-maxWalkSpeedReward = 1
 
+
+# MOTOR PARAMETERS
 servoTorque = 10 * 10 * 9.81 # in mNm
 servoSpeed = 39/50 * math.pi # in rad/sec
 
-brushlessTorque = 13750 / 3 # in mNm
+brushlessTorque =  13750 / 3 # in mNm
 brushlessSpeed = 2 * math.pi # in rad/sec
 
 
@@ -82,8 +81,8 @@ inertialUnit.enable(timestep)
 
 
 
-turnRate = 0
-walkSpeed = 0
+turnRate = 0.3
+walkSpeed = 0.3
             
 def getObservationSpace() -> np.ndarray:
     ret : list[float]= []
@@ -109,7 +108,7 @@ prevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
     global prevActions, stepsSinceReset
     
-    reward = 1
+    reward = 0
     terminated = False
     truncated = False
     
@@ -154,16 +153,16 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
             
     # calcualate reward based on how upright it is *
     bodyRot =  inertialUnit.getRollPitchYaw()
-    reward += max(-2, maxUprightReward - (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
+    reward += max(-1, (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
     
     # calculate reward based on turnspeed 
     bodyAngVelocity = BodyParts[0].angularVelocityField.getSFVec3f()
-    reward += max(-2, maxTurnRateReward - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+    reward += max(-1, abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
     
     # calculate reward based on walkspeed
     bodyLinVelocityVector = BodyParts[0].linearVelocityField.getSFVec3f()
     bodyVelocityMagnitude = math.sqrt( bodyLinVelocityVector[0] ** 2 + bodyLinVelocityVector[1] ** 2) # calc the velocity that we care about (we dont care about the z component)
-    reward += max(-2, maxWalkSpeedReward - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    reward += max(-1, abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
     
 
     
@@ -188,10 +187,21 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     
     obs = getObservationSpace()
     
-    step_size = 0.05
-    num_steps = int(0.3 / step_size) + 1
-    turnRate = np.random.choice([i * step_size for i in range(num_steps)])
-    walkSpeed = np.random.choice([i * step_size for i in range(num_steps)])
+    # increment size
+    step_size = 0.01  
+
+    # ----- walk speed range: -0.05 to +0.20 -----
+    walk_min = -0.05
+    walk_max =  0.20
+    walk_steps = int((walk_max - walk_min) / step_size) + 1
+    walkSpeed = np.random.choice([walk_min + i * step_size for i in range(walk_steps)])
+
+    # ----- turn rate range: -0.20 to +0.20 -----
+    turn_min = -0.20
+    turn_max =  0.20
+    turn_steps = int((turn_max - turn_min) / step_size) + 1
+    turnRate = np.random.choice([turn_min + i * step_size for i in range(turn_steps)])
+
         
     info = {}
     return obs, info
