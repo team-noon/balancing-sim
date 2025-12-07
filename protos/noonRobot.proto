@@ -101,7 +101,7 @@ PROTO noonRobot [
   
 ]
 {
-  DEF ROBOT-NODE  Robot {
+  Robot {
     translation  %<=`${fields.translation.value.x} ${fields.translation.value.y} ${fields.translation.value.z + fields.footHeight.value + fields.lowerLegLength.value + fields.upperLegLength.value + fields.bodySize.value.z / 2}`>%
     name IS name
     controller IS controller
