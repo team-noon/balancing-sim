@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
         
         conn, addr = server_sockets[i].accept()
-        print(f"{i} / {NUM_ROBOTS_IN_ENV * NUM_ENVS} robot connected with port: {BASEPORT + i}")
+        print(f"{i+1} / {NUM_ROBOTS_IN_ENV * NUM_ENVS} robot connected with port: {BASEPORT + i}")
         sockets.append(conn)
         i+= 1
         

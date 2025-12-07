@@ -160,7 +160,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     bodyRot =  robotSelf.getOrientation()
     reward += max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight) # beatufiul line of code
     
-    print("rotation reward: ", max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight))
+    #print("rotation reward: ", max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight))
     
     
     # calculate reward based on turnspeed 
@@ -168,14 +168,14 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     bodyAngVelocity = vel[3:]
     reward += max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
-    print("rotation: ", bodyAngVelocity[2], "reward:", max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight))
+    #print("rotation: ", bodyAngVelocity[2], "reward:", max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight))
     
     
     # calculate reward based on walkspeed
     bodyLinVelocityVector = vel[:3]
     bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[3] + bodyLinVelocityVector[1]*bodyRot[4] 
     reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
-    print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
+    #print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
     
 
     
