@@ -45,6 +45,8 @@ if(robot.getName() != "trainer" and  robot.getName() != "noonRobot"):
 
     robotSelf = robot.getFromDef("TRAINER").getFromProtoDef(f"NOONROBOT_{robot.getName()}")
 
+
+
 # PARAMETERS
 
 maxSteps = 40000 # MAX STEPS AN INSTANCE CAN LIVE
@@ -54,8 +56,8 @@ uprightRewardWeight = 0.7
 
 movementPenaltyWeight = 0.02
 
-turnRateRewardWeight = 1
-walkSpeedRewardWeight = 1
+turnRateRewardWeight = 2
+walkSpeedRewardWeight = 3
 
 
 # MOTOR PARAMETERS
@@ -72,14 +74,13 @@ BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=ti
 motors: List[MotorData] = InitMotors(timestep=timestep)
 
 
+
 gyro = Gyro(name="BODY_GYRO", sampling_period=timestep)
 gyro.enable(timestep)
 accelerometer = Accelerometer(name="BODY_ACCELEROMETER",sampling_period=timestep)
 accelerometer.enable(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
-
-
 
 turnRate = 0.3
 walkSpeed = 0.3
@@ -106,7 +107,7 @@ stepsSinceReset = 0
 prevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, stepsSinceReset
+    global prevActions, stepsSinceReset, turnRate, walkSpeed
     
     reward = 0
     terminated = False
@@ -150,19 +151,31 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     # truncates the robot if it reaches a specified limit of steps
     if(stepsSinceReset >= maxSteps):
         truncated=True
+        
             
     # calcualate reward based on how upright it is *
-    bodyRot =  inertialUnit.getRollPitchYaw()
-    reward += max(-1, (abs(bodyRot[0]) + abs(bodyRot[1])) * uprightRewardWeight)
+    
+    
+    
+    bodyRot =  robotSelf.getOrientation()
+    reward += max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight) # beatufiul line of code
+    
+    print("rotation reward: ", max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight))
+    
     
     # calculate reward based on turnspeed 
-    bodyAngVelocity = BodyParts[0].angularVelocityField.getSFVec3f()
-    reward += max(-1, abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+    vel = robotSelf.getVelocity()
+    
+    bodyAngVelocity = vel[3:]
+    reward += max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+    print("rotation: ", bodyAngVelocity[2], "reward:", max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight))
+    
     
     # calculate reward based on walkspeed
-    bodyLinVelocityVector = BodyParts[0].linearVelocityField.getSFVec3f()
-    bodyVelocityMagnitude = math.sqrt( bodyLinVelocityVector[0] ** 2 + bodyLinVelocityVector[1] ** 2) # calc the velocity that we care about (we dont care about the z component)
-    reward += max(-1, abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    bodyLinVelocityVector = vel[:3]
+    bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[3] + bodyLinVelocityVector[1]*bodyRot[4] 
+    reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
     
 
     
