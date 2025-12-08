@@ -190,9 +190,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 robotSelf.saveState(robotSelf.getDef())
 
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
-    global stepsSinceReset
+    global stepsSinceReset, prevActions
     
     global motors, BodyParts, turnRate, walkSpeed
+
+    prevActions = np.zeros((18,), dtype=np.float32)
     
     robotSelf.loadState(robotSelf.getDef())    
     
