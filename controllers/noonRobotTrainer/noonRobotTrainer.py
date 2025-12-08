@@ -148,6 +148,15 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
             reward = -10
             break
         
+        if touch !=0 and bodyPart.touchReward:
+            bodyPart.lastTouched = stepsSinceReset
+            reward += bodyPart.touchReward
+            
+        if touch == 0 and bodyPart.noTouchReward and stepsSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
+            reward += bodyPart.noTouchReward
+            
+            
+        
     # truncates the robot if it reaches a specified limit of steps
     if(stepsSinceReset >= maxSteps):
         truncated=True

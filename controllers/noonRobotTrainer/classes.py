@@ -8,6 +8,10 @@ import torch
 class BodyPart:
     name: str
     doneOnTouch : bool
+    
+    touchReward : Optional[float]
+    noTouchRewardDelay : Optional[int]
+    noTouchReward : Optional[float]
 
 @dataclass
 class BodyPartCollection:
@@ -25,6 +29,11 @@ class BodyPartData:
     startingRotation : List[float]
     touchSensor : TouchSensor
     doneOnTouch : bool
+    lastTouched : int
+    
+    touchReward : Optional[float]
+    noTouchRewardDelay : Optional[int]
+    noTouchReward : Optional[float]
 
 @dataclass
 class JointAxis:
