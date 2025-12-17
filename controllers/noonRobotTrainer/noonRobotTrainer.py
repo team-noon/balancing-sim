@@ -64,8 +64,8 @@ walkSpeedRewardWeight = 10
 servoTorque = 10 * 10 * 9.81 # in mNm
 servoSpeed = 39/50 * math.pi # in rad/sec
 
-brushlessTorque =  13750 / 3 # in mNm
-brushlessSpeed = 2 * math.pi # in rad/sec
+brushlessTorque =  30000 #13750 / 3 # in mNm
+brushlessSpeed = 3 * math.pi # in rad/sec
 
 
 BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=timestep)
