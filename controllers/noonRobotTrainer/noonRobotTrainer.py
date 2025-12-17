@@ -61,7 +61,7 @@ walkSpeedRewardWeight = 10
 
 
 # MOTOR PARAMETERS
-servoTorque = 10 * 10 * 9.81 # in mNm
+servoTorque = 15 * 10 * 9.81 # in mNm
 servoSpeed = 39/50 * math.pi # in rad/sec
 
 brushlessTorque =  30000 #13750 / 3 # in mNm
