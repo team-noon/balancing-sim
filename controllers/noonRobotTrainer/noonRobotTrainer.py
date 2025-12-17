@@ -52,12 +52,12 @@ if(robot.getName() != "trainer" and  robot.getName() != "noonRobot"):
 maxSteps = 40000 # MAX STEPS AN INSTANCE CAN LIVE
 
 # REWARD PARAMETERS
-uprightRewardWeight = 0.7
+uprightRewardWeight = 1
 
 movementPenaltyWeight = 0.02
 
-turnRateRewardWeight = 2
-walkSpeedRewardWeight = 3
+turnRateRewardWeight = 10
+walkSpeedRewardWeight = 10
 
 
 # MOTOR PARAMETERS
