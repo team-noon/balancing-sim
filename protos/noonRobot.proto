@@ -9,6 +9,11 @@ PROTO noonRobot [
 
   field SFBool inference FALSE
 
+  # ----- MOTORS ------
+  field SFFloat BLDCMaxTorque 35
+  field SFFloat ServoMaxTorque 10
+
+
   # ----- BODY ------
   field SFVec3f bodySize 0.15 0.06 0.25 # [m, m, m]
   field SFFloat bodyMass 0.456 # [kg]
@@ -151,6 +156,7 @@ PROTO noonRobot [
             name "RM_Z_HEAD"
             minPosition %<=`${-fields.headMotorLimit.value}`>%
             maxPosition %<=`${fields.headMotorLimit.value}`>%
+            maxTorque IS ServoMaxTorque
           }
           PositionSensor{
             name "PS_Z_HEAD"
@@ -226,6 +232,7 @@ PROTO noonRobot [
         device [
           RotationalMotor{
             name "RM_Y_LEFT_SHOULDER"
+            maxTorque IS ServoMaxTorque
 
             minPosition %<=`${fields.shoulderYMotorLimits.value.x}`>%
             maxPosition %<=`${fields.shoulderYMotorLimits.value.y}`>%
@@ -245,6 +252,7 @@ PROTO noonRobot [
         device2 [
           RotationalMotor{
             name "RM_Z_LEFT_SHOULDER"
+            maxTorque IS ServoMaxTorque
             
             minPosition %<=`${fields.shoulderZMotorLimits.value.x}`>%
             maxPosition %<=`${fields.shoulderZMotorLimits.value.y}`>%
@@ -292,6 +300,7 @@ PROTO noonRobot [
               device[
                 RotationalMotor{
                   name "RM_Y_LEFT_ELBOW"
+                  maxTorque IS ServoMaxTorque
 
                   minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
@@ -382,6 +391,7 @@ PROTO noonRobot [
         device [
           RotationalMotor{
             name "RM_Y_RIGHT_SHOULDER"
+            maxTorque IS ServoMaxTorque
 
             minPosition %<=`${fields.shoulderYMotorLimits.value.x}`>%
             maxPosition %<=`${fields.shoulderYMotorLimits.value.y}`>%
@@ -401,6 +411,7 @@ PROTO noonRobot [
         device2 [
           RotationalMotor{
             name "RM_Z_RIGHT_SHOULDER"
+            maxTorque IS ServoMaxTorque
             
             minPosition %<=`${fields.shoulderZMotorLimits.value.x}`>%
             maxPosition %<=`${fields.shoulderZMotorLimits.value.y}`>%
@@ -442,6 +453,7 @@ PROTO noonRobot [
               device[
                 RotationalMotor{
                   name "RM_Y_RIGHT_ELBOW"
+                  maxTorque IS ServoMaxTorque
 
                   minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
@@ -532,6 +544,7 @@ PROTO noonRobot [
         device[
           RotationalMotor{
             name "RM_X_LEFT_HIP"
+            maxTorque IS BLDCMaxTorque
             minPosition %<=`${fields.hipXMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipXMotorLimits.value.y}`>%
           }
@@ -543,6 +556,7 @@ PROTO noonRobot [
         device2[
           RotationalMotor{
             name "RM_Y_LEFT_HIP"
+            maxTorque IS ServoMaxTorque
             minPosition %<=`${fields.hipYMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipYMotorLimits.value.y}`>%
           }
@@ -554,6 +568,7 @@ PROTO noonRobot [
         device3[
           RotationalMotor{
             name "RM_Z_LEFT_HIP"
+            maxTorque IS ServoMaxTorque
             minPosition %<=`${fields.hipZMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipZMotorLimits.value.y}`>%
           }
@@ -595,6 +610,7 @@ PROTO noonRobot [
               device[
                 RotationalMotor{
                   name "RM_X_LEFT_KNEE"
+                  maxTorque IS BLDCMaxTorque
                   minPosition %<=`${fields.kneeXMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.kneeXMotorLimits.value.y}`>%
                 }
@@ -644,6 +660,7 @@ PROTO noonRobot [
                     device [
                       RotationalMotor{
                         name "RM_X_LEFT_FOOT"
+                        maxTorque IS BLDCMaxTorque
                         minPosition %<=`${fields.footXMotorLimits.value.x}`>%
                         maxPosition %<=`${fields.footXMotorLimits.value.y}`>%
                       }
@@ -655,6 +672,7 @@ PROTO noonRobot [
                     device2 [
                       RotationalMotor{
                         name "RM_Y_LEFT_FOOT"
+                        maxTorque IS ServoMaxTorque
                         minPosition %<=`${fields.footYMotorLimits.value.x}`>%
                         maxPosition %<=`${fields.footYMotorLimits.value.y}`>%
                       }
@@ -735,6 +753,7 @@ PROTO noonRobot [
         device[
           RotationalMotor{
             name "RM_X_RIGHT_HIP"
+            maxTorque IS BLDCMaxTorque
             minPosition %<=`${fields.hipXMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipXMotorLimits.value.y}`>%
           }
@@ -746,6 +765,7 @@ PROTO noonRobot [
         device2[
           RotationalMotor{
             name "RM_Y_RIGHT_HIP"
+            maxTorque IS ServoMaxTorque
             minPosition %<=`${fields.hipYMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipYMotorLimits.value.y}`>%
           }
@@ -757,6 +777,7 @@ PROTO noonRobot [
         device3[
           RotationalMotor{
             name "RM_Z_RIGHT_HIP"
+            maxTorque IS ServoMaxTorque
             minPosition %<=`${fields.hipZMotorLimits.value.x}`>%
             maxPosition %<=`${fields.hipZMotorLimits.value.y}`>%
           }
@@ -791,6 +812,7 @@ PROTO noonRobot [
               device[
                 RotationalMotor{
                   name "RM_X_RIGHT_KNEE"
+                  maxTorque IS BLDCMaxTorque
                   minPosition %<=`${fields.kneeXMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.kneeXMotorLimits.value.y}`>%
                 }
@@ -834,6 +856,7 @@ PROTO noonRobot [
                     device [
                       RotationalMotor{
                         name "RM_X_RIGHT_FOOT"
+                        maxTorque IS BLDCMaxTorque
                         minPosition %<=`${fields.footXMotorLimits.value.x}`>%
                         maxPosition %<=`${fields.footXMotorLimits.value.y}`>%
                       }
@@ -845,6 +868,7 @@ PROTO noonRobot [
                     device2 [
                       RotationalMotor{
                         name "RM_Y_RIGHT_FOOT"
+                        maxTorque IS ServoMaxTorque
                         minPosition %<=`${fields.footYMotorLimits.value.x}`>%
                         maxPosition %<=`${fields.footYMotorLimits.value.y}`>%
                       }

@@ -61,7 +61,7 @@ walkSpeedRewardWeight = 10
 
 
 # MOTOR PARAMETERS
-servoTorque = 15 * 10 * 9.81 # in mNm
+servoTorque = 20 * 10 * 9.81 # in mNm
 servoSpeed = 39/50 * math.pi # in rad/sec
 
 brushlessTorque =  30000 #13750 / 3 # in mNm
@@ -167,7 +167,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     
     bodyRot =  robotSelf.getOrientation()
-    reward += max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight) # beatufiul line of code
+    reward += max(-1, bodyRot[8] * uprightRewardWeight) # beatufiul line of code
     
     #print("rotation reward: ", max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight))
     
@@ -184,6 +184,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     bodyLinVelocityVector = vel[:3]
     bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[3] + bodyLinVelocityVector[1]*bodyRot[4] 
     reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    
     #print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
     
 
@@ -258,8 +259,12 @@ if(robotSelf.getField("inference").getSFBool()):
             # ensure observation is a numpy array (stable-baselines3 expects ndarray)
             obs_array = np.asarray(obs, dtype=np.float32)
             action, _ = model.predict(obs_array, deterministic=True)
+            i = 0
+            while(i < action.__len__()):
+               #action[i] = 0
+               i += 1
             obs, reward, terminated, truncated, info = env.step(action)
-            if terminated or truncated:
+            if False and terminated or truncated:
                 obs, info = env.reset()
     except:
         
