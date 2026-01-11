@@ -291,7 +291,7 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
-                axis 0 1 0
+                axis 0 -1 0
 
                 minStop %<=`${fields.elbowYHardLimits.value.x}`>%
                 maxStop %<=`${fields.elbowYHardLimits.value.y}`>%

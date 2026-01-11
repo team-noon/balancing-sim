@@ -49,15 +49,18 @@ if(robot.getName() != "trainer" and  robot.getName() != "noonRobot"):
 
 # PARAMETERS
 
-maxSteps = 40000 # MAX STEPS AN INSTANCE CAN LIVE
+maxSteps = 50000 # MAX STEPS AN INSTANCE CAN LIVE
 
 # REWARD PARAMETERS
-uprightRewardWeight = 1
+uprightRewardWeight = 1.2
 
 movementPenaltyWeight = 0.02
 
-turnRateRewardWeight = 10
-walkSpeedRewardWeight = 10
+turnRateRewardWeight = 4
+walkSpeedRewardWeight = 4
+
+verticalMovementPenaltyWeight = 0.2
+sideMovementPenaltyWeight = 0.2
 
 
 # MOTOR PARAMETERS
@@ -122,7 +125,9 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     i = 0
     for curAction in action:
+        curAction = np.clip(curAction, 0.0, 1.0)
         pos = ((curAction) * ((motors[i].maxPos) - (motors[i].minPos))) + motors[i].minPos
+        
         motors[i].motor.setPosition(pos)
         
         if(motors[i].currentPos):
@@ -134,11 +139,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
             motors[i].motor.setAcceleration(10)
             motors[i].motor.setAvailableTorque(servoTorque/1000)
 
-        reward -= movementPenaltyWeight*((curAction - prevActions[i]) ** 2)
+        reward -= movementPenaltyWeight*abs(curAction - prevActions[i])
         
         i+=1
         
-    prevActions = action
+    prevActions = action.copy()
     
     # checks if any parts of the body that shouldnt be is touching the floor
     for bodyPart in BodyParts:
@@ -163,9 +168,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         
             
     # calcualate reward based on how upright it is *
-    
-    
-    
+
     bodyRot =  robotSelf.getOrientation()
     reward += max(-1, bodyRot[8] * uprightRewardWeight) # beatufiul line of code
     
@@ -182,8 +185,15 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     # calculate reward based on walkspeed
     bodyLinVelocityVector = vel[:3]
-    bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[3] + bodyLinVelocityVector[1]*bodyRot[4] 
-    reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight)
+    bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[1] + bodyLinVelocityVector[1]*bodyRot[4] + bodyLinVelocityVector[2]*bodyRot[7]
+    reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
+    
+    # small penalty for vertical motion
+    reward -= verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
+    
+    # small penatly for side motion
+    bodySideVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[0] + bodyLinVelocityVector[1]*bodyRot[3] + bodyLinVelocityVector[2]*bodyRot[6]
+    reward -= sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
     
     #print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
     
@@ -191,7 +201,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     observation = getObservationSpace()
     
-    stepsSinceReset+=timestep
+    stepsSinceReset+=1
     
 
     info = {}
@@ -258,13 +268,9 @@ if(robotSelf.getField("inference").getSFBool()):
             # model.predict already runs under torch.no_grad internally
             # ensure observation is a numpy array (stable-baselines3 expects ndarray)
             obs_array = np.asarray(obs, dtype=np.float32)
-            action, _ = model.predict(obs_array, deterministic=True)
-            i = 0
-            while(i < action.__len__()):
-               #action[i] = 0
-               i += 1
+            action, _ = model.predict(obs_array, deterministic=True)               
             obs, reward, terminated, truncated, info = env.step(action)
-            if False and terminated or truncated:
+            if terminated or truncated:
                 obs, info = env.reset()
     except:
         
@@ -285,7 +291,14 @@ while True:
         pass
     
 
-
+def recv_exact(sock, n):
+    buf = b""
+    while len(buf) < n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError("Socket closed")
+        buf += chunk
+    return buf
 
 
 
@@ -297,14 +310,14 @@ obs_buffer, info = reset()
 
 # TRAINING LOOP
 while True:
-    data = thisSocket.recv(1)
+    data = recv_exact(thisSocket, 1)
     if data == b'r':
         obs, info = reset()
         packet = obs.tobytes()
         
         thisSocket.sendall(packet)
     elif data== b's':
-        action_buffer = np.frombuffer(thisSocket.recv(18*4), dtype=np.float32)
+        action_buffer = np.frombuffer(recv_exact(thisSocket, 18*4), dtype=np.float32)
         obs_buffer, reward, terminated, truncated, info= step(action_buffer)
         
         reward32 = np.float32(reward)

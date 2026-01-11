@@ -4,6 +4,7 @@ import subprocess
 import os
 import socket
 from typing import Dict, Any, Tuple
+from util import recv_exact
 
 subProcesses : list[subprocess.Popen[bytes]] = []
 
@@ -28,7 +29,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             self.sockets[self.rank].sendall(b"r")
             
             
-            data = self.sockets[self.rank].recv(29 * 4)
+            data = recv_exact(self.sockets[self.rank], 29 * 4)
             
             
             return np.frombuffer(data, dtype=np.float32), {}
@@ -37,7 +38,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             
             self.sockets[self.rank].sendall(b"s" + action.tobytes())
             
-            data = self.sockets[self.rank].recv(29 * 4 + 4 + 1 + 1)
+            data = recv_exact(self.sockets[self.rank], 29 * 4 + 4 + 1 + 1)
                 
             
             obs = np.frombuffer(data[0:29*4], dtype=np.float32)

@@ -49,4 +49,12 @@ def exportONNX(model : PPO, folderName : str):
     )
     
     model.save(f"./models/{folderName}/continue.zip")
-    
+
+def recv_exact(sock, n):
+    buf = b""
+    while len(buf) < n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError("Socket closed")
+        buf += chunk
+    return buf

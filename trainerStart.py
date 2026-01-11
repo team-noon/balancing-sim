@@ -2,7 +2,6 @@ if __name__ == "__main__":
     import socket
     import gymnasium as gym
     import numpy as np
-    from typing import Tuple, Dict, Any
     import multiprocessing as mp
     import functools
     import atexit
@@ -115,7 +114,7 @@ if __name__ == "__main__":
         print("imported model to continue training")
     
     while True:
-        model.learn(1000000)
+        model.learn(5000000)
         
         exportONNX(model, startTime)
 

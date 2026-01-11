@@ -118,7 +118,7 @@ bodyPartList = BodyPartCollection(
         BodyPart(name="hand", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
         BodyPart(name="upper_leg", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
         BodyPart(name="lower_leg", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
-        BodyPart(name="foot", doneOnTouch=False, touchReward=0.5, noTouchReward=-1, noTouchRewardDelay=40*16)
+        BodyPart(name="foot", doneOnTouch=False, touchReward=0.4, noTouchReward=-1, noTouchRewardDelay=150)
     ]
 )
 
@@ -143,7 +143,7 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
         rotField = thisNode.getField("rotation")
         
 
-        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.noTouchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
+        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
 
 
     directions = ["left", "right"]
@@ -163,5 +163,5 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
 
 
 
-            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.noTouchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
+            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
     return BodyParts
