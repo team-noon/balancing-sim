@@ -114,7 +114,7 @@ if __name__ == "__main__":
         print("imported model to continue training")
     
     while True:
-        model.learn(5000000)
+        model.learn(2000000)
         
         exportONNX(model, startTime)
 
