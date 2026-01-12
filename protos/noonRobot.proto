@@ -9,6 +9,9 @@ PROTO noonRobot [
 
   field SFBool inference FALSE
 
+  field SFInt32 cylinderSubdivision 3
+  field SFInt32 sphereSubdivision 1
+
   # ----- MOTORS ------
   field SFFloat BLDCMaxTorque 35
   field SFFloat ServoMaxTorque 10
@@ -188,7 +191,7 @@ PROTO noonRobot [
               children[
                 Shape{
                   geometry DEF EYEGEOMETRY Sphere{
-                    subdivision 5
+                    subdivision IS sphereSubdivision
                     radius %<=`${fields.headSize.value / 6}`>%
                   }
                   appearance DEF EYEMATERIAL PBRAppearance{
@@ -243,7 +246,7 @@ PROTO noonRobot [
         ]
 
         jointParameters2 JointParameters{
-          axis 0 0 1
+          axis 0 0 -1
           
           minStop %<=`${fields.shoulderZHardLimits.value.x}`>%
           maxStop %<=`${fields.shoulderZHardLimits.value.y}`>%
@@ -274,6 +277,7 @@ PROTO noonRobot [
               geometry Cylinder{
                 height IS upperArmLength
                 radius IS armRadius
+                subdivision IS cylinderSubdivision
               }
               appearance USE MATERIAL
             }
@@ -282,6 +286,7 @@ PROTO noonRobot [
               name "TS_LEFT_UPPER_ARM"
               type "bumper"
               boundingObject Cylinder{
+                subdivision IS cylinderSubdivision
                 height IS upperArmLength
                 radius IS armRadius
               }
@@ -317,6 +322,7 @@ PROTO noonRobot [
                 children [
                   DEF LowerArmShape Shape{
                     geometry Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerArmLength
                       radius IS armRadius
                     }
@@ -326,6 +332,7 @@ PROTO noonRobot [
                     name "TS_LEFT_LOWER_ARM"
                     type "bumper"
                     boundingObject Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerArmLength
                       radius IS armRadius
                     }
@@ -338,6 +345,7 @@ PROTO noonRobot [
                     children [
                       DEF HandShape Shape{
                         geometry Sphere{
+                          subdivision IS sphereSubdivision
                           radius IS handRadius
                         }
                         appearance USE MATERIAL
@@ -346,6 +354,7 @@ PROTO noonRobot [
                         name "TS_LEFT_HAND"
                         type "bumper"
                         boundingObject Sphere{
+                          subdivision IS sphereSubdivision
                           radius IS handRadius
                         }
                       }
@@ -434,6 +443,7 @@ PROTO noonRobot [
               name "TS_RIGHT_UPPER_ARM"
               type "bumper"
               boundingObject Cylinder{
+                subdivision IS cylinderSubdivision
                 height IS upperArmLength
                 radius IS armRadius
               }
@@ -473,6 +483,7 @@ PROTO noonRobot [
                     name "TS_RIGHT_LOWER_ARM"
                     type "bumper"
                     boundingObject Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerArmLength
                       radius IS armRadius
                     }
@@ -488,6 +499,7 @@ PROTO noonRobot [
                         name "TS_RIGHT_HAND"
                         type "bumper"
                         boundingObject Sphere{
+                          subdivision IS sphereSubdivision
                           radius IS handRadius
                         }
                       }
@@ -585,6 +597,7 @@ PROTO noonRobot [
           children[
             DEF UpperLegShape Shape{
               geometry Cylinder{
+                subdivision IS cylinderSubdivision
                 radius IS legRadius
                 height IS upperLegLength
               }
@@ -595,6 +608,7 @@ PROTO noonRobot [
               name "TS_LEFT_UPPER_LEG"
               type "bumper"
               boundingObject Cylinder{
+                subdivision IS cylinderSubdivision
                 radius IS legRadius
                 height IS upperLegLength
               }
@@ -627,6 +641,7 @@ PROTO noonRobot [
                 children [
                   DEF LowerLegShape Shape{
                     geometry Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerLegLength
                       radius IS legRadius
                     }
@@ -636,6 +651,7 @@ PROTO noonRobot [
                     name "TS_LEFT_LOWER_LEG"
                     type "bumper"
                     boundingObject Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerLegLength
                       radius IS legRadius
                     }
@@ -797,6 +813,7 @@ PROTO noonRobot [
               name "TS_RIGHT_UPPER_LEG"
               type "bumper"
               boundingObject Cylinder{
+                subdivision IS cylinderSubdivision
                 radius IS legRadius
                 height IS upperLegLength
               }
@@ -832,6 +849,7 @@ PROTO noonRobot [
                     name "TS_RIGHT_LOWER_LEG"
                     type "bumper"
                     boundingObject Cylinder{
+                      subdivision IS cylinderSubdivision
                       height IS lowerLegLength
                       radius IS legRadius
                     }

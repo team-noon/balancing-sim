@@ -1,6 +1,7 @@
 import torch
 from stable_baselines3 import PPO
 import os
+import socket
 
 class OnnxableSB3Policy(torch.nn.Module):
     def __init__(self, policy):
@@ -53,10 +54,4 @@ def exportONNX(model : PPO, folderName : str):
     
 
 def recv_exact(sock, n):
-    buf = b""
-    while len(buf) < n:
-        chunk = sock.recv(n - len(buf))
-        if not chunk:
-            raise ConnectionError("Socket closed")
-        buf += chunk
-    return buf
+    return sock.recv(n)

@@ -19,20 +19,30 @@ worldInfoInfoField = robot.getFromDef("WorldInfo").getField("info")
 timestep = int(robot.getBasicTimeStep())
 
 if robot.getName() == "trainer":
-    if sys.argv.__len__() == 3:
+    if sys.argv.__len__() == 4:
         env_num = int(sys.argv[1])
         NUM_ROBOTS = int(sys.argv[2])
-
+        
+        DEBUG = False
+        
+        if(sys.argv[3].strip().lower()=="true"):
+            DEBUG=True
+        
         worldInfoInfoField.insertMFString(0, f"{env_num}")
         worldInfoInfoField.insertMFString(1, f"{NUM_ROBOTS}")
+        worldInfoInfoField.insertMFString(2, f"{DEBUG}")
 
 
+        if(DEBUG):
+            print("Starting world in DEBUG mode")
 
 
         
 
         robot.getFromDef("TRAINER").getField("count").setSFInt32(NUM_ROBOTS)
+
         robot.simulationReset()
+        
 
     robot.getSelf().remove()
     robot.step(timestep)
@@ -76,6 +86,15 @@ BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=ti
 
 motors: List[MotorData] = InitMotors(timestep=timestep)
 
+basePrevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
+
+i = 0
+
+while(i < motors.__len__()):
+    basePrevActions[i] = motors[i].defaultPos
+    i+=1
+
+
 
 
 gyro = Gyro(name="BODY_GYRO", sampling_period=timestep)
@@ -85,8 +104,8 @@ accelerometer.enable(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
-turnRate = 0.3
-walkSpeed = 0.3
+turnRate = 0
+walkSpeed = 0
             
 def getObservationSpace() -> np.ndarray:
     ret : list[float]= []
@@ -107,7 +126,8 @@ def getObservationSpace() -> np.ndarray:
 stepsSinceReset = 0
 
 
-prevActions: np.ndarray = np.zeros((18,), dtype=np.float32)
+
+prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
     global prevActions, stepsSinceReset, turnRate, walkSpeed
@@ -118,8 +138,6 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     robot.step(timestep)
 
-
-    
     
     # applies the actions to the motors
     
@@ -214,7 +232,7 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     
     global motors, BodyParts, turnRate, walkSpeed
 
-    prevActions = np.zeros((18,), dtype=np.float32)
+    prevActions = basePrevActions.copy()
     
     robotSelf.loadState(robotSelf.getDef())    
     
@@ -268,9 +286,10 @@ if(robotSelf.getField("inference").getSFBool()):
             # model.predict already runs under torch.no_grad internally
             # ensure observation is a numpy array (stable-baselines3 expects ndarray)
             obs_array = np.asarray(obs, dtype=np.float32)
-            action, _ = model.predict(obs_array, deterministic=True)               
+            action, _ = model.predict(obs_array, deterministic=True)   
+                        
             obs, reward, terminated, truncated, info = env.step(action)
-            if terminated or truncated:
+            if (terminated or truncated):
                 obs, info = env.reset()
     except:
         
@@ -278,27 +297,42 @@ if(robotSelf.getField("inference").getSFBool()):
 
 rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
 
+SOCK_PATH = f"/tmp/noon_robot_{rank}.sock"
 
-thisSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-thisSocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+thisSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+#thisSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+#thisSocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+#thisSocket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 256*1024)
+#thisSocket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 256*1024)
 
 while True:
     try:
-        thisSocket.connect((HOST, BASEPORT + rank))
+        thisSocket.connect(SOCK_PATH)
+        #thisSocket.connect((HOST, BASEPORT + rank))
         break
     except:
         pass
     
 
 def recv_exact(sock, n):
-    buf = b""
-    while len(buf) < n:
-        chunk = sock.recv(n - len(buf))
-        if not chunk:
-            raise ConnectionError("Socket closed")
-        buf += chunk
-    return buf
+    return sock.recv(n)
+
+
+#import os
+
+# pins the process to 1 core
+#os.sched_setaffinity(0, {1+math.floor(rank/3)})
+
+
+DEBUG = worldInfoInfoField.getMFString(2).lower() == "true"
+IS_DEBUG_MASTER = DEBUG and rank == 0
+
+
+import time
+from collections import defaultdict
+
 
 
 
@@ -308,30 +342,121 @@ action_buffer = np.empty(18, dtype=np.float32)
 
 obs_buffer, info = reset()
 
-# TRAINING LOOP
-while True:
-    data = recv_exact(thisSocket, 1)
-    if data == b'r':
-        obs, info = reset()
-        packet = obs.tobytes()
-        
-        thisSocket.sendall(packet)
-    elif data== b's':
-        action_buffer = np.frombuffer(recv_exact(thisSocket, 18*4), dtype=np.float32)
-        obs_buffer, reward, terminated, truncated, info= step(action_buffer)
-        
-        reward32 = np.float32(reward)
-        terminated8 = np.int8(terminated)
-        truncated8 = np.int8(truncated)
+if(IS_DEBUG_MASTER):
+    
+    timing_acc = defaultdict(float)
+    timing_count = 0
+    
+    PRINT_EVERY = 200  # steps
+    while True:
+        t0 = time.perf_counter()
 
-        # Build a single contiguous byte buffer
-        packet = memoryview(obs_buffer).tobytes() + reward32.tobytes() + terminated8.tobytes() + truncated8.tobytes()
+        data = recv_exact(thisSocket, 1)
 
-        thisSocket.sendall(packet)
-        
-        
-    pass
 
+        t_recv_cmd = time.perf_counter()
+
+        if data == b'r':
+            t_reset_start = time.perf_counter()
+
+            obs, info = reset()
+
+
+            t_reset_done = time.perf_counter()
+
+            thisSocket.sendall(obs.tobytes())
+
+
+            t_send = time.perf_counter()
+
+            timing_acc["recv_cmd"] += t_recv_cmd - t0
+            timing_acc["reset"] += t_reset_done - t_reset_start
+            timing_acc["send"] += t_send - t_reset_done
+            timing_count += 1
+
+        elif data == b's':
+
+            t_recv_action_start = time.perf_counter()
+
+            action_buffer = np.frombuffer(
+                recv_exact(thisSocket, 18 * 4), dtype=np.float32
+            )
+
+
+            t_recv_action_done = time.perf_counter()
+            t_step_start = time.perf_counter()
+
+            obs_buffer, reward, terminated, truncated, info = step(action_buffer)
+
+
+            t_step_done = time.perf_counter()
+            t_pack_start = time.perf_counter()
+
+            packet = (
+                memoryview(obs_buffer).tobytes()
+                + np.float32(reward).tobytes()
+                + np.int8(terminated).tobytes()
+                + np.int8(truncated).tobytes()
+            )
+
+
+            t_pack_done = time.perf_counter()
+            t_send_start = time.perf_counter()
+
+            thisSocket.sendall(packet)
+
+            
+            t_send_done = time.perf_counter()
+            timing_acc["recv_cmd"] += t_recv_cmd - t0
+            timing_acc["recv_action"] += t_recv_action_done - t_recv_action_start
+            timing_acc["step"] += t_step_done - t_step_start
+            timing_acc["pack"] += t_pack_done - t_pack_start
+            timing_acc["send"] += t_send_done - t_send_start
+            timing_count += 1
+
+        if  timing_count >= PRINT_EVERY:
+            print("\n=== DEBUG TIMINGS (avg over", timing_count, "steps) ===")
+            for k, v in timing_acc.items():
+                print(f"{k:12s}: {(v / timing_count)*1000:.3f} ms")
+            print("========================================\n")
+
+            timing_acc.clear()
+            timing_count = 0
+else:
+    while True:
+
+        data = recv_exact(thisSocket, 1)
+
+        if data == b'r':
+
+            obs, info = reset()
+
+            thisSocket.sendall(obs.tobytes())
+
+
+    
+
+        elif data == b's':
+
+            action_buffer = np.frombuffer(
+                recv_exact(thisSocket, 18 * 4), dtype=np.float32
+            )
+
+
+
+
+            obs_buffer, reward, terminated, truncated, info = step(action_buffer)
+
+
+
+            packet = (
+                memoryview(obs_buffer).tobytes()
+                + np.float32(reward).tobytes()
+                + np.int8(terminated).tobytes()
+                + np.int8(truncated).tobytes()
+            )
+
+            thisSocket.sendall(packet)
 
 
 

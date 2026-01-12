@@ -7,7 +7,7 @@ EXTERNPROTO "../protos/noonRobotSpawner.proto"
 DEF WorldInfo WorldInfo {
   title "2025-11-27 20:12:36.922772"
   basicTimeStep 16
-  FPS 0.1
+  FPS 30
   physicsDisableLinearThreshold 0.005
   physicsDisableAngularThreshold 0.005
   contactProperties [
@@ -21,7 +21,6 @@ DEF WorldInfo WorldInfo {
   ]
   optimalThreadCount 2
 }
-
 RectangleArena {
   contactMaterial "floor"
   floorSize 200 200
@@ -35,4 +34,8 @@ noonRobot {
 DEF TRAINER noonRobotSpawner {
   count 0
   spacing 30
+}
+Viewpoint {
+  orientation 0.06956599517016107 0.06408593475701932 -0.9955167327987531 1.689412691110026
+  position 0.4875091635027713 5.947178553431404 0.8975152963625272
 }

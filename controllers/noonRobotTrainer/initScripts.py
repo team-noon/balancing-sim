@@ -59,7 +59,8 @@ def InitMotors(timestep : float) -> List[MotorData]:
                     motor=Motor(motor_name),
                     currentPos=axis.currentPos,
                     maxPos=axis.maxPos * (3.14159265359/180),
-                    minPos=axis.minPos * (3.14159265359/180)
+                    minPos=axis.minPos * (3.14159265359/180),
+                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)
                 )
 
                 if axis.currentPos:
@@ -82,7 +83,8 @@ def InitMotors(timestep : float) -> List[MotorData]:
                 motor=Motor(motor_name),
                 currentPos=axis.currentPos,
                 maxPos=axis.maxPos * (3.14159265359/180) ,
-                minPos=axis.minPos* (3.14159265359/180)
+                minPos=axis.minPos* (3.14159265359/180),
+                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)
             )
 
             if axis.currentPos:

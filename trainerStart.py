@@ -11,20 +11,41 @@ if __name__ == "__main__":
     from multiprocessing import Manager
     from util import exportONNX
     import datetime
+    import os
+    
+    DEBUG : bool =False
+    
+    NUM_ENVS : int
+    NUM_ROBOTS_IN_ENV : int
+    CONTINUE :bool
 
-    if(sys.argv.__len__() < 4):
+    if(sys.argv.__len__() == 2):
+        if(sys.argv[1].strip().lower() == "true"):
+            DEBUG =True
+            NUM_ENVS = 1
+            NUM_ROBOTS_IN_ENV = 2
+            CONTINUE = False
+            
+            print(f"\033[93m Warning: you are using debug mode, no saves will be done \033[0m")
+
+
+    if(sys.argv.__len__() < 4 and not DEBUG):
         raise "at least 3 arguments are needed, 1: NUM ENVS 2: NUM ROBOTS/ENV 3: CONTINUE?"
 
-    NUM_ENVS = int(sys.argv[1])
-    NUM_ROBOTS_IN_ENV = int(sys.argv[2])
-    arg = sys.argv[3].strip()
-    if arg.lower() == "true":
-        CONTINUE = True
-    else:
-        try:
-            CONTINUE = float(arg) > 0
-        except ValueError:
-            CONTINUE = False
+
+
+    if(not DEBUG):
+        NUM_ENVS  = int(sys.argv[1])
+        NUM_ROBOTS_IN_ENV : int= int(sys.argv[2])
+        arg = sys.argv[3].strip()
+        if arg.lower() == "true":
+            CONTINUE = True
+        else:
+            try:
+                CONTINUE = float(arg) > 0
+            except ValueError:
+                CONTINUE = False
+
 
 
     if(not NUM_ENVS or not NUM_ROBOTS_IN_ENV):
@@ -41,14 +62,23 @@ if __name__ == "__main__":
     
     server_sockets = []
     for i in range(NUM_ROBOTS_IN_ENV * NUM_ENVS):
-        srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        SOCK_PATH = f"/tmp/noon_robot_{i}.sock"
+        try:
+            os.unlink(SOCK_PATH)
+        except FileNotFoundError:
+            pass
         
-        srv.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        srv.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 256*1024)
-        srv.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 256*1024)
-        srv.setsockopt(socket.IPPROTO_TCP, 12, 1)
+        srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        #srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        #srv.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        #srv.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 256*1024)
+        #srv.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 256*1024)
+        #srv.setsockopt(socket.IPPROTO_TCP, 12, 1)
 
-        srv.bind((HOST, BASEPORT + i))
+        srv.bind(SOCK_PATH)
+        #srv.bind((HOST, BASEPORT + i))
+        
         srv.listen()
         server_sockets.append(srv)
         
@@ -63,15 +93,16 @@ if __name__ == "__main__":
     # CLEANUP
     atexit.register(cleanUp)
     def signal_handler(sig, frame):
-        if(model):
+        if(model and not DEBUG):
             exportONNX(model, startTime)
         cleanUp()
         raise SystemExit("Exiting due to signal")
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    
 
+    # pins the process to 1 core
+    #os.sched_setaffinity(0, {0})
     
     
     
@@ -89,7 +120,7 @@ if __name__ == "__main__":
     env_fns : list[functools.partial] = []
     
 
-    env_fns = [functools.partial(init_env, i, BASEPORT, sockets, NUM_ENVS, NUM_ROBOTS_IN_ENV) for i in range(NUM_ROBOTS_IN_ENV * NUM_ENVS)]
+    env_fns = [functools.partial(init_env, i, BASEPORT, sockets, NUM_ENVS, NUM_ROBOTS_IN_ENV, DEBUG) for i in range(NUM_ROBOTS_IN_ENV * NUM_ENVS)]
     
     
     env = SubprocVecEnv(env_fns)
@@ -99,7 +130,7 @@ if __name__ == "__main__":
         
 
         
-        conn, addr = server_sockets[i].accept()
+        conn, _ = server_sockets[i].accept()
         print(f"{i+1} / {NUM_ROBOTS_IN_ENV * NUM_ENVS} robot connected with port: {BASEPORT + i}")
         sockets.append(conn)
         i+= 1
@@ -116,5 +147,6 @@ if __name__ == "__main__":
     while True:
         model.learn(2000000)
         
-        exportONNX(model, startTime)
+        if(not DEBUG):
+            exportONNX(model, startTime)
 

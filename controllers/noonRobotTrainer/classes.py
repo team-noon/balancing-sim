@@ -58,6 +58,8 @@ class MotorData:
     currentPos: bool
     minPos : float
     maxPos : float
+    defaultPos : float
     positionSensor: Optional[PositionSensor] = None
+
     
     

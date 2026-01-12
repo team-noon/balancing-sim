@@ -8,7 +8,7 @@ from util import recv_exact
 
 subProcesses : list[subprocess.Popen[bytes]] = []
 
-def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnvs : int, numRobotsInEnv : int):
+def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnvs : int, numRobotsInEnv : int, Debug : bool):
     """
     Create and return an env instance for SubprocVecEnv.
     Keep this function top-level so it's picklable for spawn/forkserver.
@@ -56,12 +56,15 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
         
         # Start Webots and the controller — log output to files for debugging
         try:
-
             webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+            if(Debug):
+                
+                webots_cmd=["webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/trainDebug.wbt"] # ONLY FUR DEBUGGING
+            
             webots_proc = subprocess.Popen(webots_cmd)
 
 
-            ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/noonRobotTrainer.py", f"{int(rank / numRobotsInEnv)}", f"{numRobotsInEnv}"]  
+            ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/noonRobotTrainer.py", f"{int(rank / numRobotsInEnv)}", f"{numRobotsInEnv}", f"{Debug}"]  
             controller_proc = subprocess.Popen(ctrl_cmd)
             subProcesses.append(webots_proc)
             subProcesses.append(controller_proc)

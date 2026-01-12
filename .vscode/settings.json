@@ -12,7 +12,10 @@
         "**/Thumbs.db": true,
         ".vscode": true,
         "worlds": false,
-        "controllers/noonRobotControllerTest": true
+        "controllers/noonRobotControllerTest": true,
+        "**/__pycache__": true,
+        "**/*.wbproj": true,
+        ".gitignore": true
     },
     "explorerExclude.backup": {}
 
