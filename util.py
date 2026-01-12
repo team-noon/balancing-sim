@@ -39,6 +39,8 @@ def exportONNX(model : PPO, folderName : str):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+    model.save(f"./models/{folderName}/continue.zip")
+    
     # Export to ONNX
     torch.onnx.export(
         onnxable_policy,
@@ -48,7 +50,7 @@ def exportONNX(model : PPO, folderName : str):
         output_names=["output"] # Output name in ONNX model
     )
     
-    model.save(f"./models/{folderName}/continue.zip")
+    
 
 def recv_exact(sock, n):
     buf = b""
