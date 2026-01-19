@@ -4,11 +4,17 @@ import math
 from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
 from typing import List, Tuple, Dict, Any
 import numpy as np
-from classes import BodyPartData, MotorData
-from initScripts import InitBodyParts, InitMotors
+
 import socket
 import sys
+import os
 
+controller_dir = os.path.dirname(__file__)
+shared_dir = os.path.join(controller_dir, '..')
+sys.path.append(os.path.abspath(shared_dir))
+from classes import BodyPartData, MotorData
+from initScripts import InitBodyParts, InitMotors
+from parameters import brushlessSpeed, brushlessTorque, servoSpeed, servoTorque
 
 
 HOST = "127.0.0.1"
@@ -72,13 +78,6 @@ walkSpeedRewardWeight = 4
 verticalMovementPenaltyWeight = 0.2
 sideMovementPenaltyWeight = 0.2
 
-
-# MOTOR PARAMETERS
-servoTorque = 20 * 10 * 9.81 # in mNm
-servoSpeed = 39/50 * math.pi # in rad/sec
-
-brushlessTorque =  30000 #13750 / 3 # in mNm
-brushlessSpeed = 3 * math.pi # in rad/sec
 
 
 BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=timestep)
@@ -255,7 +254,6 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     turn_steps = int((turn_max - turn_min) / step_size) + 1
     turnRate = np.random.choice([turn_min + i * step_size for i in range(turn_steps)])
 
-        
     info = {}
     return obs, info
 
