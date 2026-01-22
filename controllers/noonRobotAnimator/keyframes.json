@@ -1,3 +1,85 @@
 {
-    
+  "shoulder": {
+    "L": {
+      "y": [],
+      "yMotorNum": 0,
+      "z": [],
+      "zMotorNum": 1
+    },
+    "R": {
+      "y": [],
+      "yMotorNum": 2,
+      "z": [],
+      "zMotorNum": 3
+    }
+  },
+
+  "elbow": {
+    "L": {
+      "y": [],
+      "yMotorNum": 4
+    },
+    "R": {
+      "y": [],
+      "yMotorNum": 5
+    }
+  },
+
+  "hip": {
+    "L": {
+      "x": [],
+      "xMotorNum": 6,
+      "y": [],
+      "yMotorNum": 7,
+      "z": [],
+      "zMotorNum": 8
+    },
+    "R": {
+      "x": [],
+      "xMotorNum": 9,
+      "y": [],
+      "yMotorNum": 10,
+      "z": [],
+      "zMotorNum": 11
+    }
+  },
+
+  "knee": {
+    "L": {
+      "x": [],
+      "xMotorNum": 12,
+      "y": []
+    },
+    "R": {
+      "x": [],
+      "xMotorNum": 13
+    }
+  },
+
+  "ankle": {
+    "L": {
+      "x": [],
+      "xMotorNum": 14,
+      "y": [],
+      "yMotorNum": 15
+    },
+    "R": {
+      "x": [],
+      "xMotorNum": 16,
+      "y": [],
+      "yMotorNum": 17
+    }
+  },
+
+  "neck": {
+
+    "z": [
+      {
+        "time": 0,
+        "pos": 1,
+        "torque": 1
+      }
+    ],
+    "zMotorNum": 18
+  }
 }

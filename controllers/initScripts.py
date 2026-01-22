@@ -3,6 +3,8 @@ from controller import Supervisor
 
 # MOTOR INITITATION ----------
 
+headJoint : Joint = Joint(name="HEAD", axes=[JointAxis(axis="Z", currentPos=False, minPos=-45, maxPos= 45)])
+
 # Define joints for motor initiation
 joints = JointCollection(
     asymmetric=[
@@ -46,10 +48,13 @@ joints = JointCollection(
     ]
 )
 
-def InitMotors(timestep : float) -> List[MotorData]:
+def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
     # INIT SYMMETRIC JOINTS
     motors : List[MotorData] = []
     directions = ["LEFT", "RIGHT"]
+    
+    if(loadHead):
+        joints.asymmetric.append(headJoint)
 
     for direction in directions:
         for joint in joints.symmetric:

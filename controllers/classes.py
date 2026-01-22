@@ -61,5 +61,34 @@ class MotorData:
     defaultPos : float
     positionSensor: Optional[PositionSensor] = None
 
+
+""" @dataclass
+class KeyFrameAxis:
+    Time : int
+    pos : float
+    torque : float
     
+class KeyFrames:
+    x : List[KeyFrameAxis]
+    xMotorNum : int
+    y : List[KeyFrameAxis]
+    yMotorNum : int
+    z: List[KeyFrameAxis]
+    zMotorNum : int
+    
+@dataclass
+class symmetricKeyFrame:
+    L : KeyFrames
+    R : KeyFrames
+
+
+@dataclass
+class KeyFrameCollection:
+    neck : KeyFrames
+    shoulder : symmetricKeyFrame
+    elbow : symmetricKeyFrame
+    hip : symmetricKeyFrame
+    knee : symmetricKeyFrame
+    ankle : symmetricKeyFrame
+     """
     
