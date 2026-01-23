@@ -14,8 +14,8 @@ import json
 keyframes : dict
 
 
-with open("keyframes.json", "r") as jsonfile:
-    data = json.loads(jsonfile)
+with open(os.path.join(controller_dir, "keyframes.json"), "r") as jsonfile:
+    data = json.loads(jsonfile.read())
     keyframes = data
 
 robot = Supervisor()
@@ -31,21 +31,21 @@ curTime : int =0
 
 def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
     lastTime :int = 0
-    lastPos : float= 0.0
-    lastTorque : float = 0.0
+    lastPos : float= motors[motorNumber].defaultPos
+    lastTorque : float = 1
     
     nextTime :int = 0
-    nextPos : float= 0.0
-    nextTorque : float = 0.0
+    nextPos : float= motors[motorNumber].defaultPos
+    nextTorque : float = 1
     
-    if(axisKeyFrames.count() > 0):
+    if(len(axisKeyFrames) > 0):
         nextTime = axisKeyFrames[0]["time"]
         nextPos = axisKeyFrames[0]["pos"]
         nextTorque = axisKeyFrames[0]["torque"]
     
     i : int = 0
     
-    while i < axisKeyFrames.count():
+    while i < len(axisKeyFrames):
         if(axisKeyFrames[i]["time"] >= curTime):
             lastTime = axisKeyFrames[i]["time"]
             lastPos = axisKeyFrames[i]["pos"]
@@ -55,17 +55,19 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
             nextPos = lastPos
             nextTorque = lastTorque
             
-            if(i < axisKeyFrames.count -1):
+            if(i < len(axisKeyFrames) -1):
                 nextTime = axisKeyFrames[i+1]["time"]
                 nextPos = axisKeyFrames[i+1]["pos"]
                 nextTorque = axisKeyFrames[i+1]["torque"]
             
         i+=1
         
-    
+    curAction = 0
         
-    
-    curAction = lastPos + (nextPos - lastPos) * ((curTime-lastTime) / (nextTime-lastTime))
+    if nextTime == lastTime:
+        curAction = nextPos
+    else:
+        curAction = lastPos + (nextPos - lastPos) * ((curTime-lastTime) / (nextTime-lastTime))
     
     curAction = min(1, max(0, curAction))
 
@@ -96,12 +98,19 @@ while robot.step(timestep) != -1:
     i : int = 0
     
     while i < symmetricList.__len__():
-        if(keyframes[symmetricList[i]]["x"] and keyframes[symmetricList[i]]["xMotorNum"]):
-            stepAxis(keyframes[symmetricList[i]]["xMotorNum"], keyframes[symmetricList[i]]["x"])
-        if(keyframes[symmetricList[i]]["y"] and keyframes[symmetricList[i]]["yMotorNum"]):
-            stepAxis(keyframes[symmetricList[i]]["yMotorNum"], keyframes[symmetricList[i]]["y"])
-        if(keyframes[symmetricList[i]]["z"] and keyframes[symmetricList[i]]["zMotorNum"]):
-            stepAxis(keyframes[symmetricList[i]]["zMotorNum"], keyframes[symmetricList[i]]["z"])
+        if(keyframes[symmetricList[i]]["L"]["xMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["L"]["xMotorNum"], keyframes[symmetricList[i]]["L"]["x"])
+        if(keyframes[symmetricList[i]]["L"]["yMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["L"]["yMotorNum"], keyframes[symmetricList[i]]["L"]["y"])
+        if(keyframes[symmetricList[i]]["L"]["zMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["L"]["zMotorNum"], keyframes[symmetricList[i]]["L"]["z"])
+            
+        if(keyframes[symmetricList[i]]["R"]["xMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["R"]["xMotorNum"], keyframes[symmetricList[i]]["R"]["x"])
+        if(keyframes[symmetricList[i]]["R"]["yMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["R"]["yMotorNum"], keyframes[symmetricList[i]]["R"]["y"])
+        if(keyframes[symmetricList[i]]["R"]["zMotorNum"] != -1):
+            stepAxis(keyframes[symmetricList[i]]["R"]["zMotorNum"], keyframes[symmetricList[i]]["R"]["z"])
         i+=1
         
     i = 0

@@ -1,12 +1,16 @@
 {
   "shoulder": {
     "L": {
+      "x": [],
+      "xMotorNum": -1,
       "y": [],
       "yMotorNum": 0,
       "z": [],
       "zMotorNum": 1
     },
     "R": {
+      "x": [],
+      "xMotorNum": -1,
       "y": [],
       "yMotorNum": 2,
       "z": [],
@@ -16,12 +20,20 @@
 
   "elbow": {
     "L": {
+      "x": [],
+      "xMotorNum": -1,
       "y": [],
-      "yMotorNum": 4
+      "yMotorNum": 4,
+      "z": [],
+      "zMotorNum": -1
     },
     "R": {
+      "x": [],
+      "xMotorNum": -1,
       "y": [],
-      "yMotorNum": 5
+      "yMotorNum": 5,
+      "z": [],
+      "zMotorNum": -1
     }
   },
 
@@ -48,11 +60,18 @@
     "L": {
       "x": [],
       "xMotorNum": 12,
-      "y": []
+      "y": [],
+      "yMotorNum": -1,
+      "z": [],
+      "zMotorNum": -1
     },
     "R": {
       "x": [],
-      "xMotorNum": 13
+      "xMotorNum": 13,
+      "y": [],
+      "yMotorNum": -1,
+      "z": [],
+      "zMotorNum": -1
     }
   },
 
@@ -61,18 +80,25 @@
       "x": [],
       "xMotorNum": 14,
       "y": [],
-      "yMotorNum": 15
+      "yMotorNum": 15,
+      "z": [],
+      "zMotorNum": -1
     },
     "R": {
       "x": [],
       "xMotorNum": 16,
       "y": [],
-      "yMotorNum": 17
+      "yMotorNum": 17,
+      "z": [],
+      "zMotorNum": -1
     }
   },
 
   "neck": {
-
+    "x": [],
+    "xMotorNum": -1,
+    "y": [],
+    "yMotorNum": -1,
     "z": [
       {
         "time": 0,

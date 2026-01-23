@@ -25,8 +25,8 @@ PROTO noonRobot [
   field SFFloat headSize 0.04 # [m]
   field SFFloat headMass 0.06 # [kg]
 
-  field SFFloat headMotorLimit 1 # [deg] the amount the head will be able to turn, in each direction (left and right) [rad]
-  field SFFloat headHardLimit 1.2 # [deg]
+  field SFFloat headMotorLimit 145 # [deg] the amount the head will be able to turn, in each direction (left and right) [rad]
+  field SFFloat headHardLimit 145 # [deg]
 
 
   # ----- ARM ------
