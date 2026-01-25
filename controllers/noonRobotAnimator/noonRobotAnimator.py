@@ -46,19 +46,21 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
     i : int = 0
     
     while i < len(axisKeyFrames):
-        if(axisKeyFrames[i]["time"] >= curTime):
+        if(axisKeyFrames[i]["time"] <= curTime):
             lastTime = axisKeyFrames[i]["time"]
             lastPos = axisKeyFrames[i]["pos"]
             lastTorque = axisKeyFrames[i]["torque"]
-            
+        
             nextTime = lastTime
             nextPos = lastPos
             nextTorque = lastTorque
+            
             
             if(i < len(axisKeyFrames) -1):
                 nextTime = axisKeyFrames[i+1]["time"]
                 nextPos = axisKeyFrames[i+1]["pos"]
                 nextTorque = axisKeyFrames[i+1]["torque"]
+
             
         i+=1
         
@@ -95,6 +97,7 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
 
 
 while robot.step(timestep) != -1:
+    curTime += timestep
     i : int = 0
     
     while i < symmetricList.__len__():
@@ -116,11 +119,11 @@ while robot.step(timestep) != -1:
     i = 0
         
     while i < asymmetricList.__len__():
-        if(keyframes[asymmetricList[i]]["x"] and keyframes[asymmetricList[i]]["xMotorNum"]):
+        if(keyframes[asymmetricList[i]]["xMotorNum"] != -1):
             stepAxis(keyframes[asymmetricList[i]]["xMotorNum"], keyframes[asymmetricList[i]]["x"])
-        if(keyframes[asymmetricList[i]]["y"] and keyframes[asymmetricList[i]]["yMotorNum"]):
+        if(keyframes[asymmetricList[i]]["yMotorNum"] != -1):
             stepAxis(keyframes[asymmetricList[i]]["yMotorNum"], keyframes[asymmetricList[i]]["y"])
-        if(keyframes[asymmetricList[i]]["z"] and keyframes[asymmetricList[i]]["zMotorNum"]):
+        if(keyframes[asymmetricList[i]]["zMotorNum"] != -1):
             stepAxis(keyframes[asymmetricList[i]]["zMotorNum"], keyframes[asymmetricList[i]]["z"])
         i+=1
     

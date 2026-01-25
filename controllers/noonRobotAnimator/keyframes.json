@@ -1,111 +1,154 @@
 {
   "shoulder": {
     "L": {
-      "x": [],
       "xMotorNum": -1,
-      "y": [],
       "yMotorNum": 0,
-      "z": [],
-      "zMotorNum": 1
+      "zMotorNum": 1,
+
+      "y": [
+
+
+      ],
+      "z": [
+
+      ]
     },
     "R": {
-      "x": [],
       "xMotorNum": -1,
-      "y": [],
-      "yMotorNum": 2,
-      "z": [],
-      "zMotorNum": 3
+      "yMotorNum": 9,
+      "zMotorNum": 10,
+
+      "y": [
+
+      ],
+      "z": [
+      ]
     }
   },
 
   "elbow": {
     "L": {
-      "x": [],
       "xMotorNum": -1,
-      "y": [],
-      "yMotorNum": 4,
-      "z": [],
-      "zMotorNum": -1
+      "yMotorNum": 2,
+      "zMotorNum": -1,
+
+      "y": [
+        {
+          "time": 1000,
+          "pos": 0,
+          "torque": 1
+        },
+        {
+          "time": 3000,
+          "pos": 1,
+          "torque": 1
+        },
+        {
+          "time": 5000,
+          "pos": 0,
+          "torque": 1
+        }
+      ]
     },
     "R": {
-      "x": [],
       "xMotorNum": -1,
-      "y": [],
-      "yMotorNum": 5,
-      "z": [],
-      "zMotorNum": -1
+      "yMotorNum": 11,
+      "zMotorNum": -1,
+
+      "y": [
+        {
+          "time": 1000,
+          "pos": 0,
+          "torque": 1
+        },
+        {
+          "time": 3000,
+          "pos": 1,
+          "torque": 1
+        },
+        {
+          "time": 5000,
+          "pos": 0,
+          "torque": 1
+        }
+      ]
     }
   },
 
   "hip": {
     "L": {
+      "xMotorNum": 3,
+      "yMotorNum": 4,
+      "zMotorNum": 5,
+
       "x": [],
-      "xMotorNum": 6,
       "y": [],
-      "yMotorNum": 7,
-      "z": [],
-      "zMotorNum": 8
+      "z": []
     },
     "R": {
+      "xMotorNum": 12,
+      "yMotorNum": 13,
+      "zMotorNum": 14,
+
       "x": [],
-      "xMotorNum": 9,
       "y": [],
-      "yMotorNum": 10,
-      "z": [],
-      "zMotorNum": 11
+      "z": []
     }
   },
 
   "knee": {
     "L": {
-      "x": [],
-      "xMotorNum": 12,
-      "y": [],
+      "xMotorNum": 6,
       "yMotorNum": -1,
-      "z": [],
-      "zMotorNum": -1
+      "zMotorNum": -1,
+
+      "x": []
     },
     "R": {
-      "x": [],
-      "xMotorNum": 13,
-      "y": [],
+      "xMotorNum": 15,
       "yMotorNum": -1,
-      "z": [],
-      "zMotorNum": -1
+      "zMotorNum": -1,
+
+      "x": []
     }
   },
 
   "ankle": {
     "L": {
-      "x": [],
-      "xMotorNum": 14,
-      "y": [],
-      "yMotorNum": 15,
-      "z": [],
-      "zMotorNum": -1
+      "xMotorNum": 7,
+      "yMotorNum": 8,
+      "zMotorNum": -1,
+
+      "x": [
+        {
+          "time": 1000,
+          "pos": 0.5,
+          "torque": 1
+        }
+      ],
+      "y": []
     },
     "R": {
-      "x": [],
       "xMotorNum": 16,
-      "y": [],
       "yMotorNum": 17,
-      "z": [],
-      "zMotorNum": -1
+      "zMotorNum": -1,
+
+      "x": [
+        {
+          "time": 1000,
+          "pos": 0.5,
+          "torque": 1
+        }
+      ],
+      "y": []
     }
   },
 
   "neck": {
-    "x": [],
     "xMotorNum": -1,
-    "y": [],
     "yMotorNum": -1,
-    "z": [
-      {
-        "time": 0,
-        "pos": 1,
-        "torque": 1
-      }
-    ],
-    "zMotorNum": 18
+    "zMotorNum": 18,
+
+    "z": []
   }
 }

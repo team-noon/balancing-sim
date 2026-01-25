@@ -15,7 +15,7 @@ joints = JointCollection(
             name="SHOULDER",
             axes=[
                 JointAxis(axis="Y", currentPos=False, minPos=-75, maxPos=75),
-                JointAxis(axis="Z", currentPos=False, minPos=-120, maxPos=120)
+                JointAxis(axis="Z", currentPos=False, minPos=-90, maxPos=90)
             ]
         ),
         Joint(
@@ -101,9 +101,7 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
             data.motor.setPosition(0.0)
             #data.motor.setVelocity(2.0)
             #data.motor.setAcceleration(2.0)
-            
-            data.minPos = axis.minPos
-            data.maxPos = axis.maxPos
+        
 
             motors.append(data)
     return motors

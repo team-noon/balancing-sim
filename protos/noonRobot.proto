@@ -275,9 +275,9 @@ PROTO noonRobot [
           children [
             DEF UpperArmShape Shape{
               geometry Cylinder{
+                subdivision IS cylinderSubdivision
                 height IS upperArmLength
                 radius IS armRadius
-                subdivision IS cylinderSubdivision
               }
               appearance USE MATERIAL
             }
