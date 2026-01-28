@@ -13,9 +13,24 @@ import json
 
 keyframes : dict
 
+def remove_json_comments(text: str) -> str:
+    lines = text.split("\n")
+
+    i = 0
+    while i < len(lines):
+        j = 0
+        while j < len(lines[i]) - 1:
+            if lines[i][j] == "/" and lines[i][j + 1] == "/":
+                lines[i] = lines[i][:j]
+                break
+            j += 1
+        i += 1
+
+    return "\n".join(lines)
+
 
 with open(os.path.join(controller_dir, "keyframes.json"), "r") as jsonfile:
-    data = json.loads(jsonfile.read())
+    data = json.loads(remove_json_comments(jsonfile.read()))
     keyframes = data
 
 robot = Supervisor()
@@ -65,6 +80,11 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
         i+=1
         
     curAction = 0
+    
+    if(nextPos < 0 or nextPos>1):
+        nextPos = motors[motorNumber].defaultPos
+    if(lastPos < 0 or lastPos>1):
+        lastPos = motors[motorNumber].defaultPos
         
     if nextTime == lastTime:
         curAction = nextPos

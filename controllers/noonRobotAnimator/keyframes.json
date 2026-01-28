@@ -1,154 +1,173 @@
 {
+  // ===================== SHOULDERS =====================
   "shoulder": {
+    // Left shoulder joint
     "L": {
-      "xMotorNum": -1,
-      "yMotorNum": 0,
-      "zMotorNum": 1,
-
+      "xMotorNum": -1, // X-axis motor (unused)
+      "yMotorNum": 0, // Y-axis motor ID
+      "zMotorNum": 1, // Z-axis motor ID
+      // Keyframes for Y-axis movement (left shoulder)
       "y": [
-
-
+        {
+          "time": 2000,
+          "pos": 0,
+          "torque": 1
+        }
       ],
+      // Keyframes for Z-axis movement (left shoulder)
       "z": [
-
+        {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+        {
+          "time": 4000,
+          "pos": 1,
+          "torque": 1
+        }
       ]
     },
+    // Right shoulder joint
     "R": {
-      "xMotorNum": -1,
-      "yMotorNum": 9,
-      "zMotorNum": 10,
-
+      "xMotorNum": -1, // X-axis motor (unused)
+      "yMotorNum": 9, // Y-axis motor ID
+      "zMotorNum": 10, // Z-axis motor ID
+      // Keyframes for Y-axis movement (right shoulder)
       "y": [
-
+        {
+          "time": 2000,
+          "pos": 0,
+          "torque": 1
+        }
       ],
+      // Keyframes for Z-axis movement (right shoulder)
       "z": [
+        {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+        {
+          "time": 4000,
+          "pos": 1,
+          "torque": 1
+        }
       ]
     }
   },
-
+  // ===================== ELBOWS =====================
   "elbow": {
+    // Left elbow joint
     "L": {
-      "xMotorNum": -1,
-      "yMotorNum": 2,
-      "zMotorNum": -1,
-
-      "y": [
-        {
-          "time": 1000,
-          "pos": 0,
-          "torque": 1
-        },
-        {
-          "time": 3000,
-          "pos": 1,
-          "torque": 1
-        },
-        {
-          "time": 5000,
-          "pos": 0,
-          "torque": 1
-        }
-      ]
+      "xMotorNum": -1, // X-axis motor (unused)
+      "yMotorNum": -1, // Y-axis motor ID
+      "zMotorNum": 2, // Z-axis motor (unused)
+      // Keyframes for Y-axis movement (left elbow)
+      "z": []
     },
+    // Right elbow joint
     "R": {
-      "xMotorNum": -1,
-      "yMotorNum": 11,
-      "zMotorNum": -1,
-
-      "y": [
-        {
-          "time": 1000,
-          "pos": 0,
-          "torque": 1
-        },
-        {
-          "time": 3000,
-          "pos": 1,
-          "torque": 1
-        },
-        {
-          "time": 5000,
-          "pos": 0,
-          "torque": 1
-        }
-      ]
+      "xMotorNum": -1, // X-axis motor (unused)
+      "yMotorNum": -1, // Y-axis motor ID
+      "zMotorNum": 11, // Z-axis motor (unused)
+      // Keyframes for Y-axis movement (right elbow)
+      "z": []
     }
   },
-
+  // ===================== HIPS =====================
   "hip": {
+    // Left hip joint
     "L": {
-      "xMotorNum": 3,
-      "yMotorNum": 4,
-      "zMotorNum": 5,
-
+      "xMotorNum": 3, // X-axis motor ID
+      "yMotorNum": 4, // Y-axis motor ID
+      "zMotorNum": 5, // Z-axis motor ID
+      // Keyframes for hip movement (left)
       "x": [],
       "y": [],
       "z": []
     },
+    // Right hip joint
     "R": {
-      "xMotorNum": 12,
-      "yMotorNum": 13,
-      "zMotorNum": 14,
-
+      "xMotorNum": 12, // X-axis motor ID
+      "yMotorNum": 13, // Y-axis motor ID
+      "zMotorNum": 14, // Z-axis motor ID
+      // Keyframes for hip movement (right)
       "x": [],
       "y": [],
       "z": []
     }
   },
-
+  // ===================== KNEES =====================
   "knee": {
+    // Left knee joint
     "L": {
-      "xMotorNum": 6,
-      "yMotorNum": -1,
-      "zMotorNum": -1,
-
+      "xMotorNum": 6, // X-axis motor ID
+      "yMotorNum": -1, // Y-axis motor (unused)
+      "zMotorNum": -1, // Z-axis motor (unused)
+      // Keyframes for knee movement (left)
       "x": []
     },
+    // Right knee joint
     "R": {
-      "xMotorNum": 15,
-      "yMotorNum": -1,
-      "zMotorNum": -1,
-
+      "xMotorNum": 15, // X-axis motor ID
+      "yMotorNum": -1, // Y-axis motor (unused)
+      "zMotorNum": -1, // Z-axis motor (unused)
+      // Keyframes for knee movement (right)
       "x": []
     }
   },
-
+  // ===================== ANKLES =====================
   "ankle": {
+    // Left ankle joint
     "L": {
-      "xMotorNum": 7,
-      "yMotorNum": 8,
-      "zMotorNum": -1,
-
+      "xMotorNum": 7, // X-axis motor ID
+      "yMotorNum": 8, // Y-axis motor ID
+      "zMotorNum": -1, // Z-axis motor (unused)
+      // Keyframes for X-axis movement (left ankle)
       "x": [
         {
           "time": 1000,
-          "pos": 0.5,
+          "pos": 1,
+          "torque": 1
+        },
+        {
+          "time": 2000,
+          "pos": -1,
           "torque": 1
         }
       ],
+      // Keyframes for Y-axis movement (left ankle)
       "y": []
     },
+    // Right ankle joint
     "R": {
-      "xMotorNum": 16,
-      "yMotorNum": 17,
-      "zMotorNum": -1,
-
+      "xMotorNum": 16, // X-axis motor ID
+      "yMotorNum": 17, // Y-axis motor ID
+      "zMotorNum": -1, // Z-axis motor (unused)
+      // Keyframes for X-axis movement (right ankle)
       "x": [
         {
           "time": 1000,
-          "pos": 0.5,
+          "pos": 1,
+          "torque": 1
+        },
+        {
+          "time": 2000,
+          "pos": -1,
           "torque": 1
         }
       ],
+      // Keyframes for Y-axis movement (right ankle)
       "y": []
     }
   },
-
+  // ===================== NECK =====================
   "neck": {
-    "xMotorNum": -1,
-    "yMotorNum": -1,
-    "zMotorNum": 18,
-
+    "xMotorNum": -1, // X-axis motor (unused)
+    "yMotorNum": -1, // Y-axis motor (unused)
+    "zMotorNum": 18, // Z-axis motor ID
+    // Keyframes for neck rotation (Z-axis)
     "z": []
   }
 }

@@ -296,7 +296,7 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
-                axis 0 -1 0
+                axis 1 0 0
 
                 minStop %<=`${fields.elbowYHardLimits.value.x}`>%
                 maxStop %<=`${fields.elbowYHardLimits.value.y}`>%
@@ -304,14 +304,14 @@ PROTO noonRobot [
 
               device[
                 RotationalMotor{
-                  name "RM_Y_LEFT_ELBOW"
+                  name "RM_Z_LEFT_ELBOW"
                   maxTorque IS ServoMaxTorque
 
                   minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
                 }
                 PositionSensor{
-                  name "PS_Y_LEFT_ELBOW"
+                  name "PS_Z_LEFT_ELBOW"
                 }
               ]
               
@@ -391,7 +391,7 @@ PROTO noonRobot [
       Hinge2Joint{
         jointParameters HingeJointParameters{
           anchor %<= `${-(-fields.bodySize.value.x / 2)} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
-          axis 0 1 0
+          axis 0 -1 0
 
           minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
           maxStop %<=`${fields.shoulderYHardLimits.value.y}`>%
@@ -454,7 +454,7 @@ PROTO noonRobot [
             HingeJoint{
               jointParameters HingeJointParameters{
                 anchor %<= `0 0 ${-fields.upperArmLength.value / 2 }` >%
-                axis 0 1 0
+                axis 1 0 0
 
                 minStop %<=`${fields.elbowYHardLimits.value.x}`>%
                 maxStop %<=`${fields.elbowYHardLimits.value.y}`>%
@@ -462,14 +462,14 @@ PROTO noonRobot [
 
               device[
                 RotationalMotor{
-                  name "RM_Y_RIGHT_ELBOW"
+                  name "RM_Z_RIGHT_ELBOW"
                   maxTorque IS ServoMaxTorque
 
                   minPosition %<=`${fields.elbowYMotorLimits.value.x}`>%
                   maxPosition %<=`${fields.elbowYMotorLimits.value.y}`>%
                 }
                 PositionSensor{
-                  name "PS_Y_RIGHT_ELBOW"
+                  name "PS_Z_RIGHT_ELBOW"
                 }
               ]
               
@@ -542,7 +542,7 @@ PROTO noonRobot [
         }
 
         jointParameters2 JointParameters{
-          axis 0 1 0
+          axis 1 0 0
           minStop %<=`${fields.hipYHardLimits.value.x}`>%
           maxStop %<=`${fields.hipYHardLimits.value.y}`>%
         }
@@ -755,13 +755,13 @@ PROTO noonRobot [
         }
 
         jointParameters2 JointParameters{
-          axis 0 1 0
+          axis -1 0 0
           minStop %<=`${fields.hipYHardLimits.value.x}`>%
           maxStop %<=`${fields.hipYHardLimits.value.y}`>%
         }
 
         jointParameters3 JointParameters{
-          axis 0 0 1
+          axis 0 0 -1
           minStop %<=`${fields.hipZHardLimits.value.x}`>%
           maxStop %<=`${fields.hipZHardLimits.value.y}`>%
         }

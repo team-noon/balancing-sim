@@ -15,13 +15,13 @@ joints = JointCollection(
             name="SHOULDER",
             axes=[
                 JointAxis(axis="Y", currentPos=False, minPos=-75, maxPos=75),
-                JointAxis(axis="Z", currentPos=False, minPos=-90, maxPos=90)
+                JointAxis(axis="Z", currentPos=False, minPos=-75, maxPos=75)
             ]
         ),
         Joint(
             name="ELBOW",
             axes=[
-                JointAxis(axis="Y", currentPos=False, minPos=-5, maxPos=150)
+                JointAxis(axis="Z", currentPos=False, minPos=-5, maxPos=150)
             ]
         ),
         Joint(
@@ -29,7 +29,7 @@ joints = JointCollection(
             axes=[
                 JointAxis(axis="X", currentPos=True, minPos=-30 , maxPos=120),
                 JointAxis(axis="Y", currentPos=False,minPos=-45 , maxPos=45),
-                JointAxis(axis="Z", currentPos=False,minPos=-90 , maxPos=90)
+                JointAxis(axis="Z", currentPos=False,minPos=-20 , maxPos=20)
             ]
         ),
         Joint(
