@@ -42,6 +42,8 @@ class JointAxis:
     minPos : float
     maxPos : float
 
+    isHipXAxis : bool = False
+
 @dataclass
 class Joint:
     name: str

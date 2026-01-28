@@ -17,12 +17,12 @@
       // Keyframes for Z-axis movement (left shoulder)
       "z": [
         {
-          "time": 2000,
+          "time": 4000,
           "pos": -1,
           "torque": 1
         },
-        {
-          "time": 4000,
+                {
+          "time": 6000,
           "pos": 1,
           "torque": 1
         }
@@ -44,12 +44,12 @@
       // Keyframes for Z-axis movement (right shoulder)
       "z": [
         {
-          "time": 2000,
+          "time": 4000,
           "pos": -1,
           "torque": 1
         },
-        {
-          "time": 4000,
+                {
+          "time": 6000,
           "pos": 1,
           "torque": 1
         }
@@ -83,7 +83,19 @@
       "yMotorNum": 4, // Y-axis motor ID
       "zMotorNum": 5, // Z-axis motor ID
       // Keyframes for hip movement (left)
-      "x": [],
+      "x": [
+                                {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+        
+                        {
+          "time": 4000,
+          "pos": 0,
+          "torque": 1
+        }
+      ],
       "y": [],
       "z": []
     },
@@ -93,7 +105,19 @@
       "yMotorNum": 13, // Y-axis motor ID
       "zMotorNum": 14, // Z-axis motor ID
       // Keyframes for hip movement (right)
-      "x": [],
+      "x": [
+                                {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+        
+                        {
+          "time": 4000,
+          "pos": 0,
+          "torque": 1
+        }
+      ],
       "y": [],
       "z": []
     }
@@ -106,7 +130,18 @@
       "yMotorNum": -1, // Y-axis motor (unused)
       "zMotorNum": -1, // Z-axis motor (unused)
       // Keyframes for knee movement (left)
-      "x": []
+      "x": [
+                {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+                        {
+          "time": 4000,
+          "pos": 0.4,
+          "torque": 1
+        }
+      ]
     },
     // Right knee joint
     "R": {
@@ -114,7 +149,19 @@
       "yMotorNum": -1, // Y-axis motor (unused)
       "zMotorNum": -1, // Z-axis motor (unused)
       // Keyframes for knee movement (right)
-      "x": []
+      "x": [
+                        {
+          "time": 2000,
+          "pos": -1,
+          "torque": 1
+        },
+        
+                        {
+          "time": 4000,
+          "pos": 0.4,
+          "torque": 1
+        }
+      ]
     }
   },
   // ===================== ANKLES =====================

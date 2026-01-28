@@ -865,7 +865,7 @@ PROTO noonRobot [
                     }
 
                     jointParameters2 JointParameters{
-                      axis 0 1 0
+                      axis 0 -1 0
                       minStop %<=`${fields.footYHardLimits.value.x}`>%
                       maxStop %<=`${fields.footYHardLimits.value.y}`>%
                     }

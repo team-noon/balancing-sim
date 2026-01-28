@@ -27,7 +27,7 @@ joints = JointCollection(
         Joint(
             name="HIP",
             axes=[
-                JointAxis(axis="X", currentPos=True, minPos=-30 , maxPos=120),
+                JointAxis(axis="X", currentPos=True, minPos=-90 , maxPos=125, isHipXAxis=True),
                 JointAxis(axis="Y", currentPos=False,minPos=-45 , maxPos=45),
                 JointAxis(axis="Z", currentPos=False,minPos=-20 , maxPos=20)
             ]
@@ -60,6 +60,8 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
         for joint in joints.symmetric:
             for axis in joint.axes:
                 motor_name = f"RM_{axis.axis}_{direction}_{joint.name}"
+                
+                    
                 data = MotorData(
                     motor=Motor(motor_name),
                     currentPos=axis.currentPos,
@@ -67,6 +69,12 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                     minPos=axis.minPos * (3.14159265359/180),
                     defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)
                 )
+                
+                if(axis.isHipXAxis and direction == "LEFT"):
+                    data.maxPos=axis.minPos * (3.14159265359/180)
+                    data.minPos=axis.maxPos * (3.14159265359/180)
+                    data.defaultPos=(-1*(axis.maxPos))/(axis.minPos-axis.maxPos)
+                    
 
                 if axis.currentPos:
                     pos_sens_name = f"PS_{axis.axis}_{direction}_{joint.name}"
