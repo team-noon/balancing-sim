@@ -1,0 +1,173 @@
+{
+  // ===== SHOULDERS =====
+  "shoulder": {
+    // Left shoulder
+    "L": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": 0,  // y
+      "zMotorNum": 1,  // z
+
+      // left shoulder - y axis
+      "y": [
+              {
+          "time" : 1000,
+          "pos": 0
+        }],
+
+      // left shoulder - z axis
+      "z": []
+    },
+
+    // Right shoulder
+    "R": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": 9,  // y
+      "zMotorNum": 10, // z
+
+      // right shoulder - y axis
+      "y": [{
+          "time" : 1000,
+          "pos": 0
+        }],
+
+      // right shoulder - z axis
+      "z": []
+    }
+  },
+
+  // ===== ELBOWS =====
+  "elbow": {
+    // Left elbow
+    "L": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": 2,  // z
+
+      // left elbow - z axis
+      "z": []
+    },
+
+    // Right elbow
+    "R": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": 11, // z
+
+      // right elbow - z axis
+      "z": []
+    }
+  },
+
+  // ===== HIPS =====
+  "hip": {
+    // Left hip
+    "L": {
+      "xMotorNum": 3, // x
+      "yMotorNum": 4, // y
+      "zMotorNum": 5, // z
+
+      // left hip - x axis
+      "x": [],
+
+      // left hip - y axis
+      "y": [],
+
+      // left hip - z axis
+      "z": []
+    },
+
+    // Right hip
+    "R": {
+      "xMotorNum": 12, // x
+      "yMotorNum": 13, // y
+      "zMotorNum": 14, // z
+
+      // right hip - x axis
+      "x": [],
+
+      // right hip - y axis
+      "y": [],
+
+      // right hip - z axis
+      "z": []
+    }
+  },
+
+  // ===== KNEES =====
+  "knee": {
+    // Left knee
+    "L": {
+      "xMotorNum": 6,  // x
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": -1, // UNUSED
+
+      // left knee - x axis
+      "x": []
+    },
+
+    // Right knee
+    "R": {
+      "xMotorNum": 15, // x
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": -1, // UNUSED
+
+      // right knee - x axis
+      "x": []
+    }
+  },
+
+  // ===== ANKLES =====
+  "ankle": {
+    // Left ankle
+    "L": {
+      "xMotorNum": 7,  // x
+      "yMotorNum": 8,  // y
+      "zMotorNum": -1, // UNUSED
+
+      // left ankle - x axis
+      "x": [        {
+          "time" : 500,
+          "pos": 0
+        },
+              {
+          "time" : 1000,
+          "pos": -1
+        }],
+
+      // left ankle - y axis
+      "y": []
+    },
+
+    // Right ankle
+    "R": {
+      "xMotorNum": 16, // x
+      "yMotorNum": 17, // y
+      "zMotorNum": -1, // UNUSED
+
+      // right ankle - x axis
+      "x": [
+                {
+          "time" : 500,
+          "pos": 0
+        },
+              {
+          "time" : 1000,
+          "pos": -1
+        }
+      ],
+
+      // right ankle - y axis
+      "y": []
+    }
+  },
+
+  // ===== NECK =====
+  "neck": {
+    "xMotorNum": -1, // UNUSED
+    "yMotorNum": -1, // UNUSED
+    "zMotorNum": 18, // z
+
+    // neck - z axis
+    "z": []
+  }
+}

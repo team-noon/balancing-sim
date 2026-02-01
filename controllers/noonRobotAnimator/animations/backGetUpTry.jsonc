@@ -1,0 +1,371 @@
+{
+  // ===== SHOULDERS =====
+  "shoulder": {
+    // Left shoulder
+    "L": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": 0,  // y
+      "zMotorNum": 1,  // z
+
+      // left shoulder - y axis
+      "y": [
+        {
+          "time": 1000,
+          "pos": 0
+        },
+        {
+          "time": 3000,
+          "pos": 0
+        },
+        {
+          "time": 4000,
+          "pos": 0.5
+        },
+        {
+          "time": 5500,
+          "pos": 0.5
+        },
+        {
+          "time": 6000,
+          "pos": 0.1
+        },
+        {
+          "time": 6500,
+          "pos": -1
+        }
+      ],
+
+      // left shoulder - z axis
+      "z": [
+        {
+          "time": 2000,
+          "pos": -1
+        },
+        {
+          "time": 3000,
+          "pos": 0
+        },
+        {
+          "time": 5500,
+          "pos": 0
+        },
+        {
+          "time": 6000,
+          "pos": 0.3
+        },
+        {
+          "time": 6500,
+          "pos": 1
+        }
+      ]
+    },
+
+    // Right shoulder
+    "R": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": 9,  // y
+      "zMotorNum": 10, // z
+
+      // right shoulder - y axis
+      "y": [
+        {
+          "time": 1000,
+          "pos": 0
+        },
+        {
+          "time": 3000,
+          "pos": 0
+        },
+        {
+          "time": 4000,
+          "pos": 0.5
+        },
+        {
+          "time": 5500,
+          "pos": 0.5
+        },
+        {
+          "time": 6000,
+          "pos": 0.1
+        },
+        {
+          "time": 6500,
+          "pos": -1
+        }
+      ],
+
+      // right shoulder - z axis
+      "z": [
+        {
+          "time": 2000,
+          "pos": -1
+        },
+        {
+          "time": 3000,
+          "pos": 0
+        },
+        {
+          "time": 5500,
+          "pos": 0
+        },
+        {
+          "time": 6000,
+          "pos": 0.3
+        },
+        {
+          "time": 6500,
+          "pos": 1
+        }
+      ]
+    }
+  },
+
+  // ===== ELBOWS =====
+  "elbow": {
+    // Left elbow
+    "L": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": 2,  // z
+
+      // left elbow - z axis
+      "z": [
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.6
+        },
+        {
+          "time": 4000,
+          "pos": 0.6
+        },
+        {
+          "time": 5000,
+          "pos": -1
+        }
+      ]
+    },
+
+    // Right elbow
+    "R": {
+      "xMotorNum": -1, // UNUSED
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": 11, // z
+
+      // right elbow - z axis
+      "z": [
+                {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.6
+        },
+        {
+          "time": 4000,
+          "pos": 0.6
+        },
+        {
+          "time": 5000,
+          "pos": -1
+        }
+      ]
+    }
+  },
+
+  // ===== HIPS =====
+  "hip": {
+    // Left hip
+    "L": {
+      "xMotorNum": 3, // x
+      "yMotorNum": 4, // y
+      "zMotorNum": 5, // z
+
+      // left hip - x axis
+      "x": [
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.15
+        },
+        {
+          "time": 5000,
+          "pos": 0.15
+        },
+        {
+          "time": 5000,
+          "pos": 0
+        }
+      ],
+
+      // left hip - y axis
+      "y": [],
+
+      // left hip - z axis
+      "z": []
+    },
+
+    // Right hip
+    "R": {
+      "xMotorNum": 12, // x
+      "yMotorNum": 13, // y
+      "zMotorNum": 14, // z
+
+      // right hip - x axis
+      "x": [
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.15
+        },
+        {
+          "time": 5000,
+          "pos": 0.15
+        },
+        {
+          "time": 5000,
+          "pos": 0
+        }
+      ],
+
+      // right hip - y axis
+      "y": [],
+
+      // right hip - z axis
+      "z": []
+    }
+  },
+
+  // ===== KNEES =====
+  "knee": {
+    // Left knee
+    "L": {
+      "xMotorNum": 6,  // x
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": -1, // UNUSED
+
+      // left knee - x axis
+      "x": [
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.0
+        }
+      ]
+    },
+
+    // Right knee
+    "R": {
+      "xMotorNum": 15, // x
+      "yMotorNum": -1, // UNUSED
+      "zMotorNum": -1, // UNUSED
+
+      // right knee - x axis
+      "x": [
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        {
+          "time": 2000,
+          "pos": 0.0
+        },
+        {
+          "time": 6000,
+          "pos": 0
+        }
+      ]
+    }
+  },
+
+  // ===== ANKLES =====
+  "ankle": {
+    // Left ankle
+    "L": {
+      "xMotorNum": 7,  // x
+      "yMotorNum": 8,  // y
+      "zMotorNum": -1, // UNUSED
+
+      // left ankle - x axis
+      "x": [
+        {
+          "time": 500,
+          "pos": 0
+        },
+        {
+          "time": 1000,
+          "pos": -1
+        },
+        
+        {
+          "time": 2000,
+          "pos": 0
+        },
+        {
+          "time": 5000,
+          "pos": 0.2
+        },
+        {
+          "time": 5500,
+          "pos": 0
+        }
+      ],
+
+      // left ankle - y axis
+      "y": []
+    },
+
+    // Right ankle
+    "R": {
+      "xMotorNum": 16, // x
+      "yMotorNum": 17, // y
+      "zMotorNum": -1, // UNUSED
+
+      // right ankle - x axis
+      "x": [
+
+        
+        {
+          "time": 2000,
+          "pos": 0
+        },
+        {
+          "time": 5000,
+          "pos": 0.2
+        },
+        {
+          "time": 5500,
+          "pos": 0
+        }
+        
+        
+      ],
+
+      // right ankle - y axis
+      "y": []
+    }
+  },
+
+  // ===== NECK =====
+  "neck": {
+    "xMotorNum": -1, // UNUSED
+    "yMotorNum": -1, // UNUSED
+    "zMotorNum": 18, // z
+
+    // neck - z axis
+    "z": []
+  }
+}

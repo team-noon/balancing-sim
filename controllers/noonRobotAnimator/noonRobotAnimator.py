@@ -29,7 +29,7 @@ def remove_json_comments(text: str) -> str:
     return "\n".join(lines)
 
 
-with open(os.path.join(controller_dir, "keyframes.json"), "r") as jsonfile:
+with open(os.path.join(controller_dir, "keyframes.jsonc"), "r") as jsonfile:
     data = json.loads(remove_json_comments(jsonfile.read()))
     keyframes = data
 
@@ -44,6 +44,13 @@ asymmetricList = ["neck"]
 
 curTime : int =0
 
+def evalTorque(axis: dict):
+    torque = axis.get("torque", 1)
+    if 0 <= torque <= 1:
+        return torque
+    else:
+        return 1
+
 def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
     lastTime :int = 0
     lastPos : float= motors[motorNumber].defaultPos
@@ -56,7 +63,7 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
     if(len(axisKeyFrames) > 0):
         nextTime = axisKeyFrames[0]["time"]
         nextPos = axisKeyFrames[0]["pos"]
-        nextTorque = axisKeyFrames[0]["torque"]
+        nextTorque = evalTorque(axisKeyFrames[0])
     
     i : int = 0
     
@@ -64,7 +71,7 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
         if(axisKeyFrames[i]["time"] <= curTime):
             lastTime = axisKeyFrames[i]["time"]
             lastPos = axisKeyFrames[i]["pos"]
-            lastTorque = axisKeyFrames[i]["torque"]
+            lastTorque = evalTorque(axisKeyFrames[i])
         
             nextTime = lastTime
             nextPos = lastPos
@@ -74,7 +81,7 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
             if(i < len(axisKeyFrames) -1):
                 nextTime = axisKeyFrames[i+1]["time"]
                 nextPos = axisKeyFrames[i+1]["pos"]
-                nextTorque = axisKeyFrames[i+1]["torque"]
+                nextTorque = evalTorque(axisKeyFrames[i+1])
 
             
         i+=1

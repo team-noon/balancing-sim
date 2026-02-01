@@ -19,7 +19,7 @@ PROTO noonRobot [
 
   # ----- BODY ------
   field SFVec3f bodySize 0.15 0.06 0.25 # [m, m, m]
-  field SFFloat bodyMass 0.456 # [kg]
+  field SFFloat bodyMass 0.5 # [kg]
   
   # ----- HEAD ------
   field SFFloat headSize 0.04 # [m]
@@ -33,10 +33,10 @@ PROTO noonRobot [
   field SFFloat armRadius 0.01 # [m]
 
   field SFFloat upperArmLength 0.121 # [m]
-  field SFFloat upperArmMass 0.028 # [kg] 
+  field SFFloat upperArmMass 0.03 # [kg] 
 
   field SFFloat lowerArmLength 0.1515 # [m]
-  field SFFloat lowerArmMass 0.014 # [kg] 
+  field SFFloat lowerArmMass 0.02 # [kg] 
 
   field SFFloat handRadius 0.015 # [m]
   field SFFloat handMass 0.01 # [kg]
@@ -61,15 +61,15 @@ PROTO noonRobot [
   field SFFloat legRadius 0.015 # [m]
 
   field SFFloat upperLegLength 0.105 # [m]
-  field SFFloat upperLegMass 0.05 # [kg]
+  field SFFloat upperLegMass 0.07 # [kg]
 
   field SFFloat lowerLegLength 0.18 # [m]
-  field SFFloat lowerLegMass 0.04 # [kg]
+  field SFFloat lowerLegMass 0.05 # [kg]
 
   field SFFloat footLength 0.1 # [m]
   field SFFloat footWidth 0.07 # [m]
   field SFFloat footHeight 0.02 # [m]
-  field SFFloat footMass 0.02 # [kg]
+  field SFFloat footMass 0.06 # [kg]
   field SFFloat footOffset 0.01 # [m] basically how in the foot (rectangle is) 0 is the legradius and anything more just pushes it more in (SAME AS THE OTHER 2 OFFSETS MAN)
 
   field SFFloat legOffset 0.02 # [m] offset from the side of the body, basically how in the legs are modeled to be, 0 is basically equal to the legRadius and it just add to that (same as the fucking arm offset i dont know why i am over explaining things (i will only ever be the only person reading this, if im not then this is my way of sending a message: SOMEONE END MY SUFFERING))

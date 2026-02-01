@@ -27,7 +27,7 @@ joints = JointCollection(
         Joint(
             name="HIP",
             axes=[
-                JointAxis(axis="X", currentPos=True, minPos=-90 , maxPos=125, isHipXAxis=True),
+                JointAxis(axis="X", currentPos=True, minPos=-125 , maxPos=125, isHipXAxis=True),
                 JointAxis(axis="Y", currentPos=False,minPos=-45 , maxPos=45),
                 JointAxis(axis="Z", currentPos=False,minPos=-20 , maxPos=20)
             ]

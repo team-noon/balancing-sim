@@ -13,16 +13,22 @@ DEF WorldInfo WorldInfo {
   contactProperties [
     ContactProperties {
       material2 "floor"
-      frictionRotation 0.05 0.05
-      rollingFriction 0.05 0.05 0.05
+      coulombFriction [
+        0.1
+      ]
+      frictionRotation 0.01 0.01
+      rollingFriction 0.01 0.01 0.01
       bounce 0
       bounceVelocity 0
+      forceDependentSlip [
+        0.2
+      ]
     }
   ]
 }
 Viewpoint {
   orientation 0.12787361201113046 0.14181193443643453 -0.9815995693777699 1.50360476832192
-  position -0.9584661233152961 12.872558957560507 3.1412184819496085
+  position -0.5820072762877054 8.475077378833792 1.959752940496758
 }
 RectangleArena {
   contactMaterial "floor"
@@ -35,4 +41,5 @@ TexturedBackground {
 }
 noonRobot {
   controller "noonRobotAnimator"
+  cylinderSubdivision 16
 }
