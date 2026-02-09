@@ -64,7 +64,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             webots_proc = subprocess.Popen(webots_cmd)
 
 
-            ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/controllers/noonRobotTrainer/noonRobotTrainer.py", f"{int(rank / numRobotsInEnv)}", f"{numRobotsInEnv}", f"{Debug}"]  
+            ctrl_cmd = [f"{os.environ['WEBOTS_HOME']}/webots-controller", f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/controllers/trainer/trainer.py", f"{int(rank / numRobotsInEnv)}", f"{numRobotsInEnv}", f"{Debug}"]  
             controller_proc = subprocess.Popen(ctrl_cmd)
             subProcesses.append(webots_proc)
             subProcesses.append(controller_proc)

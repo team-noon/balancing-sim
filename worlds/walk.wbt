@@ -40,6 +40,6 @@ TexturedBackgroundLight {
 TexturedBackground {
 }
 noonRobot {
-  controller "animator"
+  controller "walker"
   cylinderSubdivision 16
 }

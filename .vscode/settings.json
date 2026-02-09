@@ -15,7 +15,9 @@
         "controllers/noonRobotControllerTest": true,
         "**/__pycache__": true,
         "**/*.wbproj": true,
-        ".gitignore": true
+        ".gitignore": true,
+        "models": true,
+        "**/*.jpg": true
     },
     "explorerExclude.backup": {}
 
