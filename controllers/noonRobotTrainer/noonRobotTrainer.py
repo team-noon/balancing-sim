@@ -105,8 +105,12 @@ inertialUnit.enable(timestep)
 
 turnRate = 0
 walkSpeed = 0
+    
+lastObs: list[float] = []
+lastLastObs : list[float]= []
             
 def getObservationSpace() -> np.ndarray:
+    global lastObs, lastLastObs, turnRate, walkSpeed
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -114,9 +118,19 @@ def getObservationSpace() -> np.ndarray:
         else:
             ret.append(motor.motor.getTargetPosition())
     
+    
+    
     ret.extend(gyro.getValues())
     ret.extend(accelerometer.getValues())
     ret.extend(inertialUnit.getRollPitchYaw())
+    
+    tObs = ret.copy()
+    
+    ret.extend(lastObs)
+    ret.extend(lastLastObs)
+    
+    lastLastObs = lastObs.copy()
+    lastObs= tObs.copy()
     
     ret.extend([turnRate, walkSpeed])
     return np.asarray(ret, dtype=np.float32)
@@ -266,7 +280,7 @@ if(robotSelf.getField("inference").getSFBool()):
 
     env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
-    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np.float32)
+    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(101,), dtype=np.float32)
     env.reset = reset
     env.step = step
     
@@ -335,7 +349,7 @@ from collections import defaultdict
 
 
 
-obs_buffer = np.empty(29, dtype=np.float32)
+obs_buffer = np.empty(101, dtype=np.float32)
 action_buffer = np.empty(18, dtype=np.float32)
 
 obs_buffer, info = reset()

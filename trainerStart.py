@@ -54,9 +54,6 @@ if __name__ == "__main__":
     HOST = "127.0.0.1"
     BASEPORT = 9876
 
-
-    observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(29,), dtype=np. float32)
-
     manager = Manager()
     sockets : list[socket.socket] = manager.list()
     
@@ -107,7 +104,7 @@ if __name__ == "__main__":
     
     
     policy_kwargs = dict(
-        net_arch=dict(pi=[64, 64], vf=[128, 64]),
+        net_arch=dict(pi=[128, 128, 128], vf=[128, 128, 128]),
         activation_fn=torch.nn.LeakyReLU
     )
     
