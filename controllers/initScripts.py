@@ -21,7 +21,7 @@ joints = JointCollection(
         Joint(
             name="ELBOW",
             axes=[
-                JointAxis(axis="Z", currentPos=False, minPos=-5, maxPos=150)
+                JointAxis(axis="Z", currentPos=False, minPos=-150, maxPos=150)
             ]
         ),
         Joint(
@@ -35,7 +35,7 @@ joints = JointCollection(
         Joint(
             name="KNEE",
             axes=[
-                JointAxis(axis="X", currentPos=True, minPos=-130, maxPos=5)
+                JointAxis(axis="X", currentPos=True, minPos=-130, maxPos=130)
             ]
         ),
         Joint(

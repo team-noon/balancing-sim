@@ -29,22 +29,28 @@ walkSpeed = 0.1
 HipXMotorNum = 3
 
 HipXPhase  = 0
-HipXWeight = 0.2
+HipXWeight = 1
 HipXOffset = 0.5
+HipMin = 0.2
+HipMax = 0.8
 
 
 KneeXMotorNum = 6
 
 KneeXPhase  = pi / 2
-KneeXWeight = 0.2
-KneeXOffset = 0.8
+KneeXWeight = 1
+KneeXOffset = 0.5
+KneeMin = 0.3
+KneeMax = 0.7
 
 
 AnkleXMotornum = 7
 
 AnkleXPhase  = pi
-AnkleXWeight = 0.4
+AnkleXWeight = 1
 AnkleXOffset = 0.5
+AnkleMin=0.3
+AnkleMax=0.7
 
 
 curTime : int =0
@@ -52,20 +58,18 @@ curTime : int =0
 while robot.step(timestep) != -1:
     curTime += timestep
     
-    motors[HipXMotorNum].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + HipXPhase)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum].maxPos) - (motors[HipXMotorNum].minPos))) + motors[HipXMotorNum].minPos)
+    motors[HipXMotorNum].motor.setPosition((min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum].maxPos) - (motors[HipXMotorNum].minPos))) + motors[HipXMotorNum].minPos)
     
-    motors[HipXMotorNum + 9].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + HipXPhase + pi)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum+9].maxPos) - (motors[HipXMotorNum+9].minPos))) + motors[HipXMotorNum+9].minPos)
+    motors[HipXMotorNum + 9].motor.setPosition((min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase + pi)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum+9].maxPos) - (motors[HipXMotorNum+9].minPos))) + motors[HipXMotorNum+9].minPos)
     
-    motors[KneeXMotorNum].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + KneeXPhase)*KneeXWeight + KneeXOffset)) * ((motors[KneeXMotorNum].maxPos) - (motors[KneeXMotorNum].minPos))) + motors[KneeXMotorNum].minPos)
+    motors[KneeXMotorNum].motor.setPosition((min(KneeMax, max(KneeMin, sin((curTime/1000)*walkSpeed + KneeXPhase)*KneeXWeight + KneeXOffset)) * ((motors[KneeXMotorNum].maxPos) - (motors[KneeXMotorNum].minPos))) + motors[KneeXMotorNum].minPos)
     
-    motors[KneeXMotorNum + 9].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + KneeXPhase + pi)*KneeXWeight + KneeXOffset)) * ((motors[KneeXMotorNum+9].maxPos) - (motors[KneeXMotorNum+9].minPos))) + motors[KneeXMotorNum+9].minPos)
+    motors[KneeXMotorNum + 9].motor.setPosition((min(KneeMax, max(KneeMin, sin((curTime/1000)*walkSpeed + KneeXPhase + pi)*KneeXWeight + KneeXOffset)) * ((motors[KneeXMotorNum+9].maxPos) - (motors[KneeXMotorNum+9].minPos))) + motors[KneeXMotorNum+9].minPos)
     
-    motors[AnkleXMotornum].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + AnkleXPhase)*AnkleXWeight + AnkleXOffset)) * ((motors[AnkleXMotornum].maxPos) - (motors[AnkleXMotornum].minPos))) + motors[AnkleXMotornum].minPos)
+    motors[AnkleXMotornum].motor.setPosition((min(AnkleMax, max(AnkleMin, sin((curTime/1000)*walkSpeed + AnkleXPhase)*AnkleXWeight + AnkleXOffset)) * ((motors[AnkleXMotornum].maxPos) - (motors[AnkleXMotornum].minPos))) + motors[AnkleXMotornum].minPos)
     
-    motors[AnkleXMotornum + 9].motor.setPosition((min(1, max(0, sin((curTime/1000)*walkSpeed + AnkleXPhase + pi)*AnkleXWeight + AnkleXOffset)) * ((motors[AnkleXMotornum+9].maxPos) - (motors[AnkleXMotornum+9].minPos))) + motors[AnkleXMotornum+9].minPos)
-    
-    
-    i : int = 0
+    motors[AnkleXMotornum + 9].motor.setPosition((min(AnkleMax, max(AnkleMin, sin((curTime/1000)*walkSpeed + AnkleXPhase + pi)*AnkleXWeight + AnkleXOffset)) * ((motors[AnkleXMotornum+9].maxPos) - (motors[AnkleXMotornum+9].minPos))) + motors[AnkleXMotornum+9].minPos)
+
     
 
         
