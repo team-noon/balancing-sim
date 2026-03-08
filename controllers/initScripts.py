@@ -41,7 +41,7 @@ joints = JointCollection(
         Joint(
             name="FOOT",
             axes=[
-                JointAxis(axis="X", currentPos=True , minPos=-30, maxPos=45),
+                JointAxis(axis="X", currentPos=True , minPos=-45, maxPos=45),
                 JointAxis(axis="Y", currentPos=False, minPos=-20, maxPos=20)
             ]
         )
