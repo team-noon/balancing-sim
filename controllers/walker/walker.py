@@ -30,10 +30,10 @@ walkSpeed = 1
 HipXMotorNum = 3
 
 HipXPhase  = 0
-HipXWeight = 0.4
+HipXWeight = 0.07
 HipXOffset = 0.5
 HipMin = 0.45
-HipMax = 0.6
+HipMax = 0.55
 
 
 
@@ -42,8 +42,8 @@ HipYMotorNum = 4
 HipYPhase  = 0
 HipYWeight = 0.15
 HipYOffset = 0.5
-HipYMin = 0.40
-HipYMax = 0.6
+HipYMin = 0.45
+HipYMax = 0.55
 
 KneeXMotorNum = 6
 
@@ -51,7 +51,7 @@ KneeXPhase  = 0
 KneeXWeight = 0.1
 KneeXOffset = 0.5
 KneeXMin = 0.4
-KneeXMax = 0.5
+KneeXMax = 0.6
 
 
 AnkleXMotornum = 7
