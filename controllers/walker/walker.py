@@ -24,34 +24,34 @@ motors[9].motor.setPosition(((0) * ((motors[9].maxPos) - (motors[9].minPos))) + 
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
-walkSpeed = 1
+walkSpeed = 1.5
 
 
 HipXMotorNum = 3
 
 HipXPhase  = 0
-HipXWeight = 0.07
-HipXOffset = 0.5
-HipMin = 0.45
-HipMax = 0.55
+HipXWeight = 0.15
+HipXOffset = 0.525
+HipMin = 0.25
+HipMax = 0.60
 
 
 
 HipYMotorNum = 4
 
-HipYPhase  = 0
-HipYWeight = 0.15
+HipYPhase  = 0.1
+HipYWeight = -0.05
 HipYOffset = 0.5
-HipYMin = 0.45
-HipYMax = 0.55
+HipYMin = 0.48
+HipYMax = 0.52
 
 KneeXMotorNum = 6
 
-KneeXPhase  = 0
-KneeXWeight = 0.1
+KneeXPhase  = 0.3
+KneeXWeight = 0.3
 KneeXOffset = 0.5
-KneeXMin = 0.4
-KneeXMax = 0.6
+KneeXMin = 0.3
+KneeXMax = 0.5
 
 
 AnkleXMotornum = 7
@@ -61,13 +61,14 @@ AnkleYMotornum = 8
 
 curTime : int =0
 
+hipXCorrection = -1
 
 while robot.step(timestep) != -1:
     curTime += timestep
     
     rot = inertialUnit.getRollPitchYaw()
     
-    hipXAngle = (min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum].maxPos) - (motors[HipXMotorNum].minPos))) + motors[HipXMotorNum].minPos
+    hipXAngle = (min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum].maxPos) - (motors[HipXMotorNum].minPos))) + motors[HipXMotorNum].minPos - rot[0] * hipXCorrection
     
     motors[HipXMotorNum].motor.setPosition(hipXAngle)
     
@@ -86,7 +87,7 @@ while robot.step(timestep) != -1:
     
     #other leg
     
-    otherHipXAngle = (min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase + pi)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum+9].maxPos) - (motors[HipXMotorNum+9].minPos))) + motors[HipXMotorNum+9].minPos
+    otherHipXAngle = (min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase + pi)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum+9].maxPos) - (motors[HipXMotorNum+9].minPos))) + motors[HipXMotorNum+9].minPos + rot[0] * hipXCorrection
     
     motors[HipXMotorNum + 9].motor.setPosition(otherHipXAngle)
     

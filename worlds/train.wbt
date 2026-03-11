@@ -3,23 +3,25 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "../protos/noonRobot.proto"
 EXTERNPROTO "../protos/noonRobotSpawner.proto"
-
 DEF WorldInfo WorldInfo {
-  title "2025-11-27 20:12:36.922772"
   basicTimeStep 16
-  FPS 0.1
   physicsDisableLinearThreshold 0.005
   physicsDisableAngularThreshold 0.005
   contactProperties [
     ContactProperties {
       material2 "floor"
-      frictionRotation 0.05 0.05
-      rollingFriction 0.05 0.05 0.05
-      bounce 0
-      bounceVelocity 0
+      coulombFriction [
+        0.8, 0.6
+      ]
+      frictionRotation 0 0
+      rollingFriction 0.01 
+      bounce 0.05
+      bounceVelocity 0.2
+      forceDependentSlip [
+        0.02
+      ]
     }
   ]
-  optimalThreadCount 1
 }
 
 RectangleArena {

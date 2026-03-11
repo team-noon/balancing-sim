@@ -42,6 +42,7 @@ symmetricList = ["shoulder", "elbow", "hip", "knee", "ankle"]
 asymmetricList = ["neck"]
 
 
+
 curTime : int =0
 
 def evalTorque(axis: dict):
@@ -55,7 +56,7 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
     lastTime :int = 0
     lastPos : float= motors[motorNumber].defaultPos
     lastTorque : float = 1
-    
+
     nextTime :int = 0
     nextPos : float= motors[motorNumber].defaultPos
     nextTorque : float = 1
@@ -114,10 +115,6 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
         motors[motorNumber].motor.setVelocity(servoSpeed)
         motors[motorNumber].motor.setAcceleration(10)
         motors[motorNumber].motor.setAvailableTorque(nextTorque*servoTorque/1000)
-    
-    
-    
-    
     
     
     
