@@ -1,0 +1,59 @@
+#VRML_SIM R2025a utf8
+# Shared environment for every webots world we use
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+
+PROTO SharedEnvironment [
+  field SFBool visual TRUE
+]
+{
+  Group {
+    children [
+
+      WorldInfo {
+        ERP 0.3
+        basicTimeStep 16
+        physicsDisableLinearThreshold 0.005
+        physicsDisableAngularThreshold 0.005
+        contactProperties [
+          ContactProperties {
+            material2 "floor"
+            coulombFriction [
+              1.2 1
+            ]
+            rollingFriction 0.1 0.1 0.1
+            bounce 0
+            bounceVelocity 0
+            forceDependentSlip [
+              0.001
+            ]
+            softERP 0.5
+          }
+        ]
+      }
+
+      Floor {
+        contactMaterial "floor"
+        size 2000 2000
+        %< if (!fields.visual.value) { >%
+          appearance NULL
+        %< } >%
+      }
+
+      %< if (fields.visual.value) { >%
+        Viewpoint {
+          orientation 0.12787361201113046 0.14181193443643453 -0.9815995693777699 1.50360476832192
+          position -0.5820072762877054 8.475077378833792 1.959752940496758
+        }
+
+        TexturedBackgroundLight {
+        }
+
+        TexturedBackground {
+        }
+      %< } >%
+
+    ]
+  }
+}

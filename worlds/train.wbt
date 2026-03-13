@@ -1,8 +1,9 @@
 #VRML_SIM R2025a utf8
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "../protos/noonRobot.proto"
 EXTERNPROTO "../protos/noonRobotSpawner.proto"
+EXTERNPROTO "../protos/sharedEnvironment.proto"
+
 DEF WorldInfo WorldInfo {
   basicTimeStep 16
   physicsDisableLinearThreshold 0.005
@@ -24,11 +25,10 @@ DEF WorldInfo WorldInfo {
   ]
 }
 
-RectangleArena {
+Floor {
   contactMaterial "floor"
-  floorSize 200 200
-  floorTileSize 1 1
-  floorAppearance NULL
+  size 2000 2000
+  appearance NULL
 }
 noonRobot {
   controller "<extern>"

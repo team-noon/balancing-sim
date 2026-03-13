@@ -24,14 +24,14 @@ motors[9].motor.setPosition(((0) * ((motors[9].maxPos) - (motors[9].minPos))) + 
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
-walkSpeed = 1.5
+walkSpeed = 2
 
 
 HipXMotorNum = 3
 
 HipXPhase  = 0
-HipXWeight = 0.15
-HipXOffset = 0.525
+HipXWeight = 0.18
+HipXOffset = 0.49
 HipMin = 0.25
 HipMax = 0.60
 
@@ -61,7 +61,7 @@ AnkleYMotornum = 8
 
 curTime : int =0
 
-hipXCorrection = -1
+hipXCorrection = 0
 
 while robot.step(timestep) != -1:
     curTime += timestep
@@ -71,6 +71,8 @@ while robot.step(timestep) != -1:
     hipXAngle = (min(HipMax, max(HipMin, sin((curTime/1000)*walkSpeed + HipXPhase)*HipXWeight + HipXOffset)) * ((motors[HipXMotorNum].maxPos) - (motors[HipXMotorNum].minPos))) + motors[HipXMotorNum].minPos - rot[0] * hipXCorrection
     
     motors[HipXMotorNum].motor.setPosition(hipXAngle)
+    
+    print(rot[0])
     
     
     hipYAngle = (min(HipYMax, max(HipYMin,sin((curTime/1000)*walkSpeed + HipYPhase)*HipYWeight + HipYOffset))* ((motors[HipYMotorNum].maxPos) - (motors[HipYMotorNum].minPos)))+ motors[HipYMotorNum].minPos
