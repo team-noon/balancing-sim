@@ -15,10 +15,10 @@
         "controllers/noonRobotControllerTest": true,
         "**/__pycache__": true,
         "**/*.wbproj": true,
-        ".gitignore": false,
+        ".gitignore": true,
         "models": true,
         "**/*.jpg": true,
-        "README.md": true
+        "README.md": false
     },
     "explorerExclude.backup": {},
     "deno.enable": true

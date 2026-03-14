@@ -1,124 +1,152 @@
 import * as fs from "jsr:@std/fs";
 
-const worldInfos: ["trainDebug" ,"train" , "animator" , "walker" , "inference"] = ["trainDebug", "train", "animator", "walker", "inference"]
+const worldInfos = [
+  "trainDebug",
+  "train",
+  "animator",
+  "walker",
+  "inference",
+] as const;
 
-const folderPath = import.meta.dirname + "/testWorlds"
-
-console.log(folderPath)
+const folderPath = import.meta.dirname + "/worlds";
 
 if (fs.existsSync(folderPath)) {
   const resp = prompt(
     "Are you sure you want to continue? [y/N]\nA worlds folder already exists, this will delete it if you continue",
   )?.toLowerCase();
 
-  if (!(resp == "y" || resp == "yes")) {
+  if (!(resp === "y" || resp === "yes")) {
     Deno.exit();
   }
 }
 
-
-
 try {
-  Deno.removeSync(folderPath, {recursive: true})
-} catch (_error) {/**/}
+  Deno.removeSync(folderPath, { recursive: true });
+} catch {/**/}
 
-fs.ensureDirSync(folderPath)
+fs.ensureDirSync(folderPath);
 
 for (const worldInfo of worldInfos) {
-    const content = `
-    #VRML_SIM R2025a utf8
+  const extern = [
+    "#VRML_SIM R2025a utf8",
+    "",
+    'EXTERNPROTO "../protos/noonRobot.proto"',
+  ];
 
-    EXTERNPROTO "../protos/noonRobot.proto"
-    ${worldInfo == "train" ? "" : `
-      EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
-      EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-      EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
-      
-      Viewpoint {
-        orientation 0.12787361201113046 0.14181193443643453 -0.9815995693777699 1.50360476832192
-        position -0.5820072762877054 8.475077378833792 1.959752940496758
-      }
-      TexturedBackgroundLight {
-      }
-      TexturedBackground {
-      }
-        
-    `}
+  if (worldInfo !== "train") {
+    extern.push(
+      'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"',
+      'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"',
+      'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"',
+    );
+  }
 
-    Floor {
-      contactMaterial "floor"
-      size 2000 2000
-      
-      ${worldInfo == "train" ? "appearance NULL" : "" }
-        
+  if (worldInfo === "trainDebug" || worldInfo === "train") {
+    extern.push('EXTERNPROTO "../protos/noonRobotSpawner.proto"');
+  }
+
+  const worldInfoBlock = `DEF WorldInfo WorldInfo {
+  ERP 0.3
+  basicTimeStep 16
+  physicsDisableLinearThreshold 0.005
+  physicsDisableAngularThreshold 0.005
+  contactProperties [
+    ContactProperties {
+      material2 "floor"
+      coulombFriction [
+        1.2, 1
+      ]
+      rollingFriction 0.1 0.1 0.1
+      bounce 0
+      bounceVelocity 0
+      forceDependentSlip [
+        0.001
+      ]
+      softERP 0.5
     }
+  ]
+}`;
 
-    ${worldInfo == "trainDebug" || "train" ? `EXTERNPROTO "../protos/noonRobotSpawner.proto"`:""}
-
-    DEF WorldInfo WorldInfo {
-        ERP 0.3
-        basicTimeStep 16
-        physicsDisableLinearThreshold 0.005
-        physicsDisableAngularThreshold 0.005
-        contactProperties [
-          ContactProperties {
-            material2 "floor"
-            coulombFriction [
-              1.2, 1
-            ]
-            rollingFriction 0.1 0.1 0.1
-            bounce 0
-            bounceVelocity 0
-            forceDependentSlip [
-              0.001
-            ]
-            softERP 0.5
-          }
-        ]
-    }
-
-    ${()=>{
-      switch (worldInfo) {
-        case "animator":
-          
-          return `noonRobot {
-              controller "animator"
-              cylinderSubdivision 16
-            }`
-      
-        case "inference":
-          return `noonRobot {
-            controller "<extern>"
-            inference TRUE
-          }`
-          
-
-        case "trainDebug":
-          return `noonRobot {
-              controller "<extern>"
-              name "trainer"
-            }
-            DEF TRAINER noonRobotSpawner {
-              count 0
-              spacing 30
-            }`
-        case "train":
-          return `noonRobot {
-            controller "<extern>"
-            name "trainer"
-          }
-          DEF TRAINER noonRobotSpawner {
-            count 0
-            spacing 100
-          }`
-        case "walker":
-          return `noonRobot {
-            controller "walker"
-            cylinderSubdivision 16
-          }`
-      }
-    }}
-    `
-
-    Deno.writeFile(`${folderPath}/${worldInfo}.wbt`, new TextEncoder().encode(content))
+  const viewpoint = worldInfo === "train" ? "" : `Viewpoint {
+  orientation 0.12 0.14 -1 1.5
+  position -0.5 8 2
 }
+
+TexturedBackgroundLight {
+}
+
+TexturedBackground {
+}`;
+
+  const floor = `Floor {
+  contactMaterial "floor"
+  size ${worldInfo == "train" ? "2000 2000" : "100 100"}
+  ${worldInfo == "train" ? "appearance NULL" : ""}
+  }`;
+
+  let robot = "";
+
+  switch (worldInfo) {
+    case "animator":
+      robot = `noonRobot {
+  controller "animator"
+  cylinderSubdivision 16
+}`;
+      break;
+
+    case "walker":
+      robot = `noonRobot {
+  controller "walker"
+  cylinderSubdivision 16
+}`;
+      break;
+
+    case "inference":
+      robot = `noonRobot {
+  controller "<extern>"
+  inference TRUE
+}`;
+      break;
+
+    case "trainDebug":
+      robot = `noonRobot {
+  controller "<extern>"
+  name "trainer"
+}
+
+DEF TRAINER noonRobotSpawner {
+  count 0
+  spacing 30
+}`;
+      break;
+
+    case "train":
+      robot = `noonRobot {
+  controller "<extern>"
+  name "trainer"
+}
+
+DEF TRAINER noonRobotSpawner {
+  count 0
+  spacing 100
+}`;
+      break;
+  }
+
+  const content = [
+    ...extern,
+    "",
+    worldInfoBlock,
+    "",
+    viewpoint,
+    "",
+    floor,
+    "",
+    robot,
+    "",
+  ].join("\n");
+
+  await Deno.writeTextFile(`${folderPath}/${worldInfo}.wbt`, content);
+}
+
+// i wrote the logic but chatgpt refactored it
