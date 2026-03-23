@@ -128,7 +128,7 @@ DEF TRAINER noonRobotSpawner {
 
 DEF TRAINER noonRobotSpawner {
   count 0
-  spacing 100
+  spacing 400
 }`;
       break;
   }
@@ -143,7 +143,6 @@ DEF TRAINER noonRobotSpawner {
     floor,
     "",
     robot,
-    "",
   ].join("\n");
 
   await Deno.writeTextFile(`${folderPath}/${worldInfo}.wbt`, content);

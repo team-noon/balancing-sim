@@ -43,6 +43,8 @@ class JointAxis:
     maxPos : float
 
     isHipXAxis : bool = False
+    
+    defaultPosition : Optional[float]
 
 @dataclass
 class Joint:

@@ -1,3 +1,5 @@
+ONLY WORKS ON LINUX
+
 # First you need to generate the worlds
 run `deno --allow-read --allow-write ./generateWorlds.ts`
 
@@ -10,3 +12,19 @@ or to start in debug mode run `python3 trainerStart.py true` this will start one
 ## Inference
 
 run `python3 inferenceStart.py`
+
+# The neural network (notes for myself)
+
+{
+18 motor pos
+3 angle
+3 angular acc
+3 lin acc
+
+2 turn rate, walk speed
+1 turn rate walk speed mask
+
+18 target pos
+18 target pos mask
+} * 4 (3 older) = 198
+

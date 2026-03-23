@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     
     policy_kwargs = dict(
-        net_arch=dict(pi=[128, 128, 128], vf=[128, 128, 128]),
+        net_arch=dict(pi=[256, 256, 256, 256], vf=[128, 128, 128]),
         activation_fn=torch.nn.LeakyReLU
     )
     
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         print("imported model to continue training")
     
     while True:
-        model.learn(2000000)
+        model.learn(1000000)
         
         if(not DEBUG):
             exportONNX(model, startTime)

@@ -14,7 +14,7 @@ joints = JointCollection(
         Joint(
             name="SHOULDER",
             axes=[
-                JointAxis(axis="Y", currentPos=False, minPos=-75, maxPos=75),
+                JointAxis(axis="Y", currentPos=False, minPos=0, maxPos=150, defaultPosition=0),
                 JointAxis(axis="Z", currentPos=False, minPos=-75, maxPos=75)
             ]
         ),
@@ -67,13 +67,13 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                     currentPos=axis.currentPos,
                     maxPos=axis.maxPos * (3.14159265359/180),
                     minPos=axis.minPos * (3.14159265359/180),
-                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)
+                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos) if not axis.defaultPosition else axis.defaultPosition
                 )
                 
                 if(axis.isHipXAxis and direction == "LEFT"):
                     data.maxPos=axis.minPos * (3.14159265359/180)
                     data.minPos=axis.maxPos * (3.14159265359/180)
-                    data.defaultPos=(-1*(axis.maxPos))/(axis.minPos-axis.maxPos)
+                    data.defaultPos=(-1*(axis.maxPos))/(axis.minPos-axis.maxPos) if not axis.defaultPosition else axis.defaultPosition
                     
 
                 if axis.currentPos:
@@ -97,7 +97,7 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                 currentPos=axis.currentPos,
                 maxPos=axis.maxPos * (3.14159265359/180) ,
                 minPos=axis.minPos* (3.14159265359/180),
-                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)
+                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)  if not axis.defaultPosition else axis.defaultPosition
             )
 
             if axis.currentPos:
