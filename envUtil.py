@@ -56,7 +56,8 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
         
         # Start Webots and the controller — log output to files for debugging
         try:
-            webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+            #webots_cmd = ["xvfb-run","--auto-servernum","webots","--batch", "--no-rendering" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"]
+            webots_cmd=["webots","--batch","--no-rendering", "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/train.wbt"] # ONLY FUR DEBUGGING
             if(Debug):
                 
                 webots_cmd=["webots","--batch" , "--mode=fast" , f"--port={BASEPORT - 1 - int(rank / numRobotsInEnv)}", f"{os.path.dirname(__file__)}/worlds/trainDebug.wbt"] # ONLY FUR DEBUGGING

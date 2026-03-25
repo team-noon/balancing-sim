@@ -19,6 +19,6 @@ webots_process = subprocess.Popen(
 # Start controller
 webots_controller = os.path.join(os.environ["WEBOTS_HOME"], "webots-controller")
 subprocess.run(
-    [webots_controller, "--port=1235", f"{__file__[:-17]}controllers/noonRobotTrainer/noonRobotTrainer.py"]
+    [webots_controller, "--port=1235", f"{__file__[:-17]}controllers/trainer/trainer.py"]
 )
 

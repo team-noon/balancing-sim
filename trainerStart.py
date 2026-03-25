@@ -135,14 +135,14 @@ if __name__ == "__main__":
     
         
     if not CONTINUE:
-        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu", n_epochs=4, batch_size=2048, n_steps=2048)
+        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu", n_epochs=4, batch_size=1024, n_steps=1024)
         
     else:
         model = PPO.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
         print("imported model to continue training")
     
     while True:
-        model.learn(1000000)
+        model.learn(50000)
         
         if(not DEBUG):
             exportONNX(model, startTime)

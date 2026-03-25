@@ -1,55 +1,46 @@
-import torch
 from stable_baselines3 import PPO
-import os
-import socket
 
-class OnnxableSB3Policy(torch.nn.Module):
-    def __init__(self, policy):
-        super().__init__()
-        self.policy = policy
+def exportONNX(model: PPO, folderName: str):
+    import os
+    import torch
 
-    def forward(self, observation: torch.Tensor):
-        # Note: Uses deterministic=True for deterministic actions
-        return self.policy(observation, deterministic=True)
+    # Eval mode for deterministic tracing
+    model.policy.eval()
 
-def exportONNX(model : PPO, folderName : str):
-    # Convert the policy to ONNX format
+    # Wrap policy for ONNX
+    class OnnxableSB3Policy(torch.nn.Module):
+        def __init__(self, policy):
+            super().__init__()
+            self.policy = policy
+        def forward(self, observation: torch.Tensor):
+            return self.policy(observation, deterministic=True)
+
     onnxable_policy = OnnxableSB3Policy(model.policy)
 
-    # Create a dummy input matching your observation space shape (1, 29)
-    dummy_input = torch.randn(1, *model.observation_space.shape) # type: ignore
+    # Dummy input
+    dummy_input = torch.randn(1, *model.observation_space.shape)
 
-    try:
-        os.mkdir("./models")
-        print(f"Directory './models' created successfully.")
-    except FileExistsError:
-        print(f"Directory './models' already exists.")
-    except PermissionError:
-        print(f"Permission denied: Unable to create './models'.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    
-    
-    try:
-        os.mkdir(f"./models/{folderName}")
-        print(f"Directory './models/{folderName}' created successfully.")
-    except FileExistsError:
-        print(f"Directory './models/{folderName}' already exists.")
-    except PermissionError:
-        print(f"Permission denied: Unable to create './models/{folderName}'.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    # Create folders
+    os.makedirs(f"./models/{folderName}", exist_ok=True)
 
+    # Save original model
     model.save(f"./models/{folderName}/continue.zip")
-    
-    # Export to ONNX
+
+    # Export ONNX
     torch.onnx.export(
         onnxable_policy,
-        dummy_input, # type: ignore
-        f"./models/{folderName}/model.onnx",  # Output filename
-        input_names=["input"], # Input name in ONNX model
-        output_names=["output"] # Output name in ONNX model
+        dummy_input,  # shape: (1, 198)
+        "./models/policy.onnx",
+        input_names=["input"],
+        output_names=["output"],
+        opset_version=18,
+        verbose=True
     )
+
+    print(f"ONNX model exported to './models/{folderName}/model.onnx'")
+
+    # Restore train mode
+    model.policy.train()
     
     
 

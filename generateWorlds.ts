@@ -50,6 +50,7 @@ for (const worldInfo of worldInfos) {
   basicTimeStep 16
   physicsDisableLinearThreshold 0.005
   physicsDisableAngularThreshold 0.005
+  ${worldInfo === "trainDebug" || worldInfo === "train" ? "FPS 1" :""}
   contactProperties [
     ContactProperties {
       material2 "floor"
