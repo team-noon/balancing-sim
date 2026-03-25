@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     
     policy_kwargs = dict(
-        net_arch=dict(pi=[256, 256, 256, 256], vf=[128, 128, 128]),
+        net_arch=dict(pi=[128, 256, 256, 128], vf=[128, 128, 128]),
         activation_fn=torch.nn.LeakyReLU
     )
     
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     
         
     if not CONTINUE:
-        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu")
+        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu", n_epochs=4, batch_size=2048, n_steps=2048)
         
     else:
         model = PPO.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")

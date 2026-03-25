@@ -5,6 +5,7 @@ from controller import Supervisor, InertialUnit, Gyro, Accelerometer, Node
 from typing import List, Tuple, Dict, Any
 import numpy as np
 
+
 import socket
 import sys
 import os
@@ -14,8 +15,8 @@ shared_dir = os.path.join(controller_dir, '..')
 sys.path.append(os.path.abspath(shared_dir))
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from parameters import brushlessSpeed, brushlessTorque, servoSpeed, servoTorque
-
+from trainParams import maxSteps, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, targetPenaltyWeight
+from patternGenerator import patternGenerator, pattern
 
 HOST = "127.0.0.1"
 BASEPORT = 9876
@@ -63,21 +64,6 @@ if(robot.getName() != "trainer" and  robot.getName() != "noonRobot"):
 
 
 
-# PARAMETERS
-
-maxSteps = 50000 # MAX STEPS AN INSTANCE CAN LIVE
-
-# REWARD PARAMETERS
-uprightRewardWeight = 1.2
-
-movementPenaltyWeight = 0.02
-
-turnRateRewardWeight = 4
-walkSpeedRewardWeight = 4
-
-verticalMovementPenaltyWeight = 0.2
-sideMovementPenaltyWeight = 0.2
-
 
 
 BodyParts: List[BodyPartData] = InitBodyParts(robotSupervisor=robot, timestep=timestep)
@@ -106,11 +92,14 @@ inertialUnit.enable(timestep)
 turnRate = 0
 walkSpeed = 0
     
-lastObs: list[float] = []
-lastLastObs : list[float]= []
+lastObs: list[List[float]] = [[0 for _ in range(66)], [0 for _ in range(66)]]
+
+thisPatternGenerator = patternGenerator()
             
+stepsSinceReset = 0            
+
 def getObservationSpace() -> np.ndarray:
-    global lastObs, lastLastObs, turnRate, walkSpeed
+    global lastObs, turnRate, walkSpeed, thisPatternGenerator, stepsSinceReset, motors
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -122,28 +111,35 @@ def getObservationSpace() -> np.ndarray:
     
     ret.extend(gyro.getValues())
     ret.extend(accelerometer.getValues())
-    ret.extend(inertialUnit.getRollPitchYaw())
+    rot = inertialUnit.getRollPitchYaw()
+    ret.extend(rot)
     
-    tObs = ret.copy()
+    pat : pattern= thisPatternGenerator.evaluatePattern(motors=motors, rot=rot, timestep=stepsSinceReset)
     
-    ret.extend(lastObs)
-    ret.extend(lastLastObs)
+    ret.extend(pat.values)
+    ret.extend(pat.mask)
     
-    lastLastObs = lastObs.copy()
-    lastObs= tObs.copy()
+    ret.extend([turnRate, walkSpeed, pat.walkMask])
     
-    ret.extend([turnRate, walkSpeed])
+    lastObs.append(ret.copy())
+    
+    ret.extend(lastObs[0])
+    ret.extend(lastObs[1])
+    
+    lastObs.pop(0)
+    
+    
     return np.asarray(ret, dtype=np.float32)
 
 
-stepsSinceReset = 0
+
 
 
 
 prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, stepsSinceReset, turnRate, walkSpeed
+    global prevActions, stepsSinceReset, turnRate, walkSpeed, stepsSinceReset, motors
     
     reward = 0
     terminated = False
@@ -151,24 +147,18 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     robot.step(timestep)
 
+    pat = thisPatternGenerator.evaluatePattern(motors=motors, rot=inertialUnit.getRollPitchYaw(), timestep=stepsSinceReset)
     
     # applies the actions to the motors
     
     i = 0
     for curAction in action:
         curAction = np.clip(curAction, 0.0, 1.0)
-        pos = ((curAction) * ((motors[i].maxPos) - (motors[i].minPos))) + motors[i].minPos
         
-        motors[i].motor.setPosition(pos)
+        motors[i].setMotor(curAction)
         
-        if(motors[i].currentPos):
-            motors[i].motor.setVelocity(brushlessSpeed)
-            motors[i].motor.setAcceleration(10)
-            motors[i].motor.setAvailableTorque(brushlessTorque/1000)
-        else:
-            motors[i].motor.setVelocity(servoSpeed)
-            motors[i].motor.setAcceleration(10)
-            motors[i].motor.setAvailableTorque(servoTorque/1000)
+        if(pat.mask[i]):
+            reward -= targetPenaltyWeight*abs(curAction - pat.values[i])
 
         reward -= movementPenaltyWeight*abs(curAction - prevActions[i])
         
@@ -328,8 +318,6 @@ while True:
         pass
     
 
-def recv_exact(sock, n):
-    return sock.recv(n)
 
 
 #import os
@@ -349,7 +337,7 @@ from collections import defaultdict
 
 
 
-obs_buffer = np.empty(101, dtype=np.float32)
+obs_buffer = np.empty(198, dtype=np.float32)
 action_buffer = np.empty(18, dtype=np.float32)
 
 obs_buffer, info = reset()
@@ -359,11 +347,11 @@ if(IS_DEBUG_MASTER):
     timing_acc = defaultdict(float)
     timing_count = 0
     
-    PRINT_EVERY = 200  # steps
+    PRINT_EVERY = 400  # steps
     while True:
         t0 = time.perf_counter()
 
-        data = recv_exact(thisSocket, 1)
+        data = thisSocket.recv(1)
 
 
         t_recv_cmd = time.perf_counter()
@@ -391,7 +379,7 @@ if(IS_DEBUG_MASTER):
             t_recv_action_start = time.perf_counter()
 
             action_buffer = np.frombuffer(
-                recv_exact(thisSocket, 18 * 4), dtype=np.float32
+                thisSocket.recv(18 * 4), dtype=np.float32
             )
 
 
@@ -437,7 +425,7 @@ if(IS_DEBUG_MASTER):
 else:
     while True:
 
-        data = recv_exact(thisSocket, 1)
+        data = thisSocket.recv( 1)
 
         if data == b'r':
 
@@ -451,7 +439,7 @@ else:
         elif data == b's':
 
             action_buffer = np.frombuffer(
-                recv_exact(thisSocket, 18 * 4), dtype=np.float32
+                thisSocket.recv( 18 * 4), dtype=np.float32
             )
 
 

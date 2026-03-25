@@ -14,7 +14,7 @@ joints = JointCollection(
         Joint(
             name="SHOULDER",
             axes=[
-                JointAxis(axis="Y", currentPos=False, minPos=0, maxPos=150, defaultPosition=0),
+                JointAxis(axis="Y", currentPos=False, minPos=-75, maxPos=75, defaultPosition=0),
                 JointAxis(axis="Z", currentPos=False, minPos=-75, maxPos=75)
             ]
         ),
@@ -27,7 +27,7 @@ joints = JointCollection(
         Joint(
             name="HIP",
             axes=[
-                JointAxis(axis="X", currentPos=True, minPos=-125 , maxPos=125, isHipXAxis=True),
+                JointAxis(axis="X", currentPos=True, minPos=-125 , maxPos=125, isFlipped=True),
                 JointAxis(axis="Y", currentPos=False,minPos=-45 , maxPos=45),
                 JointAxis(axis="Z", currentPos=False,minPos=-20 , maxPos=20)
             ]
@@ -67,13 +67,14 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                     currentPos=axis.currentPos,
                     maxPos=axis.maxPos * (3.14159265359/180),
                     minPos=axis.minPos * (3.14159265359/180),
-                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos) if not axis.defaultPosition else axis.defaultPosition
+                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos) if  axis.defaultPosition is None else axis.defaultPosition
                 )
                 
-                if(axis.isHipXAxis and direction == "LEFT"):
-                    data.maxPos=axis.minPos * (3.14159265359/180)
-                    data.minPos=axis.maxPos * (3.14159265359/180)
-                    data.defaultPos=(-1*(axis.maxPos))/(axis.minPos-axis.maxPos) if not axis.defaultPosition else axis.defaultPosition
+                if(axis.isFlipped and direction == "LEFT"):
+                    data.maxPos=axis.minPos * (-3.14159265359/180)
+                    data.minPos=axis.maxPos * (-3.14159265359/180)
+                    data.defaultPos=((data.maxPos))/(data.maxPos-data.minPos) if axis.defaultPosition is None else axis.defaultPosition
+                    data.flipped = True
                     
 
                 if axis.currentPos:
@@ -81,10 +82,10 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                     pos_sens = PositionSensor(pos_sens_name)
                     pos_sens.enable(timestep)
                     data.positionSensor = pos_sens
+                    
+                    
 
-                data.motor.setPosition(0.0)
-                #data.motor.setVelocity(2.0)
-                #data.motor.setAcceleration(2.0)
+                data.setMotor(data.defaultPos)
                 
                 motors.append(data)
 
@@ -97,7 +98,7 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                 currentPos=axis.currentPos,
                 maxPos=axis.maxPos * (3.14159265359/180) ,
                 minPos=axis.minPos* (3.14159265359/180),
-                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)  if not axis.defaultPosition else axis.defaultPosition
+                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)  if axis.defaultPosition is None else axis.defaultPosition
             )
 
             if axis.currentPos:

@@ -229,7 +229,7 @@ PROTO noonRobot [
           anchor %<= `${-fields.bodySize.value.x / 2} 0 ${fields.bodySize.value.z/ 2 - (fields.armOffset.value + fields.armRadius.value)}` >%
           axis 0 1 0
 
-          position 1.3
+        
 
           minStop %<=`${fields.shoulderYHardLimits.value.x}`>%
           maxStop %<=`${fields.shoulderYHardLimits.value.y}`>%

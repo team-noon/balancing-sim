@@ -54,7 +54,7 @@ for (const worldInfo of worldInfos) {
     ContactProperties {
       material2 "floor"
       coulombFriction [
-        1.2, 1
+        1.2
       ]
       rollingFriction 0.1 0.1 0.1
       bounce 0
