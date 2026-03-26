@@ -18,26 +18,29 @@ if __name__ == "__main__":
     NUM_ENVS : int
     NUM_ROBOTS_IN_ENV : int
     CONTINUE :bool
+    SAVE_INTERVAL : int
 
     if(sys.argv.__len__() == 2):
         if(sys.argv[1].strip().lower() == "true"):
             DEBUG =True
             NUM_ENVS = 1
             NUM_ROBOTS_IN_ENV = 2
+            SAVE_INTERVAL = 1000
             CONTINUE = False
             
             print(f"\033[93m Warning: you are using debug mode, no saves will be done \033[0m")
 
 
-    if(sys.argv.__len__() < 4 and not DEBUG):
-        raise "at least 3 arguments are needed, 1: NUM ENVS 2: NUM ROBOTS/ENV 3: CONTINUE?"
+    if(sys.argv.__len__() < 5 and not DEBUG):
+        raise "at least 4 arguments are needed, 1: NUM ENVS 2: NUM ROBOTS/ENV 3: SAVE INTERVAL 4: CONTINUE?"
 
 
 
     if(not DEBUG):
         NUM_ENVS  = int(sys.argv[1])
         NUM_ROBOTS_IN_ENV : int= int(sys.argv[2])
-        arg = sys.argv[3].strip()
+        SAVE_INTERVAL : int= int(sys.argv[3])
+        arg = sys.argv[4].strip()
         if arg.lower() == "true":
             CONTINUE = True
         else:
@@ -142,7 +145,8 @@ if __name__ == "__main__":
         print("imported model to continue training")
     
     while True:
-        model.learn(50000)
+        model.train
+        model.learn(SAVE_INTERVAL)
         
         if(not DEBUG):
             exportONNX(model, startTime)

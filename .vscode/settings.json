@@ -11,7 +11,7 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         ".vscode": true,
-        "worlds": false,
+        "worlds": true,
         "controllers/noonRobotControllerTest": true,
         "**/__pycache__": true,
         "**/*.wbproj": true,

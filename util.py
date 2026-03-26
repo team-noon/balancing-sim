@@ -6,16 +6,24 @@ def exportONNX(model: PPO, folderName: str):
 
     # Eval mode for deterministic tracing
     model.policy.eval()
+    
+    model.policy.set_training_mode(False)
 
-    # Wrap policy for ONNX
     class OnnxableSB3Policy(torch.nn.Module):
         def __init__(self, policy):
             super().__init__()
-            self.policy = policy
-        def forward(self, observation: torch.Tensor):
-            return self.policy(observation, deterministic=True)
+            self.features = policy.features_extractor
+            self.policy_net = policy.mlp_extractor.policy_net
+            self.action_net = policy.action_net
+    
+        def forward(self, x):
+            x = self.features(x)
+            x = self.policy_net(x)
+            return self.action_net(x)
 
     onnxable_policy = OnnxableSB3Policy(model.policy)
+
+    onnxable_policy.eval()
 
     # Dummy input
     dummy_input = torch.randn(1, *model.observation_space.shape)
@@ -30,17 +38,21 @@ def exportONNX(model: PPO, folderName: str):
     torch.onnx.export(
         onnxable_policy,
         dummy_input,  # shape: (1, 198)
-        "./models/policy.onnx",
+        f"./models/{folderName}/model.onnx",
         input_names=["input"],
         output_names=["output"],
-        opset_version=18,
-        verbose=True
+        verbose=True,
+        export_params=True,
+        external_data=False,
+        keep_initializers_as_inputs=True
     )
 
     print(f"ONNX model exported to './models/{folderName}/model.onnx'")
 
     # Restore train mode
     model.policy.train()
+    
+    model.policy.set_training_mode(True)
     
     
 
