@@ -67,7 +67,8 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                     currentPos=axis.currentPos,
                     maxPos=axis.maxPos * (3.14159265359/180),
                     minPos=axis.minPos * (3.14159265359/180),
-                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos) if  axis.defaultPosition is None else axis.defaultPosition
+                    defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos) if  axis.defaultPosition is None else axis.defaultPosition,
+                    name=f"{axis.axis}_{direction}_{joint.name}"
                 )
                 
                 if(axis.isFlipped and direction == "LEFT"):
@@ -98,7 +99,8 @@ def InitMotors(timestep : float, loadHead : bool = False) -> List[MotorData]:
                 currentPos=axis.currentPos,
                 maxPos=axis.maxPos * (3.14159265359/180) ,
                 minPos=axis.minPos* (3.14159265359/180),
-                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)  if axis.defaultPosition is None else axis.defaultPosition
+                defaultPos=(-1*(axis.minPos))/(axis.maxPos-axis.minPos)  if axis.defaultPosition is None else axis.defaultPosition,
+                name=f"{axis.axis}_{joint.name}"
             )
 
             if axis.currentPos:
@@ -157,7 +159,7 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
         rotField = thisNode.getField("rotation")
         
 
-        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
+        BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100, name=f"{bodyPart.name.upper()}"))
 
 
     directions = ["left", "right"]
@@ -177,5 +179,5 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
 
 
 
-            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100))
+            BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100, name=f"{direction.upper()}_{bodyPart.name.upper()}"))
     return BodyParts

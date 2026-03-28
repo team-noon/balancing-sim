@@ -139,7 +139,7 @@ def getObservationSpace() -> np.ndarray:
 prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, stepsSinceReset, turnRate, walkSpeed, stepsSinceReset, motors
+    global prevActions, stepsSinceReset, turnRate, walkSpeed, motors
     
     reward = 0
     terminated = False
@@ -147,83 +147,104 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     
     robot.step(timestep)
 
-    pat = thisPatternGenerator.evaluatePattern(motors=motors, rot=inertialUnit.getRollPitchYaw(), timestep=stepsSinceReset)
+    pat = thisPatternGenerator.evaluatePattern(
+        motors=motors,
+        rot=inertialUnit.getRollPitchYaw(),
+        timestep=stepsSinceReset
+    )
     
-    # applies the actions to the motors
-    
-    i = 0
-    for curAction in action:
-        curAction = np.clip(curAction, 0.0, 1.0)
-        
-        motors[i].setMotor(curAction)
-        
-        if(pat.mask[i]):
-            reward -= targetPenaltyWeight*abs(curAction - pat.values[i])
+    print("\n--- STEP DEBUG ---")
+    print(f"Step: {stepsSinceReset}")
 
-        reward -= movementPenaltyWeight*abs(curAction - prevActions[i])
-        
-        i+=1
-        
+    # applies the actions to the motors
+    for i, curAction in enumerate(action):
+        curAction = np.clip(curAction, 0.0, 1.0)
+        motors[i].setMotor(curAction)
+
+        # target pattern penalty
+        if pat.mask[i]:
+            penalty = targetPenaltyWeight * abs(curAction - pat.values[i])
+            reward -= penalty
+            print(f"[Motor {i}] Target penalty: -{penalty:.4f}")
+
+        # movement smoothness penalty
+        penalty = movementPenaltyWeight * abs(curAction - prevActions[i])
+        reward -= penalty
+        print(f"[Motor {i}] Movement penalty: -{penalty:.4f}")
+
     prevActions = action.copy()
     
-    # checks if any parts of the body that shouldnt be is touching the floor
+    # body part contacts
     for bodyPart in BodyParts:
         touch = bodyPart.touchSensor.getValue()
+
         if touch != 0 and bodyPart.doneOnTouch:
             terminated = True
             reward = -10
+            print(f"[{bodyPart.name}] TERMINATION touch! Reward set to -10")
             break
         
-        if touch !=0 and bodyPart.touchReward:
+        if touch != 0 and bodyPart.touchReward:
             bodyPart.lastTouched = stepsSinceReset
             reward += bodyPart.touchReward
+            print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
             
-        if touch == 0 and bodyPart.noTouchReward and stepsSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
-            reward += bodyPart.noTouchReward
-            
-            
-        
-    # truncates the robot if it reaches a specified limit of steps
-    if(stepsSinceReset >= maxSteps):
-        truncated=True
-        
-            
-    # calcualate reward based on how upright it is *
+        if touch == 0 and bodyPart.noTouchReward:
+            if stepsSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
+                reward += bodyPart.noTouchReward
+                print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
 
-    bodyRot =  robotSelf.getOrientation()
-    reward += max(-1, bodyRot[8] * uprightRewardWeight) # beatufiul line of code
-    
-    #print("rotation reward: ", max(-1, 1 - math.acos(bodyRot[8]) * uprightRewardWeight))
-    
-    
-    # calculate reward based on turnspeed 
-    vel = robotSelf.getVelocity()
-    
-    bodyAngVelocity = vel[3:]
-    reward += max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
-    #print("rotation: ", bodyAngVelocity[2], "reward:", max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight))
-    
-    
-    # calculate reward based on walkspeed
-    bodyLinVelocityVector = vel[:3]
-    bodyVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[1] + bodyLinVelocityVector[1]*bodyRot[4] + bodyLinVelocityVector[2]*bodyRot[7]
-    reward += max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
-    
-    # small penalty for vertical motion
-    reward -= verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
-    
-    # small penatly for side motion
-    bodySideVelocityMagnitude = bodyLinVelocityVector[0]*bodyRot[0] + bodyLinVelocityVector[1]*bodyRot[3] + bodyLinVelocityVector[2]*bodyRot[6]
-    reward -= sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
-    
-    #print("velocity: ", bodyVelocityMagnitude, "reward:", max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * turnRateRewardWeight))
-    
+    # truncation
+    if stepsSinceReset >= maxSteps:
+        truncated = True
+        print("[Truncation] Max steps reached")
 
-    
+    # upright reward
+    bodyRot = robotSelf.getOrientation()
+    upright_reward = max(-1, bodyRot[8] * uprightRewardWeight)
+    reward += upright_reward
+    print(f"[Upright] Reward: {upright_reward:.4f}")
+
+    if(pat.walkMask):
+        # angular velocity reward
+        vel = robotSelf.getVelocity()
+        bodyAngVelocity = vel[3:]
+        turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+        reward += turn_reward
+        print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
+
+        # forward velocity reward
+        # COMMENTED OUT FOR NOW
+        # bodyLinVelocityVector = vel[:3]
+        # bodyVelocityMagnitude = (
+        #     bodyLinVelocityVector[0]*bodyRot[1] +
+        #     bodyLinVelocityVector[1]*bodyRot[4] +
+        #     bodyLinVelocityVector[2]*bodyRot[7]
+        # )
+        # walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
+        # reward += walk_reward
+        # print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+
+    # vertical movement penalty
+    vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
+    reward -= vertical_penalty
+    print(f"[Vertical Movement] Penalty: -{vertical_penalty:.4f}")
+
+    # side movement penalty
+    bodySideVelocityMagnitude = (
+        bodyLinVelocityVector[0]*bodyRot[0] +
+        bodyLinVelocityVector[1]*bodyRot[3] +
+        bodyLinVelocityVector[2]*bodyRot[6]
+    )
+    side_penalty = sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
+    reward -= side_penalty
+    print(f"[Side Movement] Penalty: -{side_penalty:.4f}")
+
+    print(f"TOTAL REWARD: {reward:.4f}")
+    print("--- END STEP ---\n")
+
     observation = getObservationSpace()
-    
-    stepsSinceReset+=1
-    
+    stepsSinceReset += 1
 
     info = {}
     return observation, reward, terminated, truncated, info
@@ -270,7 +291,7 @@ if(robotSelf.getField("inference").getSFBool()):
 
     env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
-    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(101,), dtype=np.float32)
+    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(198,), dtype=np.float32)
     env.reset = reset
     env.step = step
     

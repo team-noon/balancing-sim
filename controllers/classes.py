@@ -21,6 +21,8 @@ class BodyPartCollection:
 
 @dataclass
 class BodyPartData:
+    name : str
+    
     node: Node
     startingPosition: List[float]
     transField: Field
@@ -64,6 +66,8 @@ class setMotorTypes(Enum):
 
 @dataclass
 class MotorData:
+    name : str
+    
     motor: Motor
     currentPos: bool
     minPos : float

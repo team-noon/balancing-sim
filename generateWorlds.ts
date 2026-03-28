@@ -104,7 +104,7 @@ TexturedBackground {
 
     case "inference":
       robot = `noonRobot {
-  controller "<extern>"
+  controller "trainer"
   inference TRUE
 }`;
       break;
