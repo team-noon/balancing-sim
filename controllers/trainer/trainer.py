@@ -133,8 +133,12 @@ def getObservationSpace() -> np.ndarray:
 
 
 
+rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
 
+DEBUG = worldInfoInfoField.getMFString(2).lower() == "true"
+IS_DEBUG_MASTER = DEBUG and rank == 0
 
+INFERENCE = INFERENCE
 
 prevActions: np.ndarray = basePrevActions.copy()
 
@@ -152,9 +156,9 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         rot=inertialUnit.getRollPitchYaw(),
         timestep=timeSinceReset
     )
-    
-    print("\n--- STEP DEBUG ---")
-    print(f"Step: {timeSinceReset}")
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print("\n--- STEP DEBUG ---")
+        print(f"Step: {timeSinceReset}")
 
     # applies the actions to the motors
     for i, curAction in enumerate(action):
@@ -165,12 +169,14 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         if pat.mask[i]:
             penalty = targetPenaltyWeight * abs(curAction - pat.values[i])
             reward -= penalty
-            print(f"[Motor {i}] Target penalty: -{penalty:.4f}")
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[Motor {i}] Target penalty: -{penalty:.4f}")
 
         # movement smoothness penalty
         penalty = movementPenaltyWeight * abs(curAction - prevActions[i])
         reward -= penalty
-        print(f"[Motor {i}] Movement penalty: -{penalty:.4f}")
+        if(IS_DEBUG_MASTER or INFERENCE):
+            print(f"[Motor {i}] Movement penalty: -{penalty:.4f}")
 
     prevActions = action.copy()
     
@@ -181,29 +187,34 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         if touch != 0 and bodyPart.doneOnTouch:
             terminated = True
             reward = -10
-            print(f"[{bodyPart.name}] TERMINATION touch! Reward set to -10")
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[{bodyPart.name}] TERMINATION touch! Reward set to -10")
             break
         
         if touch != 0 and bodyPart.touchReward:
             bodyPart.lastTouched = timeSinceReset
             reward += bodyPart.touchReward
-            print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
             
         if touch == 0 and bodyPart.noTouchReward:
             if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
                 reward += bodyPart.noTouchReward
-                print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
+                if(IS_DEBUG_MASTER or INFERENCE):
+                    print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
 
     # truncation
     if timeSinceReset >= maxTime:
         truncated = True
-        print("[Truncation] Max steps reached")
+        if(IS_DEBUG_MASTER or INFERENCE):
+            print("[Truncation] Max steps reached")
 
     # upright reward
     bodyRot = robotSelf.getOrientation()
     upright_reward = max(-1, bodyRot[8] * uprightRewardWeight)
     reward += upright_reward
-    print(f"[Upright] Reward: {upright_reward:.4f}")
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print(f"[Upright] Reward: {upright_reward:.4f}")
     
     vel = robotSelf.getVelocity()
     bodyLinVelocityVector = vel[:3]
@@ -214,7 +225,8 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         bodyAngVelocity = vel[3:]
         turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
         reward += turn_reward
-        print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
+        if(IS_DEBUG_MASTER or INFERENCE):
+            print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
 
         # forward velocity reward
         # COMMENTED OUT FOR NOW
@@ -231,7 +243,8 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     # vertical movement penalty
     vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
     reward -= vertical_penalty
-    print(f"[Vertical Movement] Penalty: -{vertical_penalty:.4f}")
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print(f"[Vertical Movement] Penalty: -{vertical_penalty:.4f}")
 
     # side movement penalty
     bodySideVelocityMagnitude = (
@@ -241,10 +254,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     )
     side_penalty = sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
     reward -= side_penalty
-    print(f"[Side Movement] Penalty: -{side_penalty:.4f}")
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print(f"[Side Movement] Penalty: -{side_penalty:.4f}")
 
-    print(f"TOTAL REWARD: {reward:.4f}")
-    print("--- END STEP ---\n")
+        print(f"TOTAL REWARD: {reward:.4f}")
+        print("--- END STEP ---\n")
 
     observation = getObservationSpace()
     timeSinceReset += timestep
@@ -287,7 +301,7 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
 
 
 # INFERENCE
-if(robotSelf.getField("inference").getSFBool()): 
+if(INFERENCE): 
     from stable_baselines3 import PPO
     import gymnasium as gym
     env = gym.Env()
@@ -321,7 +335,6 @@ if(robotSelf.getField("inference").getSFBool()):
         
         raise Exception("cant run inference, there is no model, put one into the models folder as continue.zip")
 
-rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
 
 SOCK_PATH = f"/tmp/noon_robot_{rank}.sock"
 
@@ -350,8 +363,7 @@ while True:
 #os.sched_setaffinity(0, {1+math.floor(rank/3)})
 
 
-DEBUG = worldInfoInfoField.getMFString(2).lower() == "true"
-IS_DEBUG_MASTER = DEBUG and rank == 0
+
 
 
 import time
