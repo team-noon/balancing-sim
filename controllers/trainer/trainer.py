@@ -15,7 +15,7 @@ shared_dir = os.path.join(controller_dir, '..')
 sys.path.append(os.path.abspath(shared_dir))
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from trainParams import maxSteps, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, targetPenaltyWeight
+from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, targetPenaltyWeight
 from patternGenerator import patternGenerator, pattern
 
 HOST = "127.0.0.1"
@@ -96,10 +96,10 @@ lastObs: list[List[float]] = [[0 for _ in range(66)], [0 for _ in range(66)]]
 
 thisPatternGenerator = patternGenerator()
             
-stepsSinceReset = 0            
+timeSinceReset = 0            
 
 def getObservationSpace() -> np.ndarray:
-    global lastObs, turnRate, walkSpeed, thisPatternGenerator, stepsSinceReset, motors
+    global lastObs, turnRate, walkSpeed, thisPatternGenerator, timeSinceReset, motors
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -114,7 +114,7 @@ def getObservationSpace() -> np.ndarray:
     rot = inertialUnit.getRollPitchYaw()
     ret.extend(rot)
     
-    pat : pattern= thisPatternGenerator.evaluatePattern(motors=motors, rot=rot, timestep=stepsSinceReset)
+    pat : pattern= thisPatternGenerator.evaluatePattern(motors=motors, rot=rot, timestep=timeSinceReset)
     
     ret.extend(pat.values)
     ret.extend(pat.mask)
@@ -139,7 +139,7 @@ def getObservationSpace() -> np.ndarray:
 prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, stepsSinceReset, turnRate, walkSpeed, motors
+    global prevActions, timeSinceReset, turnRate, walkSpeed, motors
     
     reward = 0
     terminated = False
@@ -150,11 +150,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     pat = thisPatternGenerator.evaluatePattern(
         motors=motors,
         rot=inertialUnit.getRollPitchYaw(),
-        timestep=stepsSinceReset
+        timestep=timeSinceReset
     )
     
     print("\n--- STEP DEBUG ---")
-    print(f"Step: {stepsSinceReset}")
+    print(f"Step: {timeSinceReset}")
 
     # applies the actions to the motors
     for i, curAction in enumerate(action):
@@ -185,17 +185,17 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
             break
         
         if touch != 0 and bodyPart.touchReward:
-            bodyPart.lastTouched = stepsSinceReset
+            bodyPart.lastTouched = timeSinceReset
             reward += bodyPart.touchReward
             print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
             
         if touch == 0 and bodyPart.noTouchReward:
-            if stepsSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
+            if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
                 reward += bodyPart.noTouchReward
                 print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
 
     # truncation
-    if stepsSinceReset >= maxSteps:
+    if timeSinceReset >= maxTime:
         truncated = True
         print("[Truncation] Max steps reached")
 
@@ -204,10 +204,13 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     upright_reward = max(-1, bodyRot[8] * uprightRewardWeight)
     reward += upright_reward
     print(f"[Upright] Reward: {upright_reward:.4f}")
-
+    
+    vel = robotSelf.getVelocity()
+    bodyLinVelocityVector = vel[:3]
+    
     if(pat.walkMask):
         # angular velocity reward
-        vel = robotSelf.getVelocity()
+        
         bodyAngVelocity = vel[3:]
         turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
         reward += turn_reward
@@ -215,7 +218,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
         # forward velocity reward
         # COMMENTED OUT FOR NOW
-        # bodyLinVelocityVector = vel[:3]
+        # 
         # bodyVelocityMagnitude = (
         #     bodyLinVelocityVector[0]*bodyRot[1] +
         #     bodyLinVelocityVector[1]*bodyRot[4] +
@@ -244,7 +247,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     print("--- END STEP ---\n")
 
     observation = getObservationSpace()
-    stepsSinceReset += 1
+    timeSinceReset += timestep
 
     info = {}
     return observation, reward, terminated, truncated, info
@@ -252,7 +255,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 robotSelf.saveState(robotSelf.getDef())
 
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
-    global stepsSinceReset, prevActions
+    global timeSinceReset, prevActions
     
     global motors, BodyParts, turnRate, walkSpeed
 
@@ -260,7 +263,7 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     
     robotSelf.loadState(robotSelf.getDef())    
     
-    stepsSinceReset = 0
+    timeSinceReset = 0
     
     obs = getObservationSpace()
     
