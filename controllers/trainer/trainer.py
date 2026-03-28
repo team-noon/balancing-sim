@@ -133,12 +133,19 @@ def getObservationSpace() -> np.ndarray:
 
 
 
-rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
 
-DEBUG = worldInfoInfoField.getMFString(2).lower() == "true"
-IS_DEBUG_MASTER = DEBUG and rank == 0
+DEBUG = False
+IS_DEBUG_MASTER = False
 
-INFERENCE = INFERENCE
+
+INFERENCE =robotSelf.getField("inference").getSFBool()
+
+
+
+if(not INFERENCE):
+    rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
+    DEBUG = worldInfoInfoField.getMFString(2).lower() == "true"
+    IS_DEBUG_MASTER = DEBUG and rank == 0
 
 prevActions: np.ndarray = basePrevActions.copy()
 
@@ -162,7 +169,6 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
     # applies the actions to the motors
     for i, curAction in enumerate(action):
-        curAction = np.clip(curAction, 0.0, 1.0)
         motors[i].setMotor(curAction)
 
         # target pattern penalty
@@ -197,7 +203,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
             if(IS_DEBUG_MASTER or INFERENCE):
                 print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
             
-        if touch == 0 and bodyPart.noTouchReward:
+        if touch == 0 and bodyPart.noTouchReward and bodyPart.noTouchRewardDelay:
             if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
                 reward += bodyPart.noTouchReward
                 if(IS_DEBUG_MASTER or INFERENCE):
@@ -238,7 +244,8 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         # )
         # walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
         # reward += walk_reward
-        # print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+        # if(IS_DEBUG_MASTER or INFERENCE):
+        #   print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
 
     # vertical movement penalty
     vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
