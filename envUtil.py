@@ -83,7 +83,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
 def cleanUp():
     for process in subProcesses:
         process.terminate()
-    #os.system("pkill -9 webots")
-    #os.system("pkill -9 webots-bin")
+    os.system("pkill -9 webots")
+    os.system("pkill -9 webots-bin")
     os.system("pkill -9 python3")
     
