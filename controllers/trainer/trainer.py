@@ -164,11 +164,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         timestep=timeSinceReset
     )
     
-    for k, val in enumerate(pat.values):
-        if(pat.mask[k]):
-            action[k] = val
-        else:
-            action[k] = motors[k].defaultPos
+    #for k, val in enumerate(pat.values):
+    #    if(pat.mask[k]):
+    #        action[k] = val
+    #    else:
+    #        action[k] = motors[k].defaultPos
         
     
     if(IS_DEBUG_MASTER or INFERENCE):
@@ -224,15 +224,15 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         # forward velocity reward
         # COMMENTED OUT FOR NOW
         # 
-        # bodyVelocityMagnitude = (
-        #     bodyLinVelocityVector[0]*bodyRot[1] +
-        #     bodyLinVelocityVector[1]*bodyRot[4] +
-        #     bodyLinVelocityVector[2]*bodyRot[7]
-        # )
-        # walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
-        # reward += walk_reward
-        # if(IS_DEBUG_MASTER or INFERENCE):
-        #   print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+        bodyVelocityMagnitude = (
+            bodyLinVelocityVector[0]*bodyRot[1] +
+            bodyLinVelocityVector[1]*bodyRot[4] +
+            bodyLinVelocityVector[2]*bodyRot[7]
+        )
+        walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
+        reward += walk_reward
+        if(IS_DEBUG_MASTER or INFERENCE):
+          print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
 
     # vertical movement penalty
     vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
