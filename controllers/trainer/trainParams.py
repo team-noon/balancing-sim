@@ -3,14 +3,17 @@
 maxTime = 50000 # MAX STEPS AN INSTANCE CAN LIVE
 
 # REWARD PARAMETERS
-uprightRewardWeight = 1.2
+uprightRewardWeight = 1.5
 
-movementPenaltyWeight = 0.02
+movementPenaltyWeight = 0.03
 
-targetPenaltyWeight = 0.1
+maxTargetReward = 1
+TargetRewardFalloff = 2
 
-turnRateRewardWeight = 4
-walkSpeedRewardWeight = 4
+turnRateRewardWeight = 2
+walkSpeedRewardWeight = 4 # UNUSED
 
-verticalMovementPenaltyWeight = 0.2
-sideMovementPenaltyWeight = 0.2
+verticalMovementPenaltyWeight = 0.3
+sideMovementPenaltyWeight = 0.3
+
+terminationPenalty = -400

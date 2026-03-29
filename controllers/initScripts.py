@@ -134,7 +134,7 @@ bodyPartList = BodyPartCollection(
         BodyPart(name="hand", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
         BodyPart(name="upper_leg", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
         BodyPart(name="lower_leg", doneOnTouch=True, touchReward=None, noTouchReward=None, noTouchRewardDelay=None),
-        BodyPart(name="foot", doneOnTouch=False, touchReward=0.4, noTouchReward=-1, noTouchRewardDelay=150)
+        BodyPart(name="foot", doneOnTouch=False, touchReward=0.4, noTouchReward=-50, noTouchRewardDelay=1200)
     ]
 )
 

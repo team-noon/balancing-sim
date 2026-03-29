@@ -15,7 +15,7 @@ shared_dir = os.path.join(controller_dir, '..')
 sys.path.append(os.path.abspath(shared_dir))
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, targetPenaltyWeight
+from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, terminationPenalty, TargetRewardFalloff, maxTargetReward
 from patternGenerator import patternGenerator, pattern
 
 HOST = "127.0.0.1"
@@ -140,7 +140,7 @@ IS_DEBUG_MASTER = False
 
 INFERENCE =robotSelf.getField("inference").getSFBool()
 
-
+TOTAL_REWARD = 0
 
 if(not INFERENCE):
     rank = int(worldInfoInfoField.getMFString(0)) * int(worldInfoInfoField.getMFString(1)) + int(robotSelf.getField("name").getSFString())
@@ -150,7 +150,7 @@ if(not INFERENCE):
 prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, timeSinceReset, turnRate, walkSpeed, motors
+    global prevActions, timeSinceReset, turnRate, walkSpeed, motors, TOTAL_REWARD
     
     reward = 0
     terminated = False
@@ -163,6 +163,14 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         rot=inertialUnit.getRollPitchYaw(),
         timestep=timeSinceReset
     )
+    
+    for k, val in enumerate(pat.values):
+        if(pat.mask[k]):
+            action[k] = val
+        else:
+            action[k] = motors[k].defaultPos
+        
+    
     if(IS_DEBUG_MASTER or INFERENCE):
         print("\n--- STEP DEBUG ---")
         print(f"Step: {timeSinceReset}")
@@ -173,10 +181,10 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
         # target pattern penalty
         if pat.mask[i]:
-            penalty = targetPenaltyWeight * abs(curAction - pat.values[i])
-            reward -= penalty
+            penalty = maxTargetReward-TargetRewardFalloff *abs(curAction - pat.values[i])
+            reward += penalty
             if(IS_DEBUG_MASTER or INFERENCE):
-                print(f"[Motor {i}] Target penalty: -{penalty:.4f}")
+                print(f"[Motor {i}] Target reward: {penalty:.4f}")
 
         # movement smoothness penalty
         penalty = movementPenaltyWeight * abs(curAction - prevActions[i])
@@ -186,28 +194,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
     prevActions = action.copy()
     
-    # body part contacts
-    for bodyPart in BodyParts:
-        touch = bodyPart.touchSensor.getValue()
 
-        if touch != 0 and bodyPart.doneOnTouch:
-            terminated = True
-            reward = -10
-            if(IS_DEBUG_MASTER or INFERENCE):
-                print(f"[{bodyPart.name}] TERMINATION touch! Reward set to -10")
-            break
-        
-        if touch != 0 and bodyPart.touchReward:
-            bodyPart.lastTouched = timeSinceReset
-            reward += bodyPart.touchReward
-            if(IS_DEBUG_MASTER or INFERENCE):
-                print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
-            
-        if touch == 0 and bodyPart.noTouchReward and bodyPart.noTouchRewardDelay:
-            if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
-                reward += bodyPart.noTouchReward
-                if(IS_DEBUG_MASTER or INFERENCE):
-                    print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
 
     # truncation
     if timeSinceReset >= maxTime:
@@ -265,6 +252,33 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         print(f"[Side Movement] Penalty: -{side_penalty:.4f}")
 
         print(f"TOTAL REWARD: {reward:.4f}")
+        
+        # body part contacts
+    for bodyPart in BodyParts:
+        touch = bodyPart.touchSensor.getValue()
+
+        if touch != 0 and bodyPart.doneOnTouch:
+            terminated = True
+            reward = terminationPenalty
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[{bodyPart.name}] TERMINATION touch! Reward set to {terminationPenalty}")
+            break
+        
+        if touch != 0 and bodyPart.touchReward:
+            bodyPart.lastTouched = timeSinceReset
+            reward += bodyPart.touchReward
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
+            
+        if touch == 0 and bodyPart.noTouchReward and bodyPart.noTouchRewardDelay:
+            if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
+                reward += bodyPart.noTouchReward
+                if(IS_DEBUG_MASTER or INFERENCE):
+                    print(f"[{bodyPart.name}] No-touch reward: +{bodyPart.noTouchReward}")
+                    
+                    
+    if(IS_DEBUG_MASTER or INFERENCE):
+        TOTAL_REWARD += reward
         print("--- END STEP ---\n")
 
     observation = getObservationSpace()
@@ -276,7 +290,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 robotSelf.saveState(robotSelf.getDef())
 
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
-    global timeSinceReset, prevActions
+    global timeSinceReset, prevActions, TOTAL_REWARD
     
     global motors, BodyParts, turnRate, walkSpeed
 
@@ -303,6 +317,11 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     turn_steps = int((turn_max - turn_min) / step_size) + 1
     turnRate = np.random.choice([turn_min + i * step_size for i in range(turn_steps)])
 
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print(f"\033[92m🔥 Episode Total Reward: {TOTAL_REWARD:.4f} 🔥\033[0m")
+        TOTAL_REWARD = 0
+        
+    
     info = {}
     return obs, info
 
@@ -328,7 +347,9 @@ if(INFERENCE):
 
 
         model.policy.eval()
+        model.policy.set_training_mode(False)
         obs, info = env.reset()
+        
         while True:
             # model.predict already runs under torch.no_grad internally
             # ensure observation is a numpy array (stable-baselines3 expects ndarray)
@@ -411,7 +432,7 @@ if(IS_DEBUG_MASTER):
 
 
             t_send = time.perf_counter()
-
+ 
             timing_acc["recv_cmd"] += t_recv_cmd - t0
             timing_acc["reset"] += t_reset_done - t_reset_start
             timing_acc["send"] += t_send - t_reset_done
