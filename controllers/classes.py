@@ -2,7 +2,7 @@ from typing import List, Optional
 from dataclasses import dataclass
 from controller import Node, Field, TouchSensor, Motor, PositionSensor
 from enum import Enum
-from parameters import brushlessSpeed, brushlessTorque, servoSpeed, servoTorque
+from parameters import brushlessSpeed, brushlessTorque, servoSpeed, servoTorque, servoAcceleration, brushlessAcceleration
 
 # Define data structures using dataclasses
 @dataclass
@@ -78,7 +78,7 @@ class MotorData:
     flipped : bool = False
     
     
-    def setMotor(self,pos: float, type : setMotorTypes = setMotorTypes.normalised) -> float:
+    def setMotor(self,pos: float, torque : float = 1 ,type : setMotorTypes = setMotorTypes.normalised) -> float:
         angle = self.defaultPos
         if(type == setMotorTypes.normalised):
             angle = self.getAngleFromNormal(pos)
@@ -87,16 +87,19 @@ class MotorData:
             angle = min(self.maxPos, max(self.minPos, pos))
             
             
+        curTorque = min(1, max(0, torque))
+            
+            
         self.motor.setPosition(angle)
         # set motor type and attributes
         if(self.currentPos):
             self.motor.setVelocity(brushlessSpeed)
-            self.motor.setAcceleration(20)
-            self.motor.setAvailableTorque(brushlessTorque/1000)
+            self.motor.setAvailableTorque(curTorque*(brushlessTorque/1000))
+            self.motor.setAcceleration(brushlessAcceleration)
         else:
             self.motor.setVelocity(servoSpeed)
-            self.motor.setAcceleration(20)
-            self.motor.setAvailableTorque(servoTorque/1000)
+            self.motor.setAvailableTorque(curTorque*(servoTorque/1000))
+            self.motor.setAcceleration(servoAcceleration)
             
         return angle
     
@@ -118,40 +121,4 @@ class MotorData:
             clampedpos = (ang - self.minPos) / (self.maxPos - self.minPos)
         return min(1, max(0, clampedpos))
             
-        
-            
-        
-        
-
-
-""" 
-@dataclass
-class KeyFrameAxis:
-    Time : int
-    pos : float
-    torque : float
-    
-class KeyFrames:
-    x : List[KeyFrameAxis]
-    xMotorNum : int
-    y : List[KeyFrameAxis]
-    yMotorNum : int
-    z: List[KeyFrameAxis]
-    zMotorNum : int
-    
-@dataclass
-class symmetricKeyFrame:
-    L : KeyFrames
-    R : KeyFrames
-
-
-@dataclass
-class KeyFrameCollection:
-    neck : KeyFrames
-    shoulder : symmetricKeyFrame
-    elbow : symmetricKeyFrame
-    hip : symmetricKeyFrame
-    knee : symmetricKeyFrame
-    ankle : symmetricKeyFrame
-"""
     

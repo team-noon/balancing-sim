@@ -24,9 +24,6 @@ inertialUnit.enable(timestep)
 thisPatternGenerator = patternGenerator()
 
 
-
-
-
 curTime : int =0
 
 while robot.step(timestep) != -1:
@@ -34,7 +31,7 @@ while robot.step(timestep) != -1:
     
     rot = inertialUnit.getRollPitchYaw()
     
-    pats = thisPatternGenerator.evaluatePattern(timestep=curTime, rot=rot, motors=motors)
+    pats = thisPatternGenerator.evaluatePattern(timestep=curTime, rot=rot ,motors=motors)
     
     for i in range(18):
         if(pats.mask[i] == True):

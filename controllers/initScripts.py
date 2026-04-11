@@ -181,3 +181,4 @@ def InitBodyParts(robotSupervisor: Supervisor,timestep: float) -> List[BodyPartD
 
             BodyParts.append(BodyPartData(node=thisNode, startingPosition=transField.getSFVec3f(), transField=transField, linearVelocityField=linearVelocityField, angularVelocityField=angularVelocityField, touchSensor=touchSens, doneOnTouch=bodyPart.doneOnTouch, rotField=rotField, startingRotation=rotField.getSFRotation(), noTouchReward=bodyPart.noTouchReward, touchReward=bodyPart.touchReward, noTouchRewardDelay=bodyPart.noTouchRewardDelay, lastTouched=-100, name=f"{direction.upper()}_{bodyPart.name.upper()}"))
     return BodyParts
+

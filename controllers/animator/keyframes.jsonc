@@ -12,7 +12,8 @@
               {
           "time" : 1000,
           "pos": 0
-        }],
+        }
+      ],
 
       // left shoulder - z axis
       "z": []

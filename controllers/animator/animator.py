@@ -10,23 +10,9 @@ from initScripts import InitMotors
 from controller import Supervisor
 from parameters import brushlessSpeed, brushlessTorque, servoSpeed, servoTorque
 import json
+from patternGenerator import patternGenerator
 
 keyframes : dict
-
-def remove_json_comments(text: str) -> str:
-    lines = text.split("\n")
-
-    i = 0
-    while i < len(lines):
-        j = 0
-        while j < len(lines[i]) - 1:
-            if lines[i][j] == "/" and lines[i][j + 1] == "/":
-                lines[i] = lines[i][:j]
-                break
-            j += 1
-        i += 1
-
-    return "\n".join(lines)
 
 
 with open(os.path.join(controller_dir, "keyframes.jsonc"), "r") as jsonfile:
@@ -100,8 +86,6 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
         curAction = lastPos + (nextPos - lastPos) * ((curTime-lastTime) / (nextTime-lastTime))
     
     curAction = min(1, max(0, curAction))
-
-    nextTorque =min(1, max(0, nextTorque))
     
     pos = ((curAction) * ((motors[motorNumber].maxPos) - (motors[motorNumber].minPos))) + motors[motorNumber].minPos
     
@@ -115,7 +99,6 @@ def stepAxis(motorNumber : int, axisKeyFrames : list[dict]):
         motors[motorNumber].motor.setVelocity(servoSpeed)
         motors[motorNumber].motor.setAcceleration(10)
         motors[motorNumber].motor.setAvailableTorque(nextTorque*servoTorque/1000)
-    
     
     
 

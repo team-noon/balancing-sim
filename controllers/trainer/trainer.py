@@ -180,17 +180,19 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         motors[i].setMotor(curAction)
 
         # target pattern penalty
-        if pat.mask[i]:
-            penalty = maxTargetReward-TargetRewardFalloff *abs(curAction - pat.values[i])
-            reward += penalty
+        if pat.mask[i] == 1:
+            reward = maxTargetReward-TargetRewardFalloff *abs(curAction - pat.values[i])
+            reward += reward
             if(IS_DEBUG_MASTER or INFERENCE):
-                print(f"[Motor {i}] Target reward: {penalty:.4f}")
+                print(f"[Motor {i}] Target reward: {reward:.4f}")
 
-        # movement smoothness penalty
-        penalty = movementPenaltyWeight * abs(curAction - prevActions[i])
-        reward -= penalty
-        if(IS_DEBUG_MASTER or INFERENCE):
-            print(f"[Motor {i}] Movement penalty: -{penalty:.4f}")
+        # dont penalize for moving when its told to move
+        if pat.mask[i] != 1:
+            # movement smoothness penalty
+            penalty = movementPenaltyWeight * abs(curAction - prevActions[i])
+            reward -= penalty
+            if(IS_DEBUG_MASTER or INFERENCE):
+                print(f"[Motor {i}] Movement penalty: -{penalty:.4f}")
 
     prevActions = action.copy()
     
@@ -212,28 +214,27 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     vel = robotSelf.getVelocity()
     bodyLinVelocityVector = vel[:3]
     
-    if(pat.walkMask):
-        # angular velocity reward
-        
-        bodyAngVelocity = vel[3:]
-        turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
-        reward += turn_reward
-        if(IS_DEBUG_MASTER or INFERENCE):
-            print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
-
-        # forward velocity reward
-        # COMMENTED OUT FOR NOW
-        # 
-        bodyVelocityMagnitude = (
-            bodyLinVelocityVector[0]*bodyRot[1] +
-            bodyLinVelocityVector[1]*bodyRot[4] +
-            bodyLinVelocityVector[2]*bodyRot[7]
-        )
-        #walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
-        walk_reward = bodyVelocityMagnitude * walkSpeedRewardWeight
-        reward += walk_reward
-        if(IS_DEBUG_MASTER or INFERENCE):
-          print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+    
+    # angular velocity reward
+    
+    bodyAngVelocity = vel[3:]
+    turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
+    reward += turn_reward
+    if(IS_DEBUG_MASTER or INFERENCE):
+        print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
+    # forward velocity reward
+    # REWORKED
+    # 
+    bodyVelocityMagnitude = (
+        bodyLinVelocityVector[0]*bodyRot[1] +
+        bodyLinVelocityVector[1]*bodyRot[4] +
+        bodyLinVelocityVector[2]*bodyRot[7]
+    )
+    #walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
+    walk_reward = bodyVelocityMagnitude * walkSpeedRewardWeight
+    reward += walk_reward
+    if(IS_DEBUG_MASTER or INFERENCE):
+      print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
 
     # vertical movement penalty
     vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
