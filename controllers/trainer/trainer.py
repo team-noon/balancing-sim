@@ -179,7 +179,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     for i, curAction in enumerate(action):
         motors[i].setMotor(curAction)
 
-        # target pattern penalty
+        # target pattern reward
         if pat.mask[i] == 1:
             reward = maxTargetReward-TargetRewardFalloff *abs(curAction - pat.values[i])
             reward += reward

@@ -1,4 +1,7 @@
 {
+  "params":{
+    "name" : "test"
+  },
   // ===== SHOULDERS =====
   "shoulder": {
     // Left shoulder

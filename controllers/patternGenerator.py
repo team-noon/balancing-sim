@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from math import pi, sin
 from parameters import HipXMotorNum, HipYMotorNum, KneeXMotorNum, AnkleXMotornum, AnkleYMotornum
 from classes import MotorData
@@ -21,6 +21,15 @@ class patternTypes(Enum):
 class pattern:
     mask : List[float] # WHERE MASK IS 1, USE THAT NUMBER
     values : List[float]
+    uprightReward : bool
+    turnRateReward : bool
+    walkSpeedReward : bool
+    verticalPenalty : bool
+    sidePenalty : bool
+    stillnessReward : bool
+    canTouchGround : bool
+    touchReward : bool
+    noTouchReward : bool
     
 
 
@@ -35,16 +44,47 @@ class patternGenerator:
     
     animationPointers : dict = {}
     
-    timeSinceChange = 0
+    timeSinceChange : int= 0
     
-    def __init__(self) -> None:
-        
+    motors : List[MotorData] = []
+    
+    def __init__(self, motors : List[MotorData]) -> None:
+        self.motors = motors
         pass
-        
     
-    def evaluatePattern(self, timestep : int, rot: Tuple[float, float, float], motors : List[MotorData]) -> pattern:
+    def setAnimationById(self, newAnimId : int)-> None:
+        if(newAnimId >= 0 and newAnimId < self.animations.__len__()):
+            self.currentPattern = patternTypes.animate
+            self.currentAnimation = newAnimId
+            self.timeSinceChange = 0
+            
+    def setAnimationByName(self, newAnimName : str)-> None:
+        anim = self.animationPointers.get(newAnimName)
+        if anim is not None:
+            self.setAnimationById(anim)
+
+    def setWalkMode(self)-> None:
+        self.currentAnimation = -1
+        self.currentPattern = patternTypes.walk
+        self.timeSinceChange=0
         
-        if(self.currentPattern == patternTypes.walk):
-            return evaluateWalk(self.patternWalkParameters, max(0, timestep - self.timeSinceChange), rot, motors)
-        elif(self.currentPattern == patternTypes.animate):
-            return evaluateAnimation()
+    def setStandMode(self) -> None:
+        self.currentAnimation = -1
+        self.currentPattern = patternTypes.stand
+        self.timeSinceChange= 0
+    
+    def setKickMode(self) -> None:
+        self.currentAnimation = -1
+        self.currentPattern = patternTypes.kick
+        self.timeSinceChange=0
+    
+    
+    def evaluatePattern(self, timestep : int, rot: Optional[Tuple[float, float, float]] = None) -> pattern:
+        self.timeSinceChange += timestep
+        
+        if(self.currentPattern == patternTypes.walk and rot is not None):
+            return evaluateWalk(self.patternWalkParameters, max(0, self.timeSinceChange), rot, self.motors)
+        elif(self.currentPattern == patternTypes.animate and self.currentAnimation != -1):
+            return evaluateAnimation(self.animations[self.currentAnimation], self.timeSinceChange, self.motors)
+
+        return pattern([-1 for _ in range(18)],[-1 for _ in range(18)])
