@@ -1,6 +1,7 @@
 from patternGenerator import pattern
 from typing import List, Tuple
 from classes import MotorData
+import os
 
 def remove_json_comments(text: str) -> str:
     lines = text.split("\n")
@@ -19,7 +20,10 @@ def remove_json_comments(text: str) -> str:
 
 # first is the actual list of 
 def initAnimations() -> Tuple[List[dict], dict]:
-    
+    for filename in os.listdir(os.getcwd()):
+      with open(os.path.join(os.getcwd(), filename), 'r') as f:
+          pass
+
     return ([],{})
 
 

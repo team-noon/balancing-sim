@@ -21,15 +21,15 @@ class patternTypes(Enum):
 class pattern:
     mask : List[float] # WHERE MASK IS 1, USE THAT NUMBER
     values : List[float]
-    uprightReward : bool
-    turnRateReward : bool
-    walkSpeedReward : bool
-    verticalPenalty : bool
-    sidePenalty : bool
-    stillnessReward : bool
-    canTouchGround : bool
-    touchReward : bool
-    noTouchReward : bool
+    uprightReward : bool = False
+    turnRateReward : bool   = False
+    walkSpeedReward : bool = False
+    verticalPenalty : bool = False
+    sidePenalty : bool = False
+    stillnessReward : bool = False
+    canTouchGround : bool = False
+    touchReward : bool = False
+    noTouchReward : bool = False
     
 
 

@@ -114,7 +114,7 @@ def getObservationSpace() -> np.ndarray:
     rot = inertialUnit.getRollPitchYaw()
     ret.extend(rot)
     
-    pat : pattern= thisPatternGenerator.evaluatePattern(motors=motors, rot=rot, timestep=timeSinceReset)
+    pat : pattern= thisPatternGenerator.evaluatePattern(rot=rot, timestep=timeSinceReset)
     
     ret.extend(pat.values)
     ret.extend(pat.mask)
@@ -159,7 +159,6 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     robot.step(timestep)
 
     pat = thisPatternGenerator.evaluatePattern(
-        motors=motors,
         rot=inertialUnit.getRollPitchYaw(),
         timestep=timeSinceReset
     )
