@@ -1,4 +1,20 @@
 {
+  "params": {
+    "name": "sweep",
+
+
+    "uprightReward" : false, // tries to stay upright
+
+    "verticalPenalty" : false, // tries not to move up or down
+    "sidePenalty" : false, // tries to not move side to side
+
+    "stillnessReward" : false, // tries to stay still
+
+    "canTouchGround" : true, //
+
+    "touchReward" : false,
+    "noTouchReward" : false
+  },
   "shoulder": {
     "L": {
       "xMotorNum": -1,
@@ -170,17 +186,5 @@
         { "time": 4000, "pos": -1, "torque": 1 }
       ]
     }
-  },
-
-  "neck": {
-    "xMotorNum": -1,
-    "yMotorNum": -1,
-    "zMotorNum": 18,
-    "z": [
-      { "time": 18000, "pos": -1, "torque": 1 },
-      { "time": 18666, "pos": 0,  "torque": 1 },
-      { "time": 19333, "pos": 1,  "torque": 1 },
-      { "time": 20000, "pos": -1, "torque": 1 }
-    ]
   }
 }

@@ -50,6 +50,11 @@ class patternGenerator:
     
     def __init__(self, motors : List[MotorData]) -> None:
         self.motors = motors
+        
+        animInit = initAnimations()
+        self.animations = animInit[0]
+        self.animationPointers = animInit[1]
+        
         pass
     
     def setAnimationById(self, newAnimId : int)-> None:

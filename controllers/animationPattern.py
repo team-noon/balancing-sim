@@ -18,10 +18,12 @@ def remove_json_comments(text: str) -> str:
 
     return "\n".join(lines)
 
-# first is the actual list of 
+# first is the actual list of animations, the second one is pointers to them by name
 def initAnimations() -> Tuple[List[dict], dict]:
-    for filename in os.listdir(os.getcwd()):
-      with open(os.path.join(os.getcwd(), filename), 'r') as f:
+    animations_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "animations")
+    
+    for filename in os.listdir(animations_dir):
+      with open(os.path.join(animations_dir, filename), 'r') as f:
           pass
 
     return ([],{})
