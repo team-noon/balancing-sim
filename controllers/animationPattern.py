@@ -95,7 +95,7 @@ asymmetricList = []#["neck"]
 
 
 def evaluateAnimation(keyframes : dict, curTime : int, motors : List[MotorData]) -> pattern:
-    mask: List[float] = [-1 for _ in range(18)]
+    mask: List[float] = [0 for _ in range(18)]
     values: List[float] = [-1 for _ in range(18)]
     
     i = 0

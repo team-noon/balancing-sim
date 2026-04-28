@@ -90,16 +90,15 @@ inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
 turnRate = 0
-walkSpeed = 0
     
-lastObs: list[List[float]] = [[0 for _ in range(66)], [0 for _ in range(66)]]
+lastObs: list[List[float]] =  [[0 for a in range(77)] for b in range(10)]
 
-thisPatternGenerator = patternGenerator()
+thisPatternGenerator = patternGenerator(motors)
             
 timeSinceReset = 0            
 
 def getObservationSpace() -> np.ndarray:
-    global lastObs, turnRate, walkSpeed, thisPatternGenerator, timeSinceReset, motors
+    global lastObs, turnRate, thisPatternGenerator, timeSinceReset, motors
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -119,12 +118,15 @@ def getObservationSpace() -> np.ndarray:
     ret.extend(pat.values)
     ret.extend(pat.mask)
     
-    ret.extend([turnRate, walkSpeed, pat.walkMask])
+    ret.extend([turnRate, pat.uprightReward, pat.turnRateReward, pat.walkSpeedReward, pat.verticalPenalty, pat.sidePenalty, pat.stillnessReward, pat.canTouchGround, pat.touchReward, pat.noTouchReward])
     
     lastObs.append(ret.copy())
     
     ret.extend(lastObs[0])
-    ret.extend(lastObs[1])
+    ret.extend(lastObs[3])
+    ret.extend(lastObs[7])
+    ret.extend(lastObs[8])
+    ret.extend(lastObs[9])
     
     lastObs.pop(0)
     
@@ -150,7 +152,7 @@ if(not INFERENCE):
 prevActions: np.ndarray = basePrevActions.copy()
 
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, timeSinceReset, turnRate, walkSpeed, motors, TOTAL_REWARD
+    global prevActions, timeSinceReset, turnRate, motors, TOTAL_REWARD
     
     reward = 0
     terminated = False
@@ -293,7 +295,7 @@ robotSelf.saveState(robotSelf.getDef())
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     global timeSinceReset, prevActions, TOTAL_REWARD
     
-    global motors, BodyParts, turnRate, walkSpeed
+    global motors, BodyParts, turnRate
 
     prevActions = basePrevActions.copy()
     

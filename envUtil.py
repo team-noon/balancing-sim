@@ -7,8 +7,10 @@ from typing import Dict, Any, Tuple
 from util import recv_exact
 
 subProcesses : list[subprocess.Popen[bytes]] = []
+DEBUG = False
 
 def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnvs : int, numRobotsInEnv : int, Debug : bool):
+    DEBUG = Debug
     """
     Create and return an env instance for SubprocVecEnv.
     Keep this function top-level so it's picklable for spawn/forkserver.
@@ -83,7 +85,8 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
 def cleanUp():
     for process in subProcesses:
         process.terminate()
-    os.system("pkill -9 webots")
-    os.system("pkill -9 webots-bin")
+    if(not DEBUG):
+        os.system("pkill -9 webots")
+        os.system("pkill -9 webots-bin")
     os.system("pkill -9 python3")
     
