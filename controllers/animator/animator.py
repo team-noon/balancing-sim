@@ -25,7 +25,7 @@ timestep = int(robot.getBasicTimeStep())
 motors = InitMotors(timestep, True)
 
 
-thisPatternGenerator = patternGenerator()
+thisPatternGenerator = patternGenerator(motors)
 
 curTime : int =0
 

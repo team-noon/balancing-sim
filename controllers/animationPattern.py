@@ -2,6 +2,8 @@ from patternGenerator import pattern
 from typing import List, Tuple
 from classes import MotorData
 import os
+import json
+
 
 def remove_json_comments(text: str) -> str:
     lines = text.split("\n")
@@ -22,11 +24,23 @@ def remove_json_comments(text: str) -> str:
 def initAnimations() -> Tuple[List[dict], dict]:
     animations_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "animations")
     
+    anims = []
+    
+    animPointers = {}
+    
     for filename in os.listdir(animations_dir):
       with open(os.path.join(animations_dir, filename), 'r') as f:
+          
+          data = json.loads(remove_json_comments(f.read()))
+          
+          if(str(data["params"]["name"]) != ""):
+              anims.append(data)
+              animPointers[data["params"]["name"]] = anims.__len__() -1
+              print(str(data["params"]["name"]))
+          
           pass
 
-    return ([],{})
+    return (anims,animPointers)
 
 
 def stepAxis(motorNumber : int, axisKeyFrames : list[dict], curTime : int, motors : List[MotorData]) -> float:
@@ -123,6 +137,6 @@ def evaluateAnimation(keyframes : dict, curTime : int, motors : List[MotorData])
         i+=1
     
     
-    return pattern(mask=mask, values=values)
+    return pattern(mask=mask, values=values, canTouchGround=bool(keyframes["params"]["canTouchGround"]), noTouchReward=bool(keyframes["params"]["noTouchReward"]), sidePenalty=bool(keyframes["params"]["siePenalty"]), stillnessReward=bool(keyframes["params"]["stillnessReward"]), touchReward=bool(keyframes["params"]["touchReward"]))
     
     

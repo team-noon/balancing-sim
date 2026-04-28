@@ -1,22 +1,13 @@
 from enum import Enum
-from dataclasses import dataclass
 from typing import List, Tuple, Optional
-from math import pi, sin
-from parameters import HipXMotorNum, HipYMotorNum, KneeXMotorNum, AnkleXMotornum, AnkleYMotornum
-from classes import MotorData
-from walkPattern import evaluateWalk, walkParameters
-
-from animationPattern import initAnimations, evaluateAnimation
-
+from dataclasses import dataclass
 
 class patternTypes(Enum):
     walk = 0
     stand = 1
     animate = 2
     kick = 3
-    
 
-    
 @dataclass
 class pattern:
     mask : List[float] # WHERE MASK IS 1, USE THAT NUMBER
@@ -30,6 +21,25 @@ class pattern:
     canTouchGround : bool = False
     touchReward : bool = False
     noTouchReward : bool = False
+
+
+
+
+
+
+from math import pi, sin
+from parameters import HipXMotorNum, HipYMotorNum, KneeXMotorNum, AnkleXMotornum, AnkleYMotornum
+from classes import MotorData
+from walkPattern import evaluateWalk, walkParameters
+
+from animationPattern import initAnimations, evaluateAnimation
+
+
+
+    
+
+    
+
     
 
 

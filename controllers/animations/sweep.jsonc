@@ -10,10 +10,10 @@
 
     "stillnessReward" : false, // tries to stay still
 
-    "canTouchGround" : true, //
+    "canTouchGround" : true, // doesnt terminate the agent and apply a penalty if it touches the ground
 
-    "touchReward" : false,
-    "noTouchReward" : false
+    "touchReward" : false, // tries to keep both feet on ground
+    "noTouchReward" : false // tries to not lift their feet up for an extended period of time (it is more of a penalty)
   },
   "shoulder": {
     "L": {
