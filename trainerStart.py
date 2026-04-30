@@ -138,7 +138,7 @@ if __name__ == "__main__":
     
         
     if not CONTINUE:
-        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu", n_epochs=4, batch_size=1024, n_steps=1024)
+        model : PPO = PPO("MlpPolicy",verbose=1,policy_kwargs=policy_kwargs,env=env, device="cpu", n_epochs=4, batch_size=1024, n_steps=1024, learning_rate=1e-3,ent_coef=0.04, use_sde=True, sde_sample_freq=4, normalize_advantage=True, clip_range=0.3)
         
     else:
         model = PPO.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")

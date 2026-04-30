@@ -178,7 +178,8 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
         # target pattern reward
         if pat.mask[i] == 1:
-            targetReward = maxTargetReward-targetRewardFalloff *abs(curAction - pat.values[i])  + targetThreshold * targetRewardFalloff
+            
+            targetReward = maxTargetReward-targetRewardFalloff *abs(curAction - pat.values[i])  + armTargetThreshhold if isArmNum(i) else targetThreshold * targetRewardFalloff
             
             if(threshold(curAction, pat.values[i], armTargetThreshhold if isArmNum(i) else targetThreshold)):
                 targetReward = maxTargetReward
