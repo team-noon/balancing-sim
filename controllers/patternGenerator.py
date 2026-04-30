@@ -12,6 +12,14 @@ class patternTypes(Enum):
 class pattern:
     mask : List[float] # WHERE MASK IS 1, USE THAT NUMBER
     values : List[float]
+    
+    turnRate : float= 0
+    
+    walkMode : bool = False
+    standMode : bool = False
+    animateMode : bool = False
+    kickMode : bool = False
+    
     uprightReward : bool = False
     turnRateReward : bool   = False
     walkSpeedReward : bool = False
@@ -34,9 +42,10 @@ from walkPattern import evaluateWalk, walkParameters
 
 from animationPattern import initAnimations, evaluateAnimation
 
+from standPattern import evaluateStand, standParameters
 
+from parameters import ShoulderYMotornum, ShoulderZMotornum, ElbowZMotornum
 
-    
 
     
 
@@ -48,6 +57,8 @@ class patternGenerator:
     
     patternWalkParameters = walkParameters() 
     
+    patternStandParameters = standParameters()
+    
     currentAnimation : int= -1 # -1 =no animation
     
     animations : List[dict]= []
@@ -58,12 +69,22 @@ class patternGenerator:
     
     motors : List[MotorData] = []
     
-    def __init__(self, motors : List[MotorData]) -> None:
+    trainMode : bool = False
+    
+    timeStep :int = 0
+    
+    def __init__(self, motors : List[MotorData], timeStep, train : bool = False) -> None:
         self.motors = motors
         
-        animInit = initAnimations()
+        self.trainMode = train
+        
+        self.timeStep = timeStep
+        
+        animInit = initAnimations(train)
         self.animations = animInit[0]
         self.animationPointers = animInit[1]
+        
+        
         
         pass
     
@@ -73,10 +94,12 @@ class patternGenerator:
             self.currentAnimation = newAnimId
             self.timeSinceChange = 0
             
+            
     def setAnimationByName(self, newAnimName : str)-> None:
         anim = self.animationPointers.get(newAnimName)
         if anim is not None:
             self.setAnimationById(anim)
+            print("setting anim to: " + newAnimName)
 
     def setWalkMode(self)-> None:
         self.currentAnimation = -1
@@ -94,12 +117,40 @@ class patternGenerator:
         self.timeSinceChange=0
     
     
-    def evaluatePattern(self, timestep : int, rot: Optional[Tuple[float, float, float]] = None) -> pattern:
-        self.timeSinceChange += timestep
+    def evaluatePattern(self, rot: Optional[Tuple[float, float, float]] = None) -> pattern:
+        self.timeSinceChange += self.timeStep
+        
+        retPat = pattern([-1 for _ in range(18)],[-1 for _ in range(18)])
+        
+        def DefArm():
+            retPat.mask[ShoulderYMotornum] = 1
+            retPat.values[ShoulderYMotornum] = self.motors[ShoulderYMotornum].defaultPos
+            retPat.mask[ShoulderZMotornum] = 1
+            retPat.values[ShoulderZMotornum] = self.motors[ShoulderZMotornum].defaultPos
+            retPat.mask[ElbowZMotornum] = 1
+            retPat.values[ElbowZMotornum] = self.motors[ElbowZMotornum].defaultPos
+            
+            offset = 9
+            
+            retPat.mask[ShoulderYMotornum + offset] = 1
+            retPat.values[ShoulderYMotornum] = self.motors[ShoulderYMotornum+ offset].defaultPos
+            retPat.mask[ShoulderZMotornum+ offset] = 1
+            retPat.values[ShoulderZMotornum+ offset] = self.motors[ShoulderZMotornum+ offset].defaultPos
+            retPat.mask[ElbowZMotornum+ offset] = 1
+            retPat.values[ElbowZMotornum+ offset] = self.motors[ElbowZMotornum+ offset].defaultPos
         
         if(self.currentPattern == patternTypes.walk and rot is not None):
-            return evaluateWalk(self.patternWalkParameters, max(0, self.timeSinceChange), rot, self.motors)
-        elif(self.currentPattern == patternTypes.animate and self.currentAnimation != -1):
-            return evaluateAnimation(self.animations[self.currentAnimation], self.timeSinceChange, self.motors)
+            retPat = evaluateWalk(self.patternWalkParameters, max(0, self.timeSinceChange), rot, self.motors)
+            
+            if(self.patternWalkParameters.defaultArmPos):
+                DefArm()
+        
 
-        return pattern([-1 for _ in range(18)],[-1 for _ in range(18)])
+        elif(self.currentPattern == patternTypes.animate and self.currentAnimation != -1):
+            retPat = evaluateAnimation(self.animations[self.currentAnimation], self.timeSinceChange, self.motors)
+        elif(self.currentPattern == patternTypes.stand and rot is not None):
+            retPat = evaluateStand(self.patternStandParameters, max(0, self.timeSinceChange), rot, self.motors)
+            if(self.patternStandParameters.defaultArmPos):
+                DefArm()
+
+        return retPat

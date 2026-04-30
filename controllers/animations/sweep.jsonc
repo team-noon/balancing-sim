@@ -2,6 +2,7 @@
   "params": {
     "name": "sweep",
 
+    "train" : false, //whether to have segments where the model is trained on this, it is mostly useless to train on things where it is fine if the animation is just played  
 
     "uprightReward" : false, // tries to stay upright
 

@@ -21,7 +21,7 @@ def remove_json_comments(text: str) -> str:
     return "\n".join(lines)
 
 # first is the actual list of animations, the second one is pointers to them by name
-def initAnimations() -> Tuple[List[dict], dict]:
+def initAnimations(train:bool = False) -> Tuple[List[dict], dict]:
     animations_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "animations")
     
     anims = []
@@ -34,9 +34,13 @@ def initAnimations() -> Tuple[List[dict], dict]:
           data = json.loads(remove_json_comments(f.read()))
           
           if(str(data["params"]["name"]) != ""):
-              anims.append(data)
-              animPointers[data["params"]["name"]] = anims.__len__() -1
-              print(str(data["params"]["name"]))
+            if((not train) or (train and data["params"]["train"])):             
+                anims.append(data)
+                animPointers[data["params"]["name"]] = anims.__len__() -1
+                print(str(data["params"]["name"]))
+            
+                
+                
           
           pass
 
@@ -137,6 +141,6 @@ def evaluateAnimation(keyframes : dict, curTime : int, motors : List[MotorData])
         i+=1
     
     
-    return pattern(mask=mask, values=values, canTouchGround=bool(keyframes["params"]["canTouchGround"]), noTouchReward=bool(keyframes["params"]["noTouchReward"]), sidePenalty=bool(keyframes["params"]["siePenalty"]), stillnessReward=bool(keyframes["params"]["stillnessReward"]), touchReward=bool(keyframes["params"]["touchReward"]))
+    return pattern(mask=mask, values=values, canTouchGround=bool(keyframes["params"]["canTouchGround"]), noTouchReward=bool(keyframes["params"]["noTouchReward"]), sidePenalty=bool(keyframes["params"]["sidePenalty"]), stillnessReward=bool(keyframes["params"]["stillnessReward"]), touchReward=bool(keyframes["params"]["touchReward"]))
     
     

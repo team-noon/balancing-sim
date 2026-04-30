@@ -6,6 +6,7 @@ const worldInfos = [
   "animator",
   "walker",
   "inference",
+  "stander"
 ] as const;
 
 const folderPath = import.meta.dirname + "/worlds";
@@ -105,6 +106,12 @@ TexturedBackground {
     case "inference":
       robot = `noonRobot {
   controller "trainer"
+  inference TRUE
+}`;
+      break;
+    case "stander":
+      robot = `noonRobot {
+  controller "stander"
   inference TRUE
 }`;
       break;

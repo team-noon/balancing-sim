@@ -23,7 +23,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             super().__init__()
             self.rank = rank
             self.action_space = gym.spaces.Box(low=0.0, high=1.0, shape=(18,), dtype=np.float32)
-            self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(198,), dtype=np.float32)
+            self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(462,), dtype=np.float32)
             self.thisRank = rank
             self.sockets = socketsRef
 
@@ -31,7 +31,7 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             self.sockets[self.rank].sendall(b"r")
             
             
-            data = recv_exact(self.sockets[self.rank], 198 * 4)
+            data = recv_exact(self.sockets[self.rank], 462 * 4)
             
             
             return np.frombuffer(data, dtype=np.float32), {}
@@ -40,13 +40,13 @@ def init_env(rank: int, BASEPORT : int, socketsRef : list[socket.socket], numEnv
             
             self.sockets[self.rank].sendall(b"s" + action.tobytes())
             
-            data = recv_exact(self.sockets[self.rank], 198 * 4 + 4 + 1 + 1)
+            data = recv_exact(self.sockets[self.rank], 462 * 4 + 4 + 1 + 1)
                 
             
-            obs = np.frombuffer(data[0:198*4], dtype=np.float32)
-            reward = np.frombuffer(data[198*4:198*4+4], dtype=np.float32)[0]
-            terminated = bool(data[198*4+4])
-            truncated = bool(data[198*4+5])
+            obs = np.frombuffer(data[0:462*4], dtype=np.float32)
+            reward = np.frombuffer(data[462*4:462*4+4], dtype=np.float32)[0]
+            terminated = bool(data[462*4+4])
+            truncated = bool(data[462*4+5])
         
             
             info = {}

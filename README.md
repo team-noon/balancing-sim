@@ -26,5 +26,5 @@ run `python3 inferenceStart.py`
 
 18 target pos
 18 target pos mask
-}(66) * 3 (3 older) = 198
+}(66) * 3 (3 older) = 462
 

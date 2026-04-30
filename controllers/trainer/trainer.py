@@ -15,8 +15,9 @@ shared_dir = os.path.join(controller_dir, '..')
 sys.path.append(os.path.abspath(shared_dir))
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, walkSpeedRewardWeight, terminationPenalty, TargetRewardFalloff, maxTargetReward
-from patternGenerator import patternGenerator, pattern
+from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, jerkPenalty, walkSpeedRewardWeight, terminationPenalty, targetRewardFalloff, maxTargetReward, targetThreshold, armTargetThreshhold, maxStillnessReward, stillnessRewardFalloff
+from patternGenerator import patternGenerator, pattern, patternTypes
+from util import threshold, isArmNum
 
 HOST = "127.0.0.1"
 BASEPORT = 9876
@@ -89,16 +90,15 @@ accelerometer.enable(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
-turnRate = 0
     
 lastObs: list[List[float]] =  [[0 for a in range(77)] for b in range(10)]
 
-thisPatternGenerator = patternGenerator(motors)
+thisPatternGenerator = patternGenerator(motors, timestep, True)
             
 timeSinceReset = 0            
 
 def getObservationSpace() -> np.ndarray:
-    global lastObs, turnRate, thisPatternGenerator, timeSinceReset, motors
+    global lastObs, thisPatternGenerator, timeSinceReset, motors
     ret : list[float]= []
     for motor in motors:
         if motor.currentPos and motor.positionSensor:
@@ -113,20 +113,20 @@ def getObservationSpace() -> np.ndarray:
     rot = inertialUnit.getRollPitchYaw()
     ret.extend(rot)
     
-    pat : pattern= thisPatternGenerator.evaluatePattern(rot=rot, timestep=timeSinceReset)
+    pat : pattern= thisPatternGenerator.evaluatePattern(rot=rot)
     
     ret.extend(pat.values)
     ret.extend(pat.mask)
     
-    ret.extend([turnRate, pat.uprightReward, pat.turnRateReward, pat.walkSpeedReward, pat.verticalPenalty, pat.sidePenalty, pat.stillnessReward, pat.canTouchGround, pat.touchReward, pat.noTouchReward])
+    ret.extend([pat.turnRate,pat.standMode, pat.walkMode, pat.kickMode, pat.animateMode, pat.uprightReward, pat.turnRateReward, pat.walkSpeedReward, pat.verticalPenalty, pat.sidePenalty, pat.stillnessReward, pat.canTouchGround, pat.touchReward, pat.noTouchReward])
     
     lastObs.append(ret.copy())
     
-    ret.extend(lastObs[0])
-    ret.extend(lastObs[3])
-    ret.extend(lastObs[7])
-    ret.extend(lastObs[8])
     ret.extend(lastObs[9])
+    ret.extend(lastObs[8])
+    ret.extend(lastObs[7])
+    ret.extend(lastObs[3])
+    ret.extend(lastObs[0])
     
     lastObs.pop(0)
     
@@ -151,8 +151,11 @@ if(not INFERENCE):
 
 prevActions: np.ndarray = basePrevActions.copy()
 
+prevBodyVelocities : np.ndarray = np.zeros(10, dtype=np.float32)
+prevAngularVelocities : np.ndarray= np.zeros(10, dtype=np.float32)
+
 def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, Any]]:
-    global prevActions, timeSinceReset, turnRate, motors, TOTAL_REWARD
+    global prevActions, timeSinceReset, motors, TOTAL_REWARD, thisPatternGenerator, prevAngularVelocities, prevBodyVelocities
     
     reward = 0
     terminated = False
@@ -161,15 +164,8 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     robot.step(timestep)
 
     pat = thisPatternGenerator.evaluatePattern(
-        rot=inertialUnit.getRollPitchYaw(),
-        timestep=timeSinceReset
+        rot=inertialUnit.getRollPitchYaw()
     )
-    
-    #for k, val in enumerate(pat.values):
-    #    if(pat.mask[k]):
-    #        action[k] = val
-    #    else:
-    #        action[k] = motors[k].defaultPos
         
     
     if(IS_DEBUG_MASTER or INFERENCE):
@@ -182,10 +178,16 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
         # target pattern reward
         if pat.mask[i] == 1:
-            reward = maxTargetReward-TargetRewardFalloff *abs(curAction - pat.values[i])
-            reward += reward
+            targetReward = maxTargetReward-targetRewardFalloff *abs(curAction - pat.values[i])  + targetThreshold * targetRewardFalloff
+            
+            if(threshold(curAction, pat.values[i], armTargetThreshhold if isArmNum(i) else targetThreshold)):
+                targetReward = maxTargetReward
+                
+            
+            
+            reward += targetReward
             if(IS_DEBUG_MASTER or INFERENCE):
-                print(f"[Motor {i}] Target reward: {reward:.4f}")
+                print(f"[Motor {i}] Target reward: {targetReward:.4f}")
 
         # dont penalize for moving when its told to move
         if pat.mask[i] != 1:
@@ -207,10 +209,11 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
     # upright reward
     bodyRot = robotSelf.getOrientation()
-    upright_reward = max(-1, bodyRot[8] * uprightRewardWeight)
-    reward += upright_reward
+    uprightReward = max(-1, bodyRot[8] * uprightRewardWeight)
+    uprightReward *= pat.uprightReward
+    reward += uprightReward
     if(IS_DEBUG_MASTER or INFERENCE):
-        print(f"[Upright] Reward: {upright_reward:.4f}")
+        print(f"[Upright] Reward: {uprightReward:.4f}")
     
     vel = robotSelf.getVelocity()
     bodyLinVelocityVector = vel[:3]
@@ -219,29 +222,56 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     # angular velocity reward
     
     bodyAngVelocity = vel[3:]
-    turn_reward = max(-1, 1 - abs(turnRate - bodyAngVelocity[2]) * turnRateRewardWeight)
-    reward += turn_reward
+    
+    prevAngularVelocities = np.roll(prevAngularVelocities, -1)
+    prevAngularVelocities[-1] = bodyAngVelocity[2]
+    
+    turnRate = prevAngularVelocities.mean() * 0.75 + bodyAngVelocity * 0.25
+    turnReward = max(-1, 1 - abs(pat.turnRate- turnRate) * turnRateRewardWeight)
+    turnReward *= pat.turnRateReward
+    reward += turnReward 
     if(IS_DEBUG_MASTER or INFERENCE):
-        print(f"[Turn Rate] Reward: {turn_reward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
+        print(f"[Turn Rate] Reward: {turnReward:.4f} (actual: {bodyAngVelocity[2]:.4f})")
+        
+    # angular velocity jerk penalty
+    angVelocityJerk = prevAngularVelocities[-1] - 2 * prevAngularVelocities[-2] + prevAngularVelocities[-3]
+    
+    reward -= (angVelocityJerk**2) * jerkPenalty
+    
     # forward velocity reward
-    # REWORKED
-    # 
+    
     bodyVelocityMagnitude = (
         bodyLinVelocityVector[0]*bodyRot[1] +
         bodyLinVelocityVector[1]*bodyRot[4] +
         bodyLinVelocityVector[2]*bodyRot[7]
     )
-    #walk_reward = max(-1, 1 - abs(walkSpeed - bodyVelocityMagnitude) * walkSpeedRewardWeight)
-    walk_reward = bodyVelocityMagnitude * walkSpeedRewardWeight
-    reward += walk_reward
+    
+    prevBodyVelocities = np.roll(prevBodyVelocities, -1)
+    prevBodyVelocities[-1] = bodyVelocityMagnitude
+    
+    avgBodyVelocity = prevBodyVelocities.mean() * 0.75 + bodyVelocityMagnitude * 0.25
+    
+    #walk speed maximalization reward
+    walkReward = avgBodyVelocity * walkSpeedRewardWeight
+    walkReward *=pat.walkSpeedReward
+    reward += walkReward 
     if(IS_DEBUG_MASTER or INFERENCE):
-      print(f"[Walk Speed] Reward: {walk_reward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+      print(f"[Walk Speed] Reward: {walkReward:.4f} (actual: {bodyVelocityMagnitude:.4f})")
+    
+    #walk speed minimalization reward
+    stillnessReward = maxStillnessReward - stillnessRewardFalloff * abs(avgBodyVelocity)
+    stillnessReward *= pat.stillnessReward
+    reward += stillnessReward
+    
+    linVelocityJerk = prevBodyVelocities[-1] - 2 * prevBodyVelocities[-2] + prevBodyVelocities[-3]
+    reward -= (linVelocityJerk**2) * jerkPenalty
 
     # vertical movement penalty
-    vertical_penalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
-    reward -= vertical_penalty
+    verticalPenalty = verticalMovementPenaltyWeight * abs(bodyLinVelocityVector[2])
+    verticalPenalty *= pat.verticalPenalty
+    reward -= verticalPenalty 
     if(IS_DEBUG_MASTER or INFERENCE):
-        print(f"[Vertical Movement] Penalty: -{vertical_penalty:.4f}")
+        print(f"[Vertical Movement] Penalty: -{verticalPenalty:.4f}")
 
     # side movement penalty
     bodySideVelocityMagnitude = (
@@ -249,31 +279,32 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         bodyLinVelocityVector[1]*bodyRot[3] +
         bodyLinVelocityVector[2]*bodyRot[6]
     )
-    side_penalty = sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
-    reward -= side_penalty
+    sidePenalty = sideMovementPenaltyWeight * abs(bodySideVelocityMagnitude)
+    sidePenalty *= pat.sidePenalty
+    reward -= sidePenalty
     if(IS_DEBUG_MASTER or INFERENCE):
-        print(f"[Side Movement] Penalty: -{side_penalty:.4f}")
+        print(f"[Side Movement] Penalty: -{sidePenalty:.4f}")
 
-        print(f"TOTAL REWARD: {reward:.4f}")
         
-        # body part contacts
+        
+    # body part contacts
     for bodyPart in BodyParts:
         touch = bodyPart.touchSensor.getValue()
 
-        if touch != 0 and bodyPart.doneOnTouch:
+        if touch != 0 and bodyPart.doneOnTouch and pat.canTouchGround == False:
             terminated = True
             reward = terminationPenalty
             if(IS_DEBUG_MASTER or INFERENCE):
                 print(f"[{bodyPart.name}] TERMINATION touch! Reward set to {terminationPenalty}")
             break
         
-        if touch != 0 and bodyPart.touchReward:
+        if touch != 0 and bodyPart.touchReward and pat.touchReward:
             bodyPart.lastTouched = timeSinceReset
             reward += bodyPart.touchReward
             if(IS_DEBUG_MASTER or INFERENCE):
                 print(f"[{bodyPart.name}] Touch reward: +{bodyPart.touchReward}")
             
-        if touch == 0 and bodyPart.noTouchReward and bodyPart.noTouchRewardDelay:
+        if touch == 0 and bodyPart.noTouchReward and bodyPart.noTouchRewardDelay and pat.noTouchReward:
             if timeSinceReset - bodyPart.lastTouched > bodyPart.noTouchRewardDelay:
                 reward += bodyPart.noTouchReward
                 if(IS_DEBUG_MASTER or INFERENCE):
@@ -282,6 +313,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
                     
     if(IS_DEBUG_MASTER or INFERENCE):
         TOTAL_REWARD += reward
+        print(f"TOTAL REWARD: {reward:.4f}")
         print("--- END STEP ---\n")
 
     observation = getObservationSpace()
@@ -293,11 +325,15 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 robotSelf.saveState(robotSelf.getDef())
 
 def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
-    global timeSinceReset, prevActions, TOTAL_REWARD
+    global timeSinceReset, prevActions, TOTAL_REWARD, prevAngularVelocities, prevBodyVelocities
     
-    global motors, BodyParts, turnRate
+    global motors, BodyParts, thisPatternGenerator
 
     prevActions = basePrevActions.copy()
+    
+    prevAngularVelocities =np.zeros(15, dtype=np.float32)
+    prevBodyVelocities =np.zeros(15, dtype=np.float32)
+    
     
     robotSelf.loadState(robotSelf.getDef())    
     
@@ -305,21 +341,17 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
     
     obs = getObservationSpace()
     
-    # increment size
-    step_size = 0.05
+    toDo = np.random.choice([patternTypes.walk, patternTypes.stand])
+    
+    if(toDo == patternTypes.walk):
+        thisPatternGenerator.setWalkMode()
+        turnRate = 0 if np.random.choice(["straight","turn","turn","turn"]) == "straight" else np.random.choice([-2 + i * 0.1 for i in range(41)])
+        thisPatternGenerator.patternWalkParameters.turnRate = turnRate
+    elif(toDo == patternTypes.stand):
+        thisPatternGenerator.setStandMode()
+        turnRate = 0 if np.random.choice(["straight","turn"]) == "straight" else np.random.choice([-2 + i * 0.1 for i in range(41)])
+        thisPatternGenerator.patternStandParameters.turnRate = turnRate
 
-    # ----- walk speed range: -0.05 to +0.20 -----
-    #walk_min = -0.05
-    #walk_max =  0.20
-    #walk_steps = int((walk_max - walk_min) / step_size) + 1
-    #walkSpeed = np.random.choice([walk_min + i * step_size for i in range(walk_steps)])
-
-    # ----- turn rate range: -0.20 to +0.20 -----
-    turn_min = -0.40
-    turn_max =  0.40
-    turn_steps = int((turn_max - turn_min) / step_size) + 1
-    turnRate = np.random.choice([turn_min + i * step_size for i in range(turn_steps)])
-    #turnRate = 0
 
     if(IS_DEBUG_MASTER or INFERENCE):
         print(f"\033[92m🔥 Episode Total Reward: {TOTAL_REWARD:.4f} 🔥\033[0m")
@@ -338,7 +370,7 @@ if(INFERENCE):
 
     env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
-    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(198,), dtype=np.float32)
+    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(462,), dtype=np.float32)
     env.reset = reset
     env.step = step
     
@@ -405,7 +437,7 @@ from collections import defaultdict
 
 
 
-obs_buffer = np.empty(198, dtype=np.float32)
+obs_buffer = np.empty(462, dtype=np.float32)
 action_buffer = np.empty(18, dtype=np.float32)
 
 obs_buffer, info = reset()

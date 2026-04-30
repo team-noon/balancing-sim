@@ -37,7 +37,7 @@ def exportONNX(model: PPO, folderName: str):
     # Export ONNX
     torch.onnx.export(
         onnxable_policy,
-        dummy_input,  # shape: (1, 198)
+        dummy_input,  # shape: (1, 462)
         f"./models/{folderName}/model.onnx",
         input_names=["input"],
         output_names=["output"],

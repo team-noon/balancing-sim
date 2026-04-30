@@ -10,7 +10,11 @@ from dataclasses import dataclass
 
 @dataclass
 class walkParameters:
-    walkSpeed = 4
+    turnRate : float= 0
+    
+    walkSpeed : float = 4
+    
+    defaultArmPos : float = True # sets the arms to their default position so that the NN doesnt do weird shit
     
     HipXPhase  = 0
     HipXWeight = 0.15
@@ -102,4 +106,4 @@ def evaluateWalk(
     mask[AnkleYMotornum + offset] = 1
     values[AnkleYMotornum + offset] = motors[AnkleYMotornum + offset].getNormalFromAngle(-otherHipYAngle)
 
-    return pattern(mask=mask, values=values)
+    return pattern(mask=mask, values=values, canTouchGround=False, noTouchReward=True, sidePenalty=True, stillnessReward=False, touchReward=True, turnRateReward=True, uprightReward=True, verticalPenalty=True, walkSpeedReward=True, turnRate= params.turnRate)

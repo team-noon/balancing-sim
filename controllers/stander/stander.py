@@ -21,18 +21,18 @@ motors = InitMotors(timestep)
 inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
-thisPatternGenerator = patternGenerator(motors)
+thisPatternGenerator = patternGenerator(motors, timestep)
+
+thisPatternGenerator.setStandMode()
 
 
 while robot.step(timestep) != -1:
     
     rot = inertialUnit.getRollPitchYaw()
     
-    pats = thisPatternGenerator.evaluatePattern(timestep=timestep, rot=rot)
+    pat = thisPatternGenerator.evaluatePattern(rot=rot)
     
     for i in range(18):
-        if(pats.mask[i] == True):
-            motors[i].setMotor(pats.values[i])
+        if(pat.mask[i] == True):
+            motors[i].setMotor(pat.values[i])
         
-
-    

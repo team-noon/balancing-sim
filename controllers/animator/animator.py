@@ -22,17 +22,22 @@ from patternGenerator import patternGenerator
 robot = Supervisor()
 timestep = int(robot.getBasicTimeStep())
 
-motors = InitMotors(timestep, True)
+motors = InitMotors(timestep)
 
 
-thisPatternGenerator = patternGenerator(motors)
+thisPatternGenerator = patternGenerator(motors, timestep)
 
-curTime : int =0
+thisPatternGenerator.setAnimationByName("sweep")
+
 
 
 
 while robot.step(timestep) != -1:
-    curTime += timestep
+    pat = thisPatternGenerator.evaluatePattern()
+    for i in range(18):
+        if(pat.mask[i] == 1):
+            motors[i].setMotor(pat.values[i])
+            print(motors[i].name, pat.values[i])
    
    
     
