@@ -226,7 +226,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
     prevAngularVelocities = np.roll(prevAngularVelocities, -1)
     prevAngularVelocities[-1] = bodyAngVelocity[2]
     
-    turnRate = prevAngularVelocities.mean() * 0.75 + bodyAngVelocity * 0.25
+    turnRate = prevAngularVelocities.mean() * 0.75 + bodyAngVelocity[2] * 0.25
     turnReward = max(-1, 1 - abs(pat.turnRate- turnRate) * turnRateRewardWeight)
     turnReward *= pat.turnRateReward
     reward += turnReward 
@@ -331,8 +331,8 @@ def reset(seed=None, options=None)-> tuple[np.ndarray, dict]:
 
     prevActions = basePrevActions.copy()
     
-    prevAngularVelocities =np.zeros(15, dtype=np.float32)
-    prevBodyVelocities =np.zeros(15, dtype=np.float32)
+    prevAngularVelocities =np.zeros(10, dtype=np.float32)
+    prevBodyVelocities =np.zeros(10, dtype=np.float32)
     
     
     robotSelf.loadState(robotSelf.getDef())    
