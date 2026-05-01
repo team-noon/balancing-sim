@@ -15,7 +15,7 @@ shared_dir = os.path.join(controller_dir, '..')
 sys.path.append(os.path.abspath(shared_dir))
 from classes import BodyPartData, MotorData
 from initScripts import InitBodyParts, InitMotors
-from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, jerkPenalty, walkSpeedRewardWeight, terminationPenalty, targetRewardFalloff, maxTargetReward, targetThreshold, armTargetThreshhold, maxStillnessReward, stillnessRewardFalloff
+from trainParams import maxTime, movementPenaltyWeight, sideMovementPenaltyWeight, turnRateRewardWeight, uprightRewardWeight, verticalMovementPenaltyWeight, jerkPenalty, walkSpeedRewardWeight, terminationPenalty, targetRewardFalloff, maxTargetReward, targetThreshold, armTargetThreshhold, maxStillnessReward, stillnessRewardFalloff, upsideDownPenalty
 from patternGenerator import patternGenerator, pattern, patternTypes
 from util import threshold, isArmNum
 
@@ -179,7 +179,7 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
         # target pattern reward
         if pat.mask[i] == 1:
             
-            targetReward = maxTargetReward-targetRewardFalloff *abs(curAction - pat.values[i])  + armTargetThreshhold if isArmNum(i) else targetThreshold * targetRewardFalloff
+            targetReward = maxTargetReward-targetRewardFalloff *abs(curAction - pat.values[i])  + (armTargetThreshhold if isArmNum(i) else targetThreshold) * targetRewardFalloff
             
             if(threshold(curAction, pat.values[i], armTargetThreshhold if isArmNum(i) else targetThreshold)):
                 targetReward = maxTargetReward
@@ -210,7 +210,9 @@ def step(action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, Dict[str, A
 
     # upright reward
     bodyRot = robotSelf.getOrientation()
-    uprightReward = max(-1, bodyRot[8] * uprightRewardWeight)
+    uprightReward =  bodyRot[8] * uprightRewardWeight
+    if(bodyRot[8] < 0):
+        uprightReward += upsideDownPenalty
     uprightReward *= pat.uprightReward
     reward += uprightReward
     if(IS_DEBUG_MASTER or INFERENCE):

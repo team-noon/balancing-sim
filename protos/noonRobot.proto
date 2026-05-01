@@ -114,6 +114,7 @@ PROTO noonRobot [
     name IS name
     controller IS controller
     supervisor TRUE
+    #selfCollision TRUE
     children [
       # BODY
       Solid{
