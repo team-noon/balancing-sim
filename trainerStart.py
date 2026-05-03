@@ -144,7 +144,7 @@ if __name__ == "__main__":
             device="cpu",
             verbose=1,
 
-            learning_rate=3e-4,
+            learning_rate=4e-4,
             n_steps=4096,
             batch_size=256,
             n_epochs=12,
@@ -152,15 +152,15 @@ if __name__ == "__main__":
             gamma=0.99,
             gae_lambda=0.95,
 
-            clip_range=0.35,
-            ent_coef=0.06,
+            clip_range=0.5,
+            ent_coef=0.065,
 
             use_sde=True,
             sde_sample_freq=1,
 
             target_kl=0.03,
 
-            policy_kwargs=dict(net_arch=[256, 256, 256]),
+            policy_kwargs=policy_kwargs,
         )       
         
     else:
