@@ -1,6 +1,6 @@
-from stable_baselines3 import PPO
+from stable_baselines3 import SAC
 
-def exportONNX(model: PPO, folderName: str):
+def exportONNX(model: SAC, folderName: str):
     import os
     import torch
 
@@ -19,6 +19,7 @@ def exportONNX(model: PPO, folderName: str):
         def forward(self, x):
             x = self.features(x)
             x = self.policy_net(x)
+            
             return self.action_net(x)
 
     onnxable_policy = OnnxableSB3Policy(model.policy)

@@ -148,7 +148,7 @@ if __name__ == "__main__":
             n_steps=4096,
             batch_size=256,
 
-            gamma=0.99,
+            gamma=0.9,
 
 
             ent_coef=0.065,
@@ -158,7 +158,8 @@ if __name__ == "__main__":
 
 
             policy_kwargs=policy_kwargs,
-        )       
+            
+        )   
         
     else:
         model = SAC.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
