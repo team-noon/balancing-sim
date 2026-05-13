@@ -84,10 +84,10 @@ if __name__ == "__main__":
         
         
     from stable_baselines3.common.vec_env import SubprocVecEnv
-    from stable_baselines3 import PPO
+    from stable_baselines3 import SAC
     import torch
         
-    model : PPO
+    model : SAC
     startTime = datetime.datetime.now().__str__()
     
     # CLEANUP
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     
         
     if not CONTINUE:
-        model = PPO(
+        model = SAC(
             "MlpPolicy",
             env=env,
             device="cpu",
@@ -147,29 +147,28 @@ if __name__ == "__main__":
             learning_rate=4e-4,
             n_steps=4096,
             batch_size=256,
-            n_epochs=12,
 
             gamma=0.99,
-            gae_lambda=0.95,
 
-            clip_range=0.5,
+
             ent_coef=0.065,
 
             use_sde=True,
             sde_sample_freq=1,
 
-            target_kl=0.03,
 
             policy_kwargs=policy_kwargs,
         )       
         
     else:
-        model = PPO.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
+        model = SAC.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
         print("imported model to continue training")
     
     while True:
         model.train
         model.learn(SAVE_INTERVAL)
+        
+
         
         if(not DEBUG):
             exportONNX(model, startTime)
