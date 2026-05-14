@@ -16,7 +16,7 @@
         "**/__pycache__": true,
         "**/*.wbproj": true,
         ".gitignore": true,
-        "models": true,
+        "models": false,
         "**/*.jpg": true,
         "README.md": false
     },

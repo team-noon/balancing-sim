@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from envUtil import init_env, cleanUp
     import sys
     from multiprocessing import Manager
-    from util import exportONNX
+    from util import exportModel
     import datetime
     import os
     
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     atexit.register(cleanUp)
     def signal_handler(sig, frame):
         if(model and not DEBUG):
-            exportONNX(model, startTime)
+            exportModel(model, startTime)
         cleanUp()
         raise SystemExit("Exiting due to signal")
     signal.signal(signal.SIGINT, signal_handler)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     
     
     policy_kwargs = dict(
-        net_arch=dict(pi=[256, 256, 256, 256], vf=[128, 128, 128]),
+        net_arch=dict(pi=[256, 256, 256, 256], qf=[128, 128, 128]),
         activation_fn=torch.nn.LeakyReLU
     )
     
@@ -172,5 +172,5 @@ if __name__ == "__main__":
 
         
         if(not DEBUG):
-            exportONNX(model, startTime)
+            exportModel(model, startTime)
 

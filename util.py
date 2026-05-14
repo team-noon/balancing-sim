@@ -1,6 +1,6 @@
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, sac
 
-def exportONNX(model: SAC, folderName: str):
+def exportModel(model: SAC, folderName: str):
     import os
     import torch
 
@@ -10,8 +10,9 @@ def exportONNX(model: SAC, folderName: str):
     model.policy.set_training_mode(False)
 
     class OnnxableSB3Policy(torch.nn.Module):
-        def __init__(self, policy):
+        def __init__(self, policy :sac.CnnPolicy):
             super().__init__()
+            
             self.features = policy.features_extractor
             self.policy_net = policy.mlp_extractor.policy_net
             self.action_net = policy.action_net
