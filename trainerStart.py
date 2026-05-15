@@ -108,7 +108,7 @@ if __name__ == "__main__":
     
     policy_kwargs = dict(
         net_arch=dict(pi=[256, 256, 256, 256], qf=[128, 128, 128]),
-        activation_fn=torch.nn.LeakyReLU
+        activation_fn=torch.nn.ReLU
     )
     
     try:

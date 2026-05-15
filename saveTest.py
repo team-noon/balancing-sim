@@ -55,8 +55,8 @@ class DummyEnv(gym.Env):
 env = DummyEnv()
         
 policy_kwargs = dict(
-    net_arch=dict(pi=[2], qf=[1]),
-    activation_fn=torch.nn.LeakyReLU
+    net_arch=dict(pi=[1,1,1], qf=[1]),
+    activation_fn=torch.nn.ReLU
 )
 
 model = SAC("MlpPolicy",
@@ -81,9 +81,9 @@ for obs in cases:
         
     
 
-model.learn(10)
+model.learn(1)
 
-model.train(50, 132)
+model.train(1, 132)
 
 
 
