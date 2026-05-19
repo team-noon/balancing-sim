@@ -141,14 +141,19 @@ if __name__ == "__main__":
         model = SAC(
             "MlpPolicy",
             env=env,
-            device="cpu",
             verbose=1,
 
             learning_rate=4e-4,
             n_steps=4096,
-            batch_size=256,
+            batch_size=2048,
+            
+            learning_starts=0,
+            gradient_steps=10,
+            train_freq=10,
+            
+            
 
-            gamma=0.9,
+            gamma=0.85,
 
 
             ent_coef=0.065,
@@ -158,18 +163,64 @@ if __name__ == "__main__":
 
 
             policy_kwargs=policy_kwargs,
-            
         )
+        
+        print("SOFT WARMUP STARTING")
+        print(model.replay_buffer.size())
         
         done_warmup = False
         
+        restart = True
+        
+        obs : np.ndarray= np.zeros(231, dtype=np.float32)
+        next_obs : np.ndarray = np.zeros(231, dtype=np.float32)
+        
+        # WARM STARTUP
         while(not done_warmup):
+            if(restart):
+                data = sockets[0].recv(231 * 4)
+                
+
+                obs = np.frombuffer(data, dtype=np.float32)
+                
+                restart = False
+                
+                print(obs)
+                
+                del data
+                
+            print("asd2")
             
-            print(str(sockets[0].recv(3)))
+            data = sockets[0].recv(231 * 4 + 4 + 1 + 1 + 1 + 18 * 4)
+            
+            print(data.__len__())
+            
+            next_obs = np.frombuffer(data[0:231*4], dtype=np.float32)
+            reward = np.frombuffer(data[231*4:231*4+4], dtype=np.float32)[0]
+            terminated = bool(data[231*4+4])
+            truncated = bool(data[231*4+5])
+            done_warmup = bool(data[231*4+6])
+            
+            action = np.frombuffer(data[231*4+7:231*4+7+18* 4], dtype=np.float32)
+            
+            if(terminated or truncated):
+                restart = True
+               
+            info = np.array([]) 
+            if(truncated):
+                info = np.array([])
+            
+            model.replay_buffer.add(action=action, done=np.array([truncated or terminated]), infos=info, next_obs=next_obs, obs=obs, reward=reward)
+            
             pass
         
+        print("SOFT WARMUP DONE")
+        print(model.replay_buffer.size())
         
         model.learn(0)
+        
+        for i in range(256):
+            model.train(256, 2048)
         
     else:
         model = SAC.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")
@@ -177,7 +228,7 @@ if __name__ == "__main__":
     
     while True:
         model.train
-        model.learn(SAVE_INTERVAL)
+        model = model.learn(SAVE_INTERVAL)
         
 
         

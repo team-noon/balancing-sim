@@ -91,7 +91,7 @@ inertialUnit = InertialUnit(name="BODY_INERTIALUNIT", sampling_period=timestep)
 inertialUnit.enable(timestep)
 
     
-lastObs: list[List[float]] =  [[0 for a in range(77)] for b in range(10)]
+lastObs: list[List[float]] =  [[0 for a in range(77)] for b in range(2)]
 
 thisPatternGenerator = patternGenerator(motors, timestep, True)
             
@@ -122,10 +122,7 @@ def getObservationSpace() -> np.ndarray:
     
     lastObs.append(ret.copy())
     
-    ret.extend(lastObs[9])
-    ret.extend(lastObs[8])
-    ret.extend(lastObs[7])
-    ret.extend(lastObs[3])
+    ret.extend(lastObs[1])
     ret.extend(lastObs[0])
     
     lastObs.pop(0)
@@ -373,7 +370,7 @@ if(INFERENCE):
 
     env.action_space = gym.spaces.Box(low=0, high=1,shape=(18,), dtype=np.float32)
 
-    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(462,), dtype=np.float32)
+    env.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(231,), dtype=np.float32)
     env.reset = reset
     env.step = step
     
@@ -434,11 +431,119 @@ import time
 from collections import defaultdict
 
 
+# WARM STARTUP
 if(rank == 0):
-    thisSocket.sendall(b"asd")
+    done_warmup= False
+    obs = np.empty(231, dtype=np.float32)
+    action = np.empty(18, dtype=np.float32)
+    truncated = False
+    terminated = False
+    reward = 0.0
+    
+    def sendObs():
+        thisSocket.sendall(memoryview(obs).tobytes())
+    
+    def sendStep():
+        packet=(memoryview(obs).tobytes() + np.float32(reward).tobytes() + np.int8(terminated).tobytes() + np.int8(truncated).tobytes() + np.int8(done_warmup).tobytes()+ memoryview(action).tobytes())
+        
+        thisSocket.sendall(packet)
+    
+    thisPatternGenerator.setWalkMode()
+    
+    obs = reset()
+    sendObs()
+    
+    # walk
+    while not (truncated or terminated):
+        pat = thisPatternGenerator.evaluatePattern(
+            rot=inertialUnit.getRollPitchYaw(),
+            updateTimeStep=False
+        )
+        
+        action = np.array(pat.values, dtype=np.float32)
+        
+        obs, reward, terminated, truncated, infos = step(action=action)
+        
+        sendStep()
+    
+    # stand
+    
+    obs = reset()
+    terminated = False
+    truncated = False
+    sendObs()
+    
+    thisPatternGenerator.setStandMode()
+    thisPatternGenerator.patternStandParameters.turnRate = 0
+    
+    
+    while not (truncated or terminated):
+        pat = thisPatternGenerator.evaluatePattern(
+            rot=inertialUnit.getRollPitchYaw(),
+            updateTimeStep=False
+        )
+        
+        action = np.array(pat.values, dtype=np.float32)
+        
+        obs, reward, terminated, truncated, infos = step(action=action)
+        
+        
+        
+        sendStep()
+        
+    # stand + turn right
+    
+    obs = reset()
+    terminated = False
+    truncated = False
+    sendObs()
+    
+    thisPatternGenerator.setStandMode()
+    thisPatternGenerator.patternStandParameters.turnRate = 2
+    
+    
+    
+    while not (truncated or terminated):
+        pat = thisPatternGenerator.evaluatePattern(
+            rot=inertialUnit.getRollPitchYaw(),
+            updateTimeStep=False
+        )
+        
+        action = np.array(pat.values, dtype=np.float32)
+        
+        obs, reward, terminated, truncated, infos = step(action=action)
+        
+        sendStep()
+    
+    # stand + turn left slower
+    
+    obs = reset()
+    terminated = False
+    truncated = False
+    sendObs()
+    
+    thisPatternGenerator.setStandMode()
+    thisPatternGenerator.patternStandParameters.turnRate = -1
+    
+    
+    
+    while not (truncated or terminated):
+        pat = thisPatternGenerator.evaluatePattern(
+            rot=inertialUnit.getRollPitchYaw(),
+            updateTimeStep=False
+        )
+        
+        action = np.array(pat.values, dtype=np.float32)
+        
+        obs, reward, terminated, truncated, infos = step(action=action)
+        
+        if(terminated or truncated):
+            done_warmup = True
+        
+        sendStep()
 
 
-obs_buffer = np.empty(462, dtype=np.float32)
+obs_buffer = np.empty(231, dtype=np.float32)
 action_buffer = np.empty(18, dtype=np.float32)
 
 obs_buffer, info = reset()

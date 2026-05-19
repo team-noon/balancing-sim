@@ -40,7 +40,7 @@ def exportModel(model: SAC, folderName: str):
     # Export ONNX
     #torch.onnx.export(
     #    onnxable_policy,
-    #    dummy_input,  # shape: (1, 462)
+    #    dummy_input,  # shape: (1, 231)
     #    f"./models/{folderName}/model.onnx",
     #    input_names=["input"],
     #    output_names=["output"],

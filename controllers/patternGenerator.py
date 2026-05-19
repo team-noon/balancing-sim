@@ -117,8 +117,9 @@ class patternGenerator:
         self.timeSinceChange=0
     
     
-    def evaluatePattern(self, rot: Optional[Tuple[float, float, float]] = None) -> pattern:
-        self.timeSinceChange += self.timeStep
+    def evaluatePattern(self, rot: Optional[Tuple[float, float, float]] = None, updateTimeStep : bool = True) -> pattern:
+        if updateTimeStep:
+            self.timeSinceChange += self.timeStep
         
         retPat = pattern([-1 for _ in range(18)],[-1 for _ in range(18)])
         
