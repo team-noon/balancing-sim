@@ -430,14 +430,12 @@ while True:
 #os.sched_setaffinity(0, {1+math.floor(rank/3)})
 
 
-
-
-
 import time
 from collections import defaultdict
 
 
-
+if(rank == 0):
+    thisSocket.sendall(b"asd")
 
 
 obs_buffer = np.empty(462, dtype=np.float32)

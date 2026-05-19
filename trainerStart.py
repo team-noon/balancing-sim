@@ -159,7 +159,17 @@ if __name__ == "__main__":
 
             policy_kwargs=policy_kwargs,
             
-        )   
+        )
+        
+        done_warmup = False
+        
+        while(not done_warmup):
+            
+            print(str(sockets[0].recv(3)))
+            pass
+        
+        
+        model.learn(0)
         
     else:
         model = SAC.load("./models/continue", env=env, policy_kwargs=policy_kwargs, device="cpu")

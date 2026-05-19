@@ -50,7 +50,7 @@ class DummyEnv(gym.Env):
             self.curCase = np.random.choice([0,1,2,3])
 
             info = {}
-            return cases[self.curCase ], reward, False, True, info
+            return cases[self.curCase], reward, False, True, info
         
 env = DummyEnv()
         

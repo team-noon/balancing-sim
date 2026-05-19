@@ -137,7 +137,4 @@ def exportModel(model: SAC, folderName: str):
     
     model.policy.set_training_mode(True)
     
-    
 
-def recv_exact(sock, n):
-    return sock.recv(n)
