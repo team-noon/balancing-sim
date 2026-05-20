@@ -151,7 +151,8 @@ if __name__ == "__main__":
             gradient_steps=10,
             train_freq=10,
             
-            
+            # CHANGE THIS ITS ONLY SO LOW SO I CAN TEST ON MY SHITTY LAPTOP
+            buffer_size=1000,
 
             gamma=0.85,
 
@@ -175,11 +176,12 @@ if __name__ == "__main__":
         obs : np.ndarray= np.zeros(231, dtype=np.float32)
         next_obs : np.ndarray = np.zeros(231, dtype=np.float32)
         
+        print(str(sockets[0].recv(3)))
+        
         # WARM STARTUP
         while(not done_warmup):
             if(restart):
                 data = sockets[0].recv(231 * 4)
-                
 
                 obs = np.frombuffer(data, dtype=np.float32)
                 
@@ -193,9 +195,15 @@ if __name__ == "__main__":
             
             data = sockets[0].recv(231 * 4 + 4 + 1 + 1 + 1 + 18 * 4)
             
+            
             print(data.__len__())
             
             next_obs = np.frombuffer(data[0:231*4], dtype=np.float32)
+            
+            print(next_obs)
+            
+            print(np.frombuffer(data[231*4:231*4+4], dtype=np.float32))
+            
             reward = np.frombuffer(data[231*4:231*4+4], dtype=np.float32)[0]
             terminated = bool(data[231*4+4])
             truncated = bool(data[231*4+5])

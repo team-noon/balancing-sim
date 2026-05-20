@@ -433,6 +433,8 @@ from collections import defaultdict
 
 # WARM STARTUP
 if(rank == 0):
+    thisSocket.sendall(b"cum")
+    
     done_warmup= False
     obs = np.empty(231, dtype=np.float32)
     action = np.empty(18, dtype=np.float32)
@@ -441,16 +443,21 @@ if(rank == 0):
     reward = 0.0
     
     def sendObs():
+        print("SENDING JUST OBS")
+        print(memoryview(obs).tobytes())
         thisSocket.sendall(memoryview(obs).tobytes())
     
     def sendStep():
         packet=(memoryview(obs).tobytes() + np.float32(reward).tobytes() + np.int8(terminated).tobytes() + np.int8(truncated).tobytes() + np.int8(done_warmup).tobytes()+ memoryview(action).tobytes())
         
+        print("PACKEEET")
+        print(packet)
+        
         thisSocket.sendall(packet)
     
     thisPatternGenerator.setWalkMode()
     
-    obs = reset()
+    obs = reset()[0]
     sendObs()
     
     # walk
